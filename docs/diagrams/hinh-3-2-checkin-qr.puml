@@ -1,0 +1,113 @@
+@startuml
+!theme plain
+autonumber "<b>[00]</b>"
+
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam sequence {
+    ArrowColor #1E293B
+    ArrowThickness 1.5
+    LifeLineBorderColor #64748B
+    LifeLineBackgroundColor #F1F5F9
+    ParticipantBorderColor #CBD5E1
+    ParticipantBackgroundColor #FFFFFF
+    ParticipantFontStyle bold
+    ParticipantFontSize 12
+    ActorBorderColor #DC2626
+    ActorBackgroundColor #FEF2F2
+    ActorFontStyle bold
+    GroupBorderColor #94A3B8
+    GroupBackgroundColor #FAFAFA
+    GroupHeaderFontStyle bold
+    GroupHeaderFontSize 11
+    BoxPadding 15
+    ParticipantPadding 20
+}
+
+actor "Hội viên\n(Member)" as Member #FEF2F2
+participant "UI Hội Viên\n(Mobile/Web)" as AppMember #EFF6FF
+actor "Lễ Tân\n(Staff)" as Staff #FEF3C7
+participant "UI Quầy Lễ Tân\n(Web Scanner)" as AppStaff #FEF2F2
+participant "Backend API\n(Express Server)" as Server #F0FDF4
+participant "Socket.io\n(Realtime)" as Socket #EDE9FE
+database "CSDL MySQL\n(Database)" as DB #FEF3C7
+
+== BƯỚC 1: HỘI VIÊN LẤY MÃ QR ĐỘNG BẢO MẬT 60S ==
+
+Member -> AppMember : 1. Mở Cổng Hội Viên\nxem "Thẻ Điện Tử"
+activate Member
+activate AppMember
+
+AppMember -> Server : 2. GET /api/check-ins/dynamic-qr\n(Header: Bearer Token)
+activate Server
+
+Server -> DB : 3. SELECT qr_secret FROM member_profiles\nWHERE user_id = currentUserId
+activate DB
+DB --> Server : 4. Trả về qrSecret
+deactivate DB
+
+Server -> Server : 5. Ký mã JWT Token 60s:\n{ userId, qrSecret, exp: 60s }
+Server --> AppMember : 6. Trả về { qrToken, expiresIn: 60 }
+deactivate Server
+
+AppMember --> Member : 7. Hiển thị mã QR động\nkèm đồng hồ đếm ngược 60 giây
+deactivate AppMember
+
+== BƯỚC 2: QUÉT MÃ TẠI CỬA KHẨU & XÁC THỰC REALTIME ==
+
+Member -> Staff : 8. Đưa màn hình mã QR\nvào mắt đọc Camera tại quầy
+Staff -> AppStaff : 9. Hướng Camera nhận diện mã QR
+activate Staff
+activate AppStaff
+
+AppStaff -> Server : 10. POST /api/check-ins/scan\n{ qrData: qrToken, staffId }
+activate Server
+
+Server -> Server : 11. Giải mã JWT & kiểm tra tính hợp lệ:\n- Đúng chữ ký HMAC bí mật?\n- Còn trong thời hạn 60 giây?
+
+Server -> DB : 12. Truy vấn hợp đồng:\nSELECT * FROM memberships\nWHERE member_id = userId
+activate DB
+DB --> Server : 13. Trả về thông tin Hợp đồng & Ngày hết hạn
+deactivate DB
+
+== BƯỚC 3: RẼ NHÁNH XỬ LÝ CHECK-IN (ALT: HỢP LỆ / TỪ CHỐI) ==
+
+alt#LightGreen #F0FDF4 [TRƯỜNG HỢP 1: Gói tập hợp lệ (ACTIVE & Còn hạn)]
+    
+    Server -> DB : 14. INSERT INTO check_ins\n(member_id, status = 'SUCCESS', checkin_time = NOW())
+    activate DB
+    DB --> Server : 15. Ghi nhận thành công
+    deactivate DB
+    
+    Server -> Socket : 16. emit('checkin_event', {\n  status: 'SUCCESS',\n  memberName: 'Võ Duy Phúc',\n  package: 'CityVIP 12T'\n})
+    activate Socket
+    Socket --> AppStaff : 17. Đẩy Realtime kết quả hợp lệ\n(Phát âm thanh chuông xanh & mở cổng)
+    deactivate Socket
+    
+    Server --> AppStaff : 18. HTTP 200 OK (Check-in thành công)
+    AppStaff --> Staff : 19. Màn hình hiện Popup xanh:\n"Võ Duy Phúc - Còn 286 ngày"
+    
+else #FFF1F2 [TRƯỜNG HỢP 2: Gói đang bảo lưu (FROZEN) hoặc Hết hạn (EXPIRED)]
+    
+    Server -> DB : 20. INSERT INTO check_ins\n(member_id, status = 'DENIED', reason = 'Bảo lưu / Hết hạn')
+    activate DB
+    DB --> Server : 21. Ghi nhận lượt từ chối
+    deactivate DB
+    
+    Server -> Socket : 22. emit('checkin_event', {\n  status: 'DENIED',\n  reason: 'Gói tập đang tạm khóa bảo lưu'\n})
+    activate Socket
+    Socket --> AppStaff : 23. Đẩy Realtime cảnh báo đỏ\n(Phát âm thanh cảnh báo lỗi & khóa cửa)
+    deactivate Socket
+    
+    Server --> AppStaff : 24. HTTP 400 Bad Request
+    deactivate Server
+    
+    AppStaff --> Staff : 25. Màn hình cảnh báo từ chối,\nhướng dẫn khách xử lý tại quầy
+    deactivate AppStaff
+    deactivate Staff
+    deactivate Member
+    
+end
+
+@enduml
+

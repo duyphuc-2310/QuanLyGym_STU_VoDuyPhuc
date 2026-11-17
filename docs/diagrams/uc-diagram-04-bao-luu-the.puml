@@ -1,0 +1,61 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+skinparam sequence {
+    ArrowColor #DC2626
+    ActorBorderColor #DC2626
+    ActorBackgroundColor #FEF2F2
+}
+
+skinparam usecase {
+    BackgroundColor #FFFFFF
+    BorderColor #1E293B
+    BorderThickness 1.2
+    ArrowColor #475569
+    FontStyle bold
+}
+
+left to right direction
+
+actor "Lễ tân tại quầy\n(Staff)" as Staff #FEF3C7
+actor "Hội viên\n(Member)" as Member #FEF2F2
+actor "Quản trị viên\n(Admin)" as Admin #FDF2F8
+
+rectangle "Phân Hệ Bảo Lưu & Quản Lý Hợp Đồng (UC-04.3)" {
+    
+    usecase "UC-04.3: Quản lý bảo lưu\n& Bù hạn thẻ gói tập" as UC_Main #EFF6FF
+    
+    usecase "Kích hoạt đóng băng gói tập\n(Chuyển trạng thái FROZEN)" as UC_Freeze
+    usecase "Kiểm tra hạn mức ngày\nđược phép (max_freeze_days)" as UC_CheckDays
+    usecase "Tạm khóa quyền check-in\ncủa hội viên tại quầy" as UC_LockCheckin
+    
+    usecase "Mở lại hợp đồng\n(Unfreeze thẻ tập)" as UC_Unfreeze
+    usecase "Tự động tính ngày đóng băng\n& Cộng bù vào end_date mới" as UC_ExtendEnd #F0FDF4
+    usecase "Cảnh báo từ chối bảo lưu\n(Vượt quá hạn mức gói)" as UC_Reject #FFF1F2
+    usecase "In phụ lục hợp đồng bảo lưu\n(Biểu mẫu 01 - STU)" as UC_Print
+}
+
+' Tương tác Actor
+Staff --> UC_Main
+Staff --> UC_Freeze
+Staff --> UC_Unfreeze
+Member --> UC_Main
+Admin --> UC_Main
+
+' Mối quan hệ Include
+UC_Freeze .> UC_CheckDays : <<include>>
+UC_Freeze .> UC_LockCheckin : <<include>>
+UC_Unfreeze .> UC_ExtendEnd : <<include>>
+
+' Mối quan hệ Extend
+UC_Freeze .> UC_Main : <<extend>>
+UC_Unfreeze .> UC_Main : <<extend>>
+UC_Reject .> UC_Freeze : <<extend>>\n(Số ngày > Hạn mức cho phép)
+UC_Print .> UC_Main : <<extend>>
+
+@enduml
+

@@ -1,0 +1,100 @@
+@startuml
+!theme plain
+autonumber "<b>[00]</b>"
+
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam sequence {
+    ArrowColor #1E293B
+    ArrowThickness 1.5
+    LifeLineBorderColor #64748B
+    LifeLineBackgroundColor #F1F5F9
+    ParticipantBorderColor #CBD5E1
+    ParticipantBackgroundColor #FFFFFF
+    ParticipantFontStyle bold
+    ParticipantFontSize 12
+    ActorBorderColor #DC2626
+    ActorBackgroundColor #FEF2F2
+    ActorFontStyle bold
+    GroupBorderColor #94A3B8
+    GroupBackgroundColor #FAFAFA
+    GroupHeaderFontStyle bold
+    GroupHeaderFontSize 11
+    BoxPadding 15
+    ParticipantPadding 20
+}
+
+actor "Lễ Tân / Hội Viên\n(Staff / Member)" as Actor #FEF2F2
+participant "Giao Diện Web\n(React UI)" as UI #EFF6FF
+participant "Máy Chủ Backend\n(Express API)" as Server #F0FDF4
+database "CSDL MySQL\n(Database)" as DB #FEF3C7
+
+== PHẦN 1: NGHIỆP VỤ ĐÓNG BĂNG BẢO LƯU GÓI TẬP ==
+
+Actor -> UI : 1. Chọn hợp đồng cần bảo lưu\n& nhập số ngày (vd: 15 ngày)
+activate Actor
+activate UI
+
+UI -> Server : 2. POST /api/memberships/:id/freeze\n{\n  freezeDays: 15,\n  reason: "Đi công tác xa"\n}
+activate Server
+
+Server -> DB : 3. SELECT m.*, p.max_freeze_days\nFROM memberships m\nJOIN packages p ON m.package_id = p.id\nWHERE m.id = :id
+activate DB
+DB --> Server : 4. max_freeze_days = 60, frozen_days_used = 0
+deactivate DB
+
+alt#LightGreen #F0FDF4 [Hạn mức hợp lệ: số ngày yêu cầu <= hạn mức còn lại]
+    
+    Server -> DB : 5. BEGIN TRANSACTION
+    activate DB
+    Server -> DB : 6. UPDATE memberships\nSET status = 'FROZEN'\nWHERE id = :id
+    
+    Server -> DB : 7. INSERT INTO membership_freezes\n(membership_id, freeze_start, days_count, status)\nVALUES (:id, NOW(), 15, 'ACTIVE')
+    
+    Server -> DB : 8. COMMIT TRANSACTION
+    DB --> Server : 9. Giao dịch bảo lưu hoàn tất
+    deactivate DB
+    
+    Server --> UI : 10. HTTP 200 OK\n(Đã bảo lưu thẻ thành công, khóa quyền check-in)
+    UI --> Actor : 11. Cập nhật thẻ trạng thái sang 'FROZEN'\n(Màu xanh dương)
+    
+else #FFF1F2 [Vượt quá hạn mức bảo lưu của gói]
+    
+    Server --> UI : 12. HTTP 400 Bad Request\n("Số ngày vượt quá hạn mức tối đa của gói!")
+    UI --> Actor : 13. Hiển thị thông báo từ chối yêu cầu
+    
+end
+deactivate UI
+
+== PHẦN 2: NGHIỆP VỤ MỞ LẠI THẺ VÀ TỰ ĐỘNG CỘNG BÙ NGÀY ==
+
+Actor -> UI : 14. Bấm "Mở lại hợp đồng (Unfreeze)"
+activate UI
+
+UI -> Server : 15. POST /api/memberships/:id/unfreeze
+Server -> DB : 16. SELECT * FROM membership_freezes\nWHERE membership_id = :id AND status = 'ACTIVE'
+activate DB
+DB --> Server : 17. Trả về ngày bắt đầu bảo lưu (freeze_start)
+deactivate DB
+
+Server -> Server : 18. Tính số ngày đóng băng thực tế:\nactualDays = today - freeze_start (vd: 15 ngày)\nnewEndDate = oldEndDate + actualDays
+
+Server -> DB : 19. BEGIN TRANSACTION
+activate DB
+Server -> DB : 20. UPDATE memberships\nSET status = 'ACTIVE',\n    end_date = newEndDate\nWHERE id = :id
+
+Server -> DB : 21. UPDATE membership_freezes\nSET status = 'COMPLETED', unfreeze_date = NOW()\nWHERE id = freezeId
+
+Server -> DB : 22. COMMIT TRANSACTION
+DB --> Server : 23. Cập nhật ngày hết hạn mới thành công
+deactivate DB
+
+Server --> UI : 24. HTTP 200 OK\n{\n  message: "Mở lại hợp đồng thành công!",\n  addedDays: 15,\n  newEndDate: "2027-01-25"\n}
+
+UI --> Actor : 25. Popup xanh: "Đã cộng bù 15 ngày vào hạn thẻ!\nHạn thẻ mới: 25/01/2027"
+deactivate UI
+deactivate Server
+deactivate Actor
+
+@enduml
+

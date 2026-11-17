@@ -1,0 +1,93 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+skinparam sequence {
+    ArrowColor #DC2626
+    ActorBorderColor #DC2626
+    ActorBackgroundColor #FEF2F2
+}
+
+skinparam usecase {
+    BackgroundColor #FFFFFF
+    BorderColor #1E293B
+    BorderThickness 1.2
+    ArrowColor #475569
+    FontStyle bold
+}
+
+left to right direction
+
+actor "Khách Vãng Lai\n(Guest Lead)" as Guest #FEF2F2
+actor "Hội Viên\n(Member)" as Member #EFF6FF
+actor "Lễ Tân Quầy\n(Receptionist)" as Staff #FEF3C7
+actor "Huấn Luyện Viên\n(Trainer PT)" as PT #F0FDF4
+actor "Quản Trị Viên\n(Admin)" as Admin #FDF2F8
+
+rectangle "HỆ THỐNG QUẢN LÝ PHÒNG TẬP CITYGYM (STU)" {
+    
+    package "Phân Hệ Khách Hàng & Bán Hàng" {
+        usecase "UC-01: Xem giới thiệu\n& Tính BMI/TDEE" as UC01
+        usecase "UC-02: Đăng ký vé tập thử\n03 ngày 0Đ (E-Pass QR)" as UC02
+        usecase "UC-03: Đăng ký mua gói tập\n& Thanh toán VietQR" as UC03
+    }
+
+    package "Phân Hệ Cửa Khẩu & Điểm Danh" {
+        usecase "UC-04: Lấy mã QR động 60s\n(Chống chụp màn hình)" as UC04
+        usecase "UC-05: Quét mã QR Check-in\nqua cổng Turnstile" as UC05
+    }
+
+    package "Phân Hệ Hợp Đồng & Hội Viên" {
+        usecase "UC-06: Quản lý hợp đồng hội viên\n& In biểu mẫu STU" as UC06
+        usecase "UC-07: Đóng băng bảo lưu thẻ\n& Tự động cộng bù ngày" as UC07
+        usecase "UC-08: CRM Chăm sóc Lead\n& Chốt gói hội viên" as UC08
+    }
+
+    package "Phân Hệ Huấn Luyện Viên (PT)" {
+        usecase "UC-09: Đặt lịch tập PT 1-1\n(Chống trùng lịch)" as UC09
+        usecase "UC-10: Xác nhận hoàn thành buổi tập\n& Cấn trừ số buổi" as UC10
+        usecase "UC-11: Cập nhật chỉ số InBody 270\n& Tính hoa hồng PT" as UC11
+    }
+
+    package "Phân Hệ Quản Trị & Báo Cáo BI" {
+        usecase "UC-12: Xem Dashboard BI\n& Heatmap giờ cao điểm" as UC12
+        usecase "UC-13: Quản lý danh mục gói tập,\nnhân viên & phân quyền" as UC13
+    }
+}
+
+' Liên kết Khách Vãng Lai
+Guest --> UC01
+Guest --> UC02
+Guest --> UC03
+
+' Liên kết Hội Viên
+Member --> UC04
+Member --> UC09
+Member --> UC03
+
+' Liên kết Lễ Tân
+Staff --> UC05
+Staff --> UC06
+Staff --> UC07
+Staff --> UC08
+
+' Liên kết Huấn Luyện Viên PT
+PT --> UC10
+PT --> UC11
+
+' Liên kết Quản Trị Viên Admin (Kế thừa toàn quyền)
+Admin --> UC12
+Admin --> UC13
+Admin --> UC06
+Admin --> UC07
+
+' Quan hệ Include / Extend
+UC02 .> UC05 : <<include>>\n(Quét vé tập thử)
+UC09 .> UC10 : <<extend>>
+UC03 .> UC06 : <<include>>\n(Kích hoạt HĐ)
+
+@enduml
+

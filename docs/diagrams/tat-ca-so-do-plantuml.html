@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Kho Mã PlantUML Đầy Đủ & Đặc Tả Use Case - Luận Văn STU</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    pre {
+      font-family: 'Consolas', 'Courier New', monospace;
+      white-space: pre;
+      line-height: 1.45;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 p-4 sm:p-8 font-sans max-w-7xl mx-auto space-y-8">
+
+  <!-- Header -->
+  <header class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+    <div class="flex items-center justify-between">
+      <div>
+        <span class="text-xs font-black uppercase text-red-600 tracking-wider">Trường ĐH Công Nghệ Sài Gòn (STU) — Khoa Công Nghệ Thông Tin</span>
+        <h1 class="text-3xl font-black text-slate-900 mt-1">KHO MÃ NGUỒN PLANTUML TỔNG HỢP TOÀN BỘ SƠ ĐỒ</h1>
+        <p class="text-sm text-slate-500 mt-2">
+          Đề tài: <b>XÂY DỰNG HỆ THỐNG WEBSITE QUẢN LÝ PHÒNG GYM TÍCH HỢP ĐẶT LỊCH PT, THANH TOÁN TRỰC TUYẾN VÀ CỔNG KHÁCH HÀNG</b> (CITYGYM)
+        </p>
+      </div>
+      <div class="hidden md:flex flex-col items-end">
+        <span class="px-3 py-1 bg-red-100 text-red-700 font-bold rounded-lg text-xs">SV: Võ Duy Phúc</span>
+        <span class="text-xs text-slate-400 mt-1">GVHD: ThS. Bùi Nhật Bằng</span>
+      </div>
+    </div>
+
+    <!-- Quick Navigation -->
+    <div class="pt-6 border-t border-slate-100 mt-6">
+      <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Điều hướng nhanh sơ đồ:</div>
+      <div class="flex flex-wrap gap-2">
+        <a href="#tong-quat" class="px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800">Hình 2-1: UC Tổng Quát</a>
+        <span class="text-slate-300 self-center">|</span>
+        <a href="#uc-05" class="px-3 py-1.5 rounded-xl bg-red-50 text-red-700 border border-red-200 text-xs font-bold hover:bg-red-100">Hình 3-2: UC-05 Check-in QR</a>
+        <a href="#uc-06" class="px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold hover:bg-blue-100">Hình 3-3: UC-06 Đặt Lịch PT</a>
+        <a href="#uc-04" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100">Hình 3-4: UC-04.3 Bảo Lưu Thẻ</a>
+        <a href="#uc-08" class="px-3 py-1.5 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold hover:bg-purple-100">Hình 3-5: UC-08 Webhook VietQR</a>
+        <span class="text-slate-300 self-center">|</span>
+        <a href="#seq-checkin" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200">Hình 3-6: Sequence Check-in</a>
+        <a href="#seq-booking" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200">Hình 3-7: Sequence Đặt Lịch PT</a>
+        <a href="#seq-webhook" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200">Hình 3-8: Sequence Webhook</a>
+        <a href="#seq-freeze" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200">Hình 3-9: Sequence Bảo Lưu</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hướng dẫn sử dụng PlantUML -->
+  <div class="bg-amber-50 border border-amber-200 p-6 rounded-3xl flex items-start gap-4">
+    <div class="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 font-bold text-lg">💡</div>
+    <div>
+      <h3 class="font-bold text-amber-900 text-sm">Cách dùng mã nguồn PlantUML để xuất ảnh chất lượng cao vào Luận văn:</h3>
+      <ol class="list-decimal list-inside text-xs text-amber-800 space-y-1 mt-2">
+        <li>Nhấn nút <b>"Sao chép mã PlantUML"</b> tại bất kỳ sơ đồ nào bên dưới.</li>
+        <li>Truy cập trang web miễn phí: <a href="https://www.plantuml.com/plantuml/uml" target="_blank" class="font-bold underline text-amber-900">plantuml.com/plantuml/uml</a> (hoặc dùng Extension PlantUML trong VS Code).</li>
+        <li>Dán mã vào ô soạn thảo $\rightarrow$ Hệ thống tự sinh ảnh SVG / PNG siêu nét, không bị dính chữ hay chồng chéo dòng kẻ.</li>
+        <li>Tải ảnh về máy và chèn trực tiếp vào tài liệu Word luận văn.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- PHẦN 1: CÁC SƠ ĐỒ USE CASE (USE CASE DIAGRAMS) -->
+  <div class="pt-4">
+    <div class="flex items-center gap-2 mb-4">
+      <span class="w-3 h-3 rounded-full bg-red-600"></span>
+      <h2 class="text-xl font-black text-slate-900 uppercase">I. CÁC SƠ ĐỒ USE CASE (USE CASE DIAGRAMS)</h2>
+    </div>
+
+    <!-- 1.1 SƠ ĐỒ USE CASE TỔNG QUÁT -->
+    <section id="tong-quat" class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 space-y-4 mb-6">
+      <div class="flex justify-between items-start border-b pb-4">
+        <div>
+          <span class="text-xs font-black uppercase text-red-600">Chương 2 — Hình 2-1</span>
+          <h3 class="text-xl font-black text-slate-900">Sơ Đồ Use Case Tổng Quát Toàn Hệ Thống (General Use Case)</h3>
+          <p class="text-xs text-slate-500 mt-1">Gồm 5 Tác nhân chính (Khách Vãng Lai, Hội Viên, Lễ Tân, PT, Admin) và 13 Use case thuộc 5 Package phân hệ.</p>
+        </div>
+        <button onclick="copyCode('code-tongquat')" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-sm">
+          <i class="fa-regular fa-copy"></i> Sao Chép Mã PlantUML
+        </button>
+      </div>
+      <pre id="code-tongquat" class="p-4 bg-slate-900 text-slate-100 rounded-2xl text-xs overflow-x-auto max-h-96">@startuml
+!theme plain
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+skinparam sequence {
+    ArrowColor #DC2626
+    ActorBorderColor #DC2626
+    ActorBackgroundColor #FEF2F2
+}
+
+skinparam usecase {
+    BackgroundColor #FFFFFF
+    BorderColor #1E293B
+    BorderThickness 1.2
+    ArrowColor #475569
+    FontStyle bold
+}
+
+left to right direction
+
+actor "Khách Vãng Lai\n(Guest Lead)" as Guest #FEF2F2
+actor "Hội Viên\n(Member)" as Member #EFF6FF
+actor "Lễ Tân Quầy\n(Receptionist)" as Staff #FEF3C7
+actor "Huấn Luyện Viên\n(Trainer PT)" as PT #F0FDF4
+actor "Quản Trị Viên\n(Admin)" as Admin #FDF2F8
+
+rectangle "HỆ THỐNG QUẢN LÝ PHÒNG TẬP CITYGYM (STU)" {
+    
+    package "Phân Hệ Khách Hàng & Bán Hàng" {
+        usecase "UC-01: Xem giới thiệu\n& Tính BMI/TDEE" as UC01
+        usecase "UC-02: Đăng ký vé tập thử\n03 ngày 0Đ (E-Pass QR)" as UC02
+        usecase "UC-03: Đăng ký mua gói tập\n& Thanh toán VietQR" as UC03
+    }
+
+    package "Phân Hệ Cửa Khẩu & Điểm Danh" {
+        usecase "UC-04: Lấy mã QR động 60s\n(Chống chụp màn hình)" as UC04
+        usecase "UC-05: Quét mã QR Check-in\nqua cổng Turnstile" as UC05
+    }
+
+    package "Phân Hệ Hợp Đồng & Hội Viên" {
+        usecase "UC-06: Quản lý hợp đồng hội viên\n& In biểu mẫu STU" as UC06
+        usecase "UC-07: Đóng băng bảo lưu thẻ\n& Tự động cộng bù ngày" as UC07
+        usecase "UC-08: CRM Chăm sóc Lead\n& Chốt gói hội viên" as UC08
+    }
+
+    package "Phân Hệ Huấn Luyện Viên (PT)" {
+        usecase "UC-09: Đặt lịch tập PT 1-1\n(Chống trùng lịch)" as UC09
+        usecase "UC-10: Xác nhận hoàn thành\nbuổi tập & Trừ buổi" as UC10
+        usecase "UC-11: Cập nhật chỉ số InBody\n& Lộ trình dinh dưỡng" as UC11
+    }
+
+    package "Phân Hệ Quản Trị & Báo Cáo" {
+        usecase "UC-12: Quản lý danh mục gói,\nnhân sự & phân quyền" as UC12
+        usecase "UC-13: Xem Dashboard BI\nDoanh thu & Hoa hồng PT" as UC13
+    }
+}
+
+' Tương tác Khách Vãng Lai
+Guest --> UC01
+Guest --> UC02
+Guest --> UC03
+
+' Tương tác Hội Viên
+Member --> UC03
+Member --> UC04
+Member --> UC05
+Member --> UC09
+Member --> UC11
+
+' Tương tác Lễ Tân
+Staff --> UC05
+Staff --> UC06
+Staff --> UC07
+Staff --> UC08
+
+' Tương tác PT
+PT --> UC09
+PT --> UC10
+PT --> UC11
+
+' Tương tác Admin
+Admin --> UC06
+Admin --> UC07
+Admin --> UC12
+Admin --> UC13
+@enduml</pre>
+    </section>
+
+    <!-- 1.2 UC-05 SƠ ĐỒ USE CASE CHI TIẾT -->
+    <section id="uc-05" class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 space-y-4 mb-6">
+      <div class="flex justify-between items-start border-b pb-4">
+        <div>
+          <span class="text-xs font-black uppercase text-red-600">Chương 3 — Hình 3-2</span>
+          <h3 class="text-xl font-black text-slate-900">Sơ Đồ Use Case Chi Tiết: Kiểm Soát Check-in Mã QR Động (UC-05)</h3>
+          <p class="text-xs text-slate-500 mt-1">Thể hiện mối quan hệ &lt;&lt;include&gt;&gt; (sinh mã, quét mã, kiểm tra hợp đồng) và &lt;&lt;extend&gt;&gt; (mở cửa chuông xanh, từ chối chuông đỏ).</p>
+        </div>
+        <button onclick="copyCode('code-uc05')" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-sm">
+          <i class="fa-regular fa-copy"></i> Sao Chép Mã PlantUML
+        </button>
+      </div>
+      <pre id="code-uc05" class="p-4 bg-slate-900 text-slate-100 rounded-2xl text-xs overflow-x-auto max-h-96">@startuml
+!theme plain
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+skinparam sequence {
+    ArrowColor #DC2626
+    ActorBorderColor #DC2626
+    ActorBackgroundColor #FEF2F2
+}
+
+skinparam usecase {
+    BackgroundColor #FFFFFF
+    BorderColor #1E293B
+    BorderThickness 1.2
+    ArrowColor #475569
+    FontStyle bold
+}
+
+left to right direction
+
+actor "Hội viên\n(Member)" as Member #FEF2F2
+actor "Lễ tân tại quầy\n(Staff)" as Staff #FEF3C7
+
+rectangle "Phân Hệ Kiểm Soát Ra Vào Cửa Khẩu (UC-05)" {
+    usecase "UC-05: Kiểm soát Check-in\nbằng mã QR động" as UC_Main #EFF6FF
+    usecase "Lấy mã QR động\n(JWT 60 giây)" as UC_GenQR
+    usecase "Quét giải mã QR\nqua Camera quầy" as UC_Scan
+    usecase "Kiểm tra trạng thái\nhợp đồng & hạn gói" as UC_Validate
+    usecase "Mở cửa Turnstile &\nChuông xanh Realtime" as UC_Success #F0FDF4
+    usecase "Cảnh báo từ chối &\nChuông đỏ (Bảo lưu/Hết hạn)" as UC_Denied #FFF1F2
+    usecase "Check-in vé tập thử\nE-Pass (Khách vãng lai)" as UC_Trial
+}
+
+' Tương tác Actor
+Member --> UC_Main
+Staff --> UC_Main
+Staff --> UC_Scan
+
+' Mối quan hệ Include
+UC_Main .> UC_GenQR : <<include>>
+UC_Main .> UC_Scan : <<include>>
+UC_Main .> UC_Validate : <<include>>
+
+' Mối quan hệ Extend
+UC_Success .> UC_Main : <<extend>>\n(Hợp lệ: ACTIVE & Còn hạn)
+UC_Denied .> UC_Main : <<extend>>\n(Từ chối: FROZEN / EXPIRED)
+UC_Trial .> UC_Main : <<extend>>\n(Áp dụng cho vé tập thử)
+@enduml</pre>
+    </section>
+
+    <!-- 1.3 UC-06 SƠ ĐỒ USE CASE CHI TIẾT -->
+    <section id="uc-06" class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 space-y-4 mb-6">
+      <div class="flex justify-between items-start border-b pb-4">
+        <div>
+          <span class="text-xs font-black uppercase text-red-600">Chương 3 — Hình 3-3</span>
+          <h3 class="text-xl font-black text-slate-900">Sơ Đồ Use Case Chi Tiết: Đặt Lịch Tập 1-1 Cùng Huấn Luyện Viên PT (UC-06)</h3>
+          <p class="text-xs text-slate-500 mt-1">Bao gồm &lt;&lt;include&gt;&gt; kiểm tra buổi tập, lịch rảnh, khóa Transaction và &lt;&lt;extend&gt;&gt; khi có xung đột trùng giờ.</p>
+        </div>
+        <button onclick="copyCode('code-uc06')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-sm">
+          <i class="fa-regular fa-copy"></i> Sao Chép Mã PlantUML
+        </button>
+      </div>
+      <pre id="code-uc06" class="p-4 bg-slate-900 text-slate-100 rounded-2xl text-xs overflow-x-auto max-h-96">@startuml
+!theme plain
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+skinparam sequence {
+    ArrowColor #DC2626
+    ActorBorderColor #DC2626
+    ActorBackgroundColor #FEF2F2
+}
+
+skinparam usecase {
+    BackgroundColor #FFFFFF
+    BorderColor #1E293B
+    BorderThickness 1.2
+    ArrowColor #475569
+    FontStyle bold
+}
+
+left to right direction
+
+actor "Hội viên\n(Member)" as Member #FEF2F2
+actor "Huấn luyện viên\n(Trainer PT)" as PT #F0FDF4
+
+rectangle "Phân Hệ Đặt Lịch Huấn Luyện Viên 1-1 (UC-06)" {
+    usecase "UC-06: Đặt lịch tập 1-1\ncùng Huấn luyện viên (PT)" as UC_Main #EFF6FF
+    usecase "Tra cứu lịch rảnh\ncủa Huấn luyện viên" as UC_CheckPT
+    usecase "Kiểm tra số buổi còn lại\ntrong hợp đồng (>= 1)" as UC_CheckSessions
+    usecase "Kiểm soát xung đột trùng lịch\n(MySQL Transaction)" as UC_Lock
+    usecase "Xác nhận lịch hẹn &\nGửi email nhắc lịch (Nodemailer)" as UC_Success #F0FDF4
+    usecase "Cảnh báo trùng giờ &\nRollback giao dịch CSDL" as UC_Conflict #FFF1F2
+    usecase "Hủy lịch hẹn trước 02 giờ\n(Không bị trừ buổi)" as UC_Cancel
+}
+
+' Tương tác Actor
+Member --> UC_Main
+Member --> UC_Cancel
+PT --> UC_Main
+
+' Mối quan hệ Include
+UC_Main .> UC_CheckPT : <<include>>
+UC_Main .> UC_CheckSessions : <<include>>
+UC_Main .> UC_Lock : <<include>>
+
+' Mối quan hệ Extend
+UC_Success .> UC_Main : <<extend>>\n(Không có xung đột)
+UC_Conflict .> UC_Main : <<extend>>\n(Trùng giờ PT hoặc Hội viên)
+@enduml</pre>
+    </section>
+
+    <!-- 1.4 UC-04.3 SƠ ĐỒ USE CASE CHI TIẾT -->
+    <section id="uc-04" class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 space-y-4 mb-6">
+      <div class="flex justify-between items-start border-b pb-4">
+        <div>
+          <span class="text-xs font-black uppercase text-red-600">Chương 3 — Hình 3-4</span>
+          <h3 class="text-xl font-black text-slate-900">Sơ Đồ Use Case Chi Tiết: Quản Lý Bảo Lưu & Bù Ngày Hết Hạn (UC-04.3)</h3>
+          <p class="text-xs text-slate-500 mt-1">Bao gồm kích hoạt đóng băng, khóa check-in, kiểm tra max_freeze_days và tự động cộng dồn ngày khi Unfreeze.</p>
+        </div>
+        <button onclick="copyCode('code-uc04')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-sm">
+          <i class="fa-regular fa-copy"></i> Sao Chép Mã PlantUML
+        </button>
+      </div>
+      <pre id="code-uc04" class="p-4 bg-slate-900 text-slate-100 rounded-2xl text-xs overflow-x-auto max-h-96">@startuml
+!theme plain
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+skinparam sequence {
+    ArrowColor #DC2626
+    ActorBorderColor #DC2626
+    ActorBackgroundColor #FEF2F2
+}
+
+skinparam usecase {
+    BackgroundColor #FFFFFF
+    BorderColor #1E293B
+    BorderThickness 1.2
+    ArrowColor #475569
+    FontStyle bold
+}
+
+left to right direction
+
+actor "Lễ tân tại quầy\n(Staff)" as Staff #FEF3C7
+actor "Hội viên\n(Member)" as Member #FEF2F2
+actor "Quản trị viên\n(Admin)" as Admin #FDF2F8
+
+rectangle "Phân Hệ Bảo Lưu & Quản Lý Hợp Đồng (UC-04.3)" {
+    usecase "UC-04.3: Quản lý bảo lưu\n& Bù hạn thẻ gói tập" as UC_Main #EFF6FF
+    usecase "Kích hoạt đóng băng gói tập\n(Chuyển trạng thái FROZEN)" as UC_Freeze
+    usecase "Kiểm tra hạn mức ngày\nđược phép (max_freeze_days)" as UC_CheckDays
+    usecase "Tạm khóa quyền check-in\ncủa hội viên tại quầy" as UC_LockCheckin
+    usecase "Mở lại hợp đồng\n(Unfreeze thẻ tập)" as UC_Unfreeze
+    usecase "Tự động tính ngày đóng băng\n& Cộng bù vào end_date mới" as UC_ExtendEnd #F0FDF4
+    usecase "Cảnh báo từ chối bảo lưu\n(Vượt quá hạn mức gói)" as UC_Reject #FFF1F2
+    usecase "In phụ lục hợp đồng bảo lưu\n(Biểu mẫu 01 - STU)" as UC_Print
+}
+
+' Tương tác Actor
+Staff --> UC_Main
+Staff --> UC_Freeze
+Staff --> UC_Unfreeze
+Member --> UC_Main
+Admin --> UC_Main
+
+' Mối quan hệ Include
+UC_Freeze .> UC_CheckDays : <<include>>
+UC_Freeze .> UC_LockCheckin : <<include>>
+UC_Unfreeze .> UC_ExtendEnd : <<include>>
+
+' Mối quan hệ Extend
+UC_Freeze .> UC_Main : <<extend>>
+UC_Unfreeze .> UC_Main : <<extend>>
+UC_Reject .> UC_Freeze : <<extend>>\n(Số ngày > Hạn mức cho phép)
+UC_Print .> UC_Main : <<extend>>
+@enduml</pre>
+    </section>
+
+    <!-- 1.5 UC-08 SƠ ĐỒ USE CASE CHI TIẾT -->
+    <section id="uc-08" class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 space-y-4 mb-6">
+      <div class="flex justify-between items-start border-b pb-4">
+        <div>
+          <span class="text-xs font-black uppercase text-red-600">Chương 3 — Hình 3-5</span>
+          <h3 class="text-xl font-black text-slate-900">Sơ Đồ Use Case Chi Tiết: Thanh Toán Online & Kích Hoạt Qua Webhook (UC-08)</h3>
+          <p class="text-xs text-slate-500 mt-1">Xử lý khởi tạo đơn hàng, sinh mã VietQR chuẩn NAPAS, kiểm tra chữ ký HMAC SHA256 và kích hoạt gói tức thì.</p>
+        </div>
+        <button onclick="copyCode('code-uc08')" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-sm">
+          <i class="fa-regular fa-copy"></i> Sao Chép Mã PlantUML
+        </button>
+      </div>
+      <pre id="code-uc08" class="p-4 bg-slate-900 text-slate-100 rounded-2xl text-xs overflow-x-auto max-h-96">@startuml
+!theme plain
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+skinparam sequence {
+    ArrowColor #DC2626
+    ActorBorderColor #DC2626
+    ActorBackgroundColor #FEF2F2
+}
+
+skinparam usecase {
+    BackgroundColor #FFFFFF
+    BorderColor #1E293B
+    BorderThickness 1.2
+    ArrowColor #475569
+    FontStyle bold
+}
+
+left to right direction
+
+actor "Khách hàng / Hội viên\n(Customer / Member)" as User #FEF2F2
+actor "Cổng Thanh Toán\n(VietQR / PayOS)" as Gateway #EDE9FE
+
+rectangle "Phân Hệ Thanh Toán Trực Tuyến & Webhook (UC-08)" {
+    usecase "UC-08: Thanh toán trực tuyến\n& Kích hoạt gói qua Webhook" as UC_Main #EFF6FF
+    usecase "Khởi tạo đơn hàng thanh toán\n(Trạng thái PENDING)" as UC_CreateOrder
+    usecase "Sinh mã VietQR chuyển khoản\nkèm đồng hồ đếm ngược 15p" as UC_GenVietQR
+    usecase "Quét mã & Chuyển khoản\nqua App Mobile Banking" as UC_BankTransfer
+    usecase "Xử lý nhận Webhook đối soát\ntự động từ Cổng thanh toán" as UC_ProcessWebhook
+    usecase "Xác thực tính toàn vẹn\nchữ ký số HMAC SHA256" as UC_VerifyHMAC
+    usecase "Kiểm tra tính lũy đẳng\n(Idempotency: Tránh ghi đúp)" as UC_Idempotency
+    usecase "Tự động kích hoạt hợp đồng ACTIVE\n& Gửi email biên lai (Biểu mẫu 02)" as UC_Success #F0FDF4
+    usecase "Từ chối Webhook giả mạo\n(Trả về lỗi 403 Forbidden)" as UC_FakeReject #FFF1F2
+}
+
+' Tương tác Actor
+User --> UC_Main
+User --> UC_BankTransfer
+Gateway --> UC_ProcessWebhook
+
+' Mối quan hệ Include
+UC_Main .> UC_CreateOrder : <<include>>
+UC_Main .> UC_GenVietQR : <<include>>
+UC_ProcessWebhook .> UC_VerifyHMAC : <<include>>
+UC_ProcessWebhook .> UC_Idempotency : <<include>>
+
+' Mối quan hệ Extend
+UC_ProcessWebhook .> UC_Main : <<extend>>
+UC_Success .> UC_ProcessWebhook : <<extend>>\n(Hợp lệ & Thành công)
+UC_FakeReject .> UC_ProcessWebhook : <<extend>>\n(Sai chữ ký HMAC)
+@enduml</pre>
+    </section>
+  </div>
+
+  <!-- PHẦN 2: CÁC SƠ ĐỒ TUẦN TỰ (SEQUENCE DIAGRAMS) -->
+  <div class="pt-8">
+    <div class="flex items-center gap-2 mb-4">
+      <span class="w-3 h-3 rounded-full bg-blue-600"></span>
+      <h2 class="text-xl font-black text-slate-900 uppercase">II. CÁC SƠ ĐỒ TUẦN TỰ (SEQUENCE DIAGRAMS)</h2>
+    </div>
+
+    <!-- 2.1 SEQUENCE CHECK-IN -->
+    <section id="seq-checkin" class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 space-y-4 mb-6">
+      <div class="flex justify-between items-start border-b pb-4">
+        <div>
+          <span class="text-xs font-black uppercase text-blue-600">Chương 3 — Hình 3-6</span>
+          <h3 class="text-xl font-black text-slate-900">Sơ Đồ Tuần Tự: Quy Trình Check-in Mã QR Động Realtime (UC-05)</h3>
+          <p class="text-xs text-slate-500 mt-1">Xác thực token JWT 60 giây, kiểm tra trạng thái hợp đồng CSDL và đẩy sự kiện Socket.io chuông xanh / đỏ.</p>
+        </div>
+        <button onclick="copyCode('code-seq-checkin')" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-sm">
+          <i class="fa-regular fa-copy"></i> Sao Chép Mã PlantUML
+        </button>
+      </div>
+      <pre id="code-seq-checkin" class="p-4 bg-slate-900 text-slate-100 rounded-2xl text-xs overflow-x-auto max-h-96">@startuml
+!theme plain
+autonumber "<b>[00]</b>"
+
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam sequence {
+    ArrowColor #1E293B
+    ArrowThickness 1.5
+    LifeLineBorderColor #64748B
+    LifeLineBackgroundColor #F1F5F9
+    ParticipantBorderColor #CBD5E1
+    ParticipantBackgroundColor #FFFFFF
+    ParticipantFontStyle bold
+    ParticipantFontSize 12
+    ActorBorderColor #DC2626
+    ActorBackgroundColor #FEF2F2
+    ActorFontStyle bold
+    GroupBorderColor #94A3B8
+    GroupBackgroundColor #FAFAFA
+    GroupHeaderFontStyle bold
+    GroupHeaderFontSize 11
+    BoxPadding 15
+    ParticipantPadding 20
+}
+
+actor "Hội viên\n(Member)" as Member #FEF2F2
+participant "UI Hội Viên\n(Mobile/Web)" as AppMember #EFF6FF
+actor "Lễ Tân\n(Staff)" as Staff #FEF3C7
+participant "UI Quầy Lễ Tân\n(Web Scanner)" as AppStaff #FEF2F2
+participant "Backend API\n(Express Server)" as Server #F0FDF4
+participant "Socket.io\n(Realtime)" as Socket #EDE9FE
+database "CSDL MySQL\n(Database)" as DB #FEF3C7
+
+== BƯỚC 1: HỘI VIÊN LẤY MÃ QR ĐỘNG BẢO MẬT 60S ==
+
+Member -> AppMember : 1. Mở Cổng Hội Viên\nxem "Thẻ Điện Tử"
+activate Member
+activate AppMember
+
+AppMember -> Server : 2. GET /api/check-ins/dynamic-qr\n(Header: Bearer Token)
+activate Server
+
+Server -> DB : 3. SELECT qr_secret FROM member_profiles\nWHERE user_id = currentUserId
+activate DB
+DB --> Server : 4. Trả về qrSecret
+deactivate DB
+
+Server -> Server : 5. Ký mã JWT Token 60s:\n{ userId, qrSecret, exp: 60s }
+Server --> AppMember : 6. Trả về { qrToken, expiresIn: 60 }
+deactivate Server
+
+AppMember --> Member : 7. Hiển thị mã QR động\n(Đồng hồ đếm ngược 60s)
+deactivate AppMember
+
+== BƯỚC 2: QUÉT MÃ QR TẠI CỬA KHẨU PHÒNG TẬP ==
+
+Member -> Staff : 8. Đưa màn hình điện thoại vào camera quầy
+activate Staff
+
+Staff -> AppStaff : 9. Hướng camera nhận diện mã QR
+activate AppStaff
+
+AppStaff -> Server : 10. POST /api/check-ins/scan\n{ qrToken: "eyJhbGciOi..." }
+activate Server
+
+Server -> Server : 11. Giải mã & kiểm tra tính toàn vẹn JWT\n(Hạn token <= 60s & đúng qrSecret)
+
+Server -> DB : 12. SELECT m.*, u.full_name, u.avatar_url\nFROM memberships m\nJOIN users u ON m.member_id = u.id\nWHERE m.member_id = userId\n  AND m.status IN ('ACTIVE', 'FROZEN')
+activate DB
+DB --> Server : 13. Trả về thông tin hợp đồng & trạng thái
+deactivate DB
+
+== BƯỚC 3: RẼ NHÁNH XỬ LÝ KẾT QUẢ CHECK-IN ==
+
+alt#LightGreen #F0FDF4 [TRƯỜNG HỢP 1: Hợp đồng hợp lệ (ACTIVE & Còn hạn)]
+    
+    Server -> DB : 14. INSERT INTO check_ins\n(member_id, status, checkin_time)\nVALUES (userId, 'SUCCESS', NOW())
+    activate DB
+    DB --> Server : 15. Ghi nhận thành công
+    deactivate DB
+    
+    Server -> Socket : 16. emit('checkin_event', {\n  status: 'SUCCESS',\n  member: { name: 'Võ Duy Phúc', package: 'VIP 12T', daysLeft: 245 }\n})
+    activate Socket
+    Socket --> AppStaff : 17. Đẩy thông báo tức thì lên màn hình
+    deactivate Socket
+    
+    AppStaff --> Staff : 18. Phát chuông <b>"BÍP XANH"</b>,\nhiển thị ảnh hội viên & bật mở cổng Turnstile
+    
+    Server --> AppStaff : 19. HTTP 200 OK { success: true }
+    
+else #FFF1F2 [TRƯỜNG HỢP 2: Bị từ chối (Gói FROZEN bảo lưu hoặc EXPIRED hết hạn)]
+    
+    Server -> DB : 20. INSERT INTO check_ins\n(member_id, status, deny_reason, checkin_time)\nVALUES (userId, 'DENIED', 'Gói tập đang bảo lưu', NOW())
+    activate DB
+    DB --> Server : 21. Lưu vết vi phạm
+    deactivate DB
+    
+    Server -> Socket : 22. emit('checkin_event', {\n  status: 'DENIED',\n  reason: 'Gói tập đang tạm ngưng bảo lưu!'\n})
+    activate Socket
+    Socket --> AppStaff : 23. Đẩy cảnh báo đỏ lên màn hình
+    deactivate Socket
+    
+    AppStaff --> Staff : 24. Phát còi <b>"TÍT TÍT ĐỎ"</b> cảnh báo,\nkhóa chặt cổng Turnstile
+    
+    Server --> AppStaff : 25. HTTP 400 Bad Request { success: false, reason: "..." }
+    deactivate Server
+    
+end
+deactivate AppStaff
+deactivate Staff
+deactivate Member
+@enduml</pre>
+    </section>
+
+    <!-- 2.2 SEQUENCE ĐẶT LỊCH PT -->
+    <section id="seq-booking" class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 space-y-4 mb-6">
+      <div class="flex justify-between items-start border-b pb-4">
+        <div>
+          <span class="text-xs font-black uppercase text-blue-600">Chương 3 — Hình 3-7</span>
+          <h3 class="text-xl font-black text-slate-900">Sơ Đồ Tuần Tự: Đặt Lịch PT 1-1 Chống Trùng Lịch Có Transaction (UC-06)</h3>
+          <p class="text-xs text-slate-500 mt-1">Sử dụng SELECT FOR UPDATE để khóa dòng, kiểm tra xung đột thời gian và Rollback an toàn khi có 2 người cùng đặt 1 giờ.</p>
+        </div>
+        <button onclick="copyCode('code-seq-booking')" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-sm">
+          <i class="fa-regular fa-copy"></i> Sao Chép Mã PlantUML
+        </button>
+      </div>
+      <pre id="code-seq-booking" class="p-4 bg-slate-900 text-slate-100 rounded-2xl text-xs overflow-x-auto max-h-96">@startuml
+!theme plain
+autonumber "<b>[00]</b>"
+
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam sequence {
+    ArrowColor #1E293B
+    ArrowThickness 1.5
+    LifeLineBorderColor #64748B
+    LifeLineBackgroundColor #F1F5F9
+    ParticipantBorderColor #CBD5E1
+    ParticipantBackgroundColor #FFFFFF
+    ParticipantFontStyle bold
+    ParticipantFontSize 12
+    ActorBorderColor #DC2626
+    ActorBackgroundColor #FEF2F2
+    ActorFontStyle bold
+    GroupBorderColor #94A3B8
+    GroupBackgroundColor #FAFAFA
+    GroupHeaderFontStyle bold
+    GroupHeaderFontSize 11
+    BoxPadding 15
+    ParticipantPadding 25
+}
+
+actor "Hội viên\n(Member)" as Member #FEF2F2
+participant "Cổng Hội Viên\n(React UI)" as UI #EFF6FF
+participant "Máy Chủ Backend\n(Express API)" as Server #F0FDF4
+database "CSDL MySQL\n(Prisma Transaction)" as DB #FEF3C7
+participant "Dịch Vụ Email\n(Nodemailer)" as Mail #F1F5F9
+
+== BƯỚC 1: KHỞI TẠO YÊU CẦU ĐẶT LỊCH ==
+
+Member -> UI : 1. Chọn PT, ngày tập & khung giờ\n(Ví dụ: 18:00 - 19:00)
+activate Member
+activate UI
+
+Member -> UI : 2. Nhấn nút "Xác nhận đặt lịch"
+UI -> Server : 3. POST /api/pt-bookings\n{\n  membershipId: 101,\n  ptId: 5,\n  date: "2026-11-15",\n  time: "18:00-19:00"\n}
+activate Server
+
+== BƯỚC 2: KIỂM SOÁT ĐỒNG THỜI & BẢO VỆ GIAO DỊCH ==
+
+Server -> DB : 4. BEGIN TRANSACTION
+activate DB
+
+Server -> DB : 5. SELECT remaining_sessions\nFROM memberships\nWHERE id = membershipId\n<b>FOR UPDATE</b> (Khóa dòng chống cấn trừ sai)
+
+DB --> Server : 6. remaining_sessions = 5\n<i>(Hợp lệ: Hội viên còn buổi tập)</i>
+
+Server -> DB : 7. SELECT * FROM pt_bookings\nWHERE pt_id = 5\n  AND booking_date = '2026-11-15'\n  AND start_time = '18:00-19:00'\n  AND status = 'SCHEDULED'
+
+DB --> Server : 8. Kết quả: [Trống]\n<i>(Chưa có ai đặt khung giờ này)</i>
+
+== BƯỚC 3: RẼ NHÁNH XỬ LÝ (ALT: HỢP LỆ HOẶC XUNG ĐỘT) ==
+
+alt#LightGreen #F0FDF4 [TRƯỜNG HỢP 1: Khung giờ hợp lệ (Không trùng lịch)]
+    
+    Server -> DB : 9. INSERT INTO pt_bookings\n(membership_id, pt_id, booking_date, time, status)\nVALUES (101, 5, '2026-11-15', '18:00-19:00', 'SCHEDULED')
+    DB --> Server : 10. Ghi nhận thành công
+    
+    Server -> DB : 11. COMMIT TRANSACTION
+    deactivate DB
+    
+    Server -> Mail : 12. Gửi email xác nhận & nhắc lịch\nđến Huấn luyện viên & Hội viên
+    activate Mail
+    Mail --> Server : Email sent OK
+    deactivate Mail
+    
+    Server --> UI : 13. HTTP 201 Created\n{\n  success: true,\n  message: "Đặt lịch PT thành công!",\n  bookingId: 8829\n}
+    
+    UI --> Member : 14. Hiển thị Popup thành công\n& cập nhật thẻ lịch hẹn lên giao diện
+    
+else #FFF1F2 [TRƯỜNG HỢP 2: Có xung đột trùng giờ (PT đã kín lịch)]
+    
+    activate DB
+    Server -> DB : 15. ROLLBACK TRANSACTION\n(Hủy bỏ mọi thay đổi tạm thời)
+    deactivate DB
+    
+    Server --> UI : 16. HTTP 409 Conflict\n{\n  success: false,\n  message: "Khung giờ PT đã có học viên đặt!"\n}
+    deactivate Server
+    
+    UI --> Member : 17. Hiển thị cảnh báo đỏ lỗi 409:\n"Khung giờ đã kín, vui lòng chọn giờ khác!"
+    deactivate UI
+    deactivate Member
+    
+end
+@enduml</pre>
+    </section>
+
+    <!-- 2.3 SEQUENCE WEBHOOK -->
+    <section id="seq-webhook" class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 space-y-4 mb-6">
+      <div class="flex justify-between items-start border-b pb-4">
+        <div>
+          <span class="text-xs font-black uppercase text-blue-600">Chương 3 — Hình 3-8</span>
+          <h3 class="text-xl font-black text-slate-900">Sơ Đồ Tuần Tự: Thanh Toán Trực Tuyến & Đối Soát Webhook VietQR (UC-08)</h3>
+          <p class="text-xs text-slate-500 mt-1">Xác thực HMAC SHA256, kiểm tra tính lũy đẳng (Idempotency) tránh kích hoạt đúp và phát WebSocket kích hoạt tài khoản.</p>
+        </div>
+        <button onclick="copyCode('code-seq-webhook')" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-sm">
+          <i class="fa-regular fa-copy"></i> Sao Chép Mã PlantUML
+        </button>
+      </div>
+      <pre id="code-seq-webhook" class="p-4 bg-slate-900 text-slate-100 rounded-2xl text-xs overflow-x-auto max-h-96">@startuml
+!theme plain
+autonumber "<b>[00]</b>"
+
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam sequence {
+    ArrowColor #1E293B
+    ArrowThickness 1.5
+    LifeLineBorderColor #64748B
+    LifeLineBackgroundColor #F1F5F9
+    ParticipantBorderColor #CBD5E1
+    ParticipantBackgroundColor #FFFFFF
+    ParticipantFontStyle bold
+    ParticipantFontSize 12
+    ActorBorderColor #DC2626
+    ActorBackgroundColor #FEF2F2
+    ActorFontStyle bold
+    GroupBorderColor #94A3B8
+    GroupBackgroundColor #FAFAFA
+    GroupHeaderFontStyle bold
+    GroupHeaderFontSize 11
+    BoxPadding 15
+    ParticipantPadding 20
+}
+
+actor "Khách hàng / Hội viên\n(Customer / Member)" as User #FEF2F2
+participant "Frontend React\n(Giao diện Web)" as UI #EFF6FF
+participant "Máy Chủ Backend\n(Express API)" as Server #F0FDF4
+participant "Cổng VietQR / PayOS\n(Payment Gateway)" as Gateway #EDE9FE
+database "CSDL MySQL\n(Database)" as DB #FEF3C7
+
+== GIAI ĐOẠN 1: TẠO ĐƠN HÀNG VÀ MÃ THANH TOÁN VIETQR ==
+
+User -> UI : 1. Chọn gói tập &\nbấm "Thanh toán VietQR"
+activate User
+activate UI
+
+UI -> Server : 2. POST /api/payments/create-order\n{\n  packageId: 3,\n  memberId: 101\n}
+activate Server
+
+Server -> DB : 3. INSERT INTO payments\n(payment_code, amount, status)\nVALUES ('PAY-8829', 5800000, 'PENDING')
+activate DB
+DB --> Server : 4. Ghi nhận hóa đơn tạm thời
+deactivate DB
+
+Server -> Gateway : 5. Tạo giao dịch QR Sandbox\nkèm mã thanh toán & số tiền
+activate Gateway
+Gateway --> Server : 6. Trả về Link ảnh QR\n& paymentCode đối soát
+deactivate Gateway
+
+Server --> UI : 7. Trả về mã VietQR\nkèm kênh WebSocket lắng nghe
+UI --> User : 8. Hiển thị mã QR ngân hàng\nkèm đồng hồ đếm ngược 15 phút
+deactivate UI
+
+== GIAI ĐOẠN 2: KHÁCH HÀNG CHUYỂN KHOẢN MOBILE BANKING ==
+
+User -> Gateway : 9. Mở App ngân hàng quét mã VietQR\n& xác thực chuyển khoản
+activate Gateway
+Gateway -> Gateway : 10. Hệ thống ngân hàng khớp lệnh\nchuyển tiền thành công
+
+== GIAI ĐOẠN 3: XỬ LÝ WEBHOOK TỰ ĐỘNG & KÍCH HOẠT GÓI TẬP ==
+
+Gateway -> Server : 11. POST /api/payments/webhook\n{\n  paymentCode: 'PAY-8829',\n  amount: 5800000,\n  signature: 'hmac_sha256_hash'\n}
+deactivate Gateway
+
+Server -> Server : 12. Kiểm tra tính hợp lệ\ncủa chữ ký số HMAC SHA256
+
+Server -> DB : 13. SELECT status FROM payments\nWHERE payment_code = 'PAY-8829'
+activate DB
+DB --> Server : 14. status = 'PENDING'\n<i>(Chưa đối soát, hợp lệ)</i>
+
+Server -> DB : 15. BEGIN TRANSACTION
+Server -> DB : 16. UPDATE payments\nSET status = 'PAID', paid_at = NOW()\nWHERE payment_code = 'PAY-8829'
+
+Server -> DB : 17. UPDATE memberships\nSET status = 'ACTIVE'\nWHERE id = membershipId
+
+Server -> DB : 18. COMMIT TRANSACTION
+DB --> Server : 19. Giao dịch CSDL hoàn tất
+deactivate DB
+
+Server --> Gateway : 20. HTTP 200 OK\n(Xác nhận đã xử lý Webhook)
+
+Server -> UI : 21. Gửi sự kiện WebSocket (Socket.io):\n{ event: 'PAYMENT_SUCCESS', membershipId: 101 }
+activate UI
+
+UI --> User : 22. Tự động chuyển trang thông báo:\n<b>"Kích hoạt gói tập thành công!"</b>\n& cấp quyền check-in tức thì
+deactivate UI
+deactivate Server
+deactivate User
+@enduml</pre>
+    </section>
+
+    <!-- 2.4 SEQUENCE BẢO LƯU -->
+    <section id="seq-freeze" class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 space-y-4 mb-6">
+      <div class="flex justify-between items-start border-b pb-4">
+        <div>
+          <span class="text-xs font-black uppercase text-blue-600">Chương 3 — Hình 3-9</span>
+          <h3 class="text-xl font-black text-slate-900">Sơ Đồ Tuần Tự: Bảo Lưu Gói Tập & Tự Động Cộng Bù Hạn Thẻ (UC-04.3)</h3>
+          <p class="text-xs text-slate-500 mt-1">Quy trình đóng băng thẻ (FROZEN), tạm khóa check-in và tính ngày thực tế để cộng dồn vào end_date mới khi mở lại.</p>
+        </div>
+        <button onclick="copyCode('code-seq-freeze')" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-sm">
+          <i class="fa-regular fa-copy"></i> Sao Chép Mã PlantUML
+        </button>
+      </div>
+      <pre id="code-seq-freeze" class="p-4 bg-slate-900 text-slate-100 rounded-2xl text-xs overflow-x-auto max-h-96">@startuml
+!theme plain
+autonumber "<b>[00]</b>"
+
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam sequence {
+    ArrowColor #1E293B
+    ArrowThickness 1.5
+    LifeLineBorderColor #64748B
+    LifeLineBackgroundColor #F1F5F9
+    ParticipantBorderColor #CBD5E1
+    ParticipantBackgroundColor #FFFFFF
+    ParticipantFontStyle bold
+    ParticipantFontSize 12
+    ActorBorderColor #DC2626
+    ActorBackgroundColor #FEF2F2
+    ActorFontStyle bold
+    GroupBorderColor #94A3B8
+    GroupBackgroundColor #FAFAFA
+    GroupHeaderFontStyle bold
+    GroupHeaderFontSize 11
+    BoxPadding 15
+    ParticipantPadding 20
+}
+
+actor "Lễ Tân / Hội Viên\n(Staff / Member)" as Actor #FEF2F2
+participant "Giao Diện Web\n(React UI)" as UI #EFF6FF
+participant "Máy Chủ Backend\n(Express API)" as Server #F0FDF4
+database "CSDL MySQL\n(Database)" as DB #FEF3C7
+
+== PHẦN 1: NGHIỆP VỤ ĐÓNG BĂNG BẢO LƯU GÓI TẬP ==
+
+Actor -> UI : 1. Chọn hợp đồng cần bảo lưu\n& nhập số ngày (vd: 15 ngày)
+activate Actor
+activate UI
+
+UI -> Server : 2. POST /api/memberships/:id/freeze\n{\n  freezeDays: 15,\n  reason: "Đi công tác xa"\n}
+activate Server
+
+Server -> DB : 3. SELECT m.*, p.max_freeze_days\nFROM memberships m\nJOIN packages p ON m.package_id = p.id\nWHERE m.id = :id
+activate DB
+DB --> Server : 4. max_freeze_days = 60, frozen_days_used = 0
+deactivate DB
+
+alt#LightGreen #F0FDF4 [Hạn mức hợp lệ: số ngày yêu cầu <= hạn mức còn lại]
+    
+    Server -> DB : 5. BEGIN TRANSACTION
+    activate DB
+    Server -> DB : 6. UPDATE memberships\nSET status = 'FROZEN'\nWHERE id = :id
+    
+    Server -> DB : 7. INSERT INTO membership_freezes\n(membership_id, freeze_start, days_count, status)\nVALUES (:id, NOW(), 15, 'ACTIVE')
+    
+    Server -> DB : 8. COMMIT TRANSACTION
+    DB --> Server : 9. Giao dịch bảo lưu hoàn tất
+    deactivate DB
+    
+    Server --> UI : 10. HTTP 200 OK\n(Đã bảo lưu thẻ thành công, khóa quyền check-in)
+    UI --> Actor : 11. Cập nhật thẻ trạng thái sang 'FROZEN'\n(Màu xanh dương)
+    
+else #FFF1F2 [Vượt quá hạn mức bảo lưu của gói]
+    
+    Server --> UI : 12. HTTP 400 Bad Request\n("Số ngày vượt quá hạn mức tối đa của gói!")
+    UI --> Actor : 13. Hiển thị thông báo từ chối yêu cầu
+    
+end
+deactivate UI
+
+== PHẦN 2: NGHIỆP VỤ MỞ LẠI THẺ VÀ TỰ ĐỘNG CỘNG BÙ NGÀY ==
+
+Actor -> UI : 14. Bấm "Mở lại hợp đồng (Unfreeze)"
+activate UI
+
+UI -> Server : 15. POST /api/memberships/:id/unfreeze
+Server -> DB : 16. SELECT * FROM membership_freezes\nWHERE membership_id = :id AND status = 'ACTIVE'
+activate DB
+DB --> Server : 17. Trả về ngày bắt đầu bảo lưu (freeze_start)
+deactivate DB
+
+Server -> Server : 18. Tính số ngày đóng băng thực tế:\nactualDays = today - freeze_start (vd: 15 ngày)\nnewEndDate = oldEndDate + actualDays
+
+Server -> DB : 19. BEGIN TRANSACTION
+activate DB
+Server -> DB : 20. UPDATE memberships\nSET status = 'ACTIVE',\n    end_date = newEndDate\nWHERE id = :id
+
+Server -> DB : 21. UPDATE membership_freezes\nSET status = 'COMPLETED', unfreeze_date = NOW()\nWHERE id = freezeId
+
+Server -> DB : 22. COMMIT TRANSACTION
+DB --> Server : 23. Cập nhật ngày hết hạn mới thành công
+deactivate DB
+
+Server --> UI : 24. HTTP 200 OK\n{\n  message: "Mở lại hợp đồng thành công!",\n  addedDays: 15,\n  newEndDate: "2027-01-25"\n}
+
+UI --> Actor : 25. Popup xanh: "Đã cộng bù 15 ngày vào hạn thẻ!\nHạn thẻ mới: 25/01/2027"
+deactivate UI
+deactivate Server
+deactivate Actor
+@enduml</pre>
+    </section>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50">
+    <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">✓</div>
+    <span id="toast-text" class="text-sm font-semibold">Đã sao chép mã PlantUML vào Clipboard!</span>
+  </div>
+
+  <script>
+    function copyCode(elementId) {
+      const codeText = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(codeText).then(() => {
+        showToast("Đã sao chép mã PlantUML thành công! Bạn có thể dán vào plantuml.com");
+      }).catch(err => {
+        alert("Lỗi khi sao chép: " + err);
+      });
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toast-text');
+      text.innerText = message;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

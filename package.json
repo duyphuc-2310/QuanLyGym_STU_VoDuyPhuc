@@ -1,0 +1,14 @@
+{
+  "name": "quan-ly-gym-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CITYGYM Management System - STU Graduation Thesis 2026",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "start": "npm --prefix frontend run dev",
+    "frontend": "npm --prefix frontend run dev",
+    "backend": "npm --prefix backend run dev",
+    "install:all": "npm --prefix frontend install && npm --prefix backend install"
+  }
+}
+

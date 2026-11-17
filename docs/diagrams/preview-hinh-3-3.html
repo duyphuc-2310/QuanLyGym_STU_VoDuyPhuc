@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Mã PlantUML - Hình 3-3: Sơ Đồ Tuần Tự Đặt Lịch PT 1-1</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 p-6 max-w-4xl mx-auto font-sans">
+  <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-200 space-y-4">
+    <div class="flex justify-between items-center pb-4 border-b">
+      <div>
+        <span class="text-xs font-black uppercase text-red-600 tracking-wider">Luận Văn Tốt Nghiệp STU - Chương 3</span>
+        <h1 class="text-2xl font-black text-slate-900">Hình 3-3: Sơ Đồ Tuần Tự Đặt Lịch PT 1-1 (PlantUML)</h1>
+        <p class="text-xs text-slate-500">Đã tối ưu hóa khoảng cách, ngắt dòng SQL và phân vùng màu sắc tránh dính chữ 100%.</p>
+      </div>
+      <button onclick="navigator.clipboard.writeText(document.getElementById('pumlCode').innerText); alert('Đã sao chép mã PlantUML vào clipboard!');" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs shadow">
+        Sao Chép Mã PlantUML
+      </button>
+    </div>
+
+    <div class="flex gap-2 text-xs">
+      <a href="https://www.planttext.com/" target="_blank" class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 font-bold hover:bg-blue-100">
+        Mở trang PlantText.com để dán mã vẽ ngay ↗
+      </a>
+      <a href="http://www.plantuml.com/plantuml/uml/" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-300 font-bold hover:bg-slate-200">
+        Mở trang PlantUML Server chính thức ↗
+      </a>
+    </div>
+
+    <pre id="pumlCode" class="p-5 bg-slate-900 text-slate-100 rounded-2xl text-xs font-mono overflow-x-auto leading-relaxed border border-slate-800">
+@startuml
+!theme plain
+autonumber "<b>[00]</b>"
+
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam sequence {
+    ArrowColor #1E293B
+    ArrowThickness 1.5
+    LifeLineBorderColor #64748B
+    LifeLineBackgroundColor #F1F5F9
+    ParticipantBorderColor #CBD5E1
+    ParticipantBackgroundColor #FFFFFF
+    ParticipantFontStyle bold
+    ParticipantFontSize 12
+    ActorBorderColor #DC2626
+    ActorBackgroundColor #FEF2F2
+    ActorFontStyle bold
+    GroupBorderColor #94A3B8
+    GroupBackgroundColor #FAFAFA
+    GroupHeaderFontStyle bold
+    GroupHeaderFontSize 11
+    BoxPadding 15
+    ParticipantPadding 25
+}
+
+actor "Hội viên\n(Member)" as Member #FEF2F2
+participant "Cổng Hội Viên\n(React UI)" as UI #EFF6FF
+participant "Máy Chủ Backend\n(Express API)" as Server #F0FDF4
+database "CSDL MySQL\n(Prisma Transaction)" as DB #FEF3C7
+participant "Dịch Vụ Email\n(Nodemailer)" as Mail #F1F5F9
+
+== BƯỚC 1: KHỞI TẠO YÊU CẦU ĐẶT LỊCH ==
+
+Member -> UI : 1. Chọn PT, ngày tập & khung giờ\n(Ví dụ: 18:00 - 19:00)
+activate Member
+activate UI
+
+Member -> UI : 2. Nhấn nút "Xác nhận đặt lịch"
+UI -> Server : 3. POST /api/pt-bookings\n{\n  membershipId: 101,\n  ptId: 5,\n  date: "2026-11-15",\n  time: "18:00-19:00"\n}
+activate Server
+
+== BƯỚC 2: KIỂM SOÁT ĐỒNG THỜI & BẢO VỆ GIAO DỊCH ==
+
+Server -> DB : 4. BEGIN TRANSACTION
+activate DB
+
+Server -> DB : 5. SELECT remaining_sessions\nFROM memberships\nWHERE id = membershipId\n<b>FOR UPDATE</b> (Khóa dòng chống cấn trừ sai)
+
+DB --> Server : 6. remaining_sessions = 5\n<i>(Hợp lệ: Hội viên còn buổi tập)</i>
+
+Server -> DB : 7. SELECT * FROM pt_bookings\nWHERE pt_id = 5\n  AND booking_date = '2026-11-15'\n  AND start_time = '18:00-19:00'\n  AND status = 'SCHEDULED'
+
+DB --> Server : 8. Kết quả: [Trống]\n<i>(Chưa có ai đặt khung giờ này)</i>
+
+== BƯỚC 3: RẼ NHÁNH XỬ LÝ (ALT: HỢP LỆ HOẶC XUNG ĐỘT) ==
+
+alt#LightGreen #F0FDF4 [TRƯỜNG HỢP 1: Khung giờ hợp lệ (Không trùng lịch)]
+    
+    Server -> DB : 9. INSERT INTO pt_bookings\n(membership_id, pt_id, booking_date, time, status)\nVALUES (101, 5, '2026-11-15', '18:00-19:00', 'SCHEDULED')
+    DB --> Server : 10. Ghi nhận thành công
+    
+    Server -> DB : 11. COMMIT TRANSACTION
+    deactivate DB
+    
+    Server -> Mail : 12. Gửi email xác nhận & nhắc lịch\nđến Huấn luyện viên & Hội viên
+    activate Mail
+    Mail --> Server : Email sent OK
+    deactivate Mail
+    
+    Server --> UI : 13. HTTP 201 Created\n{\n  success: true,\n  message: "Đặt lịch PT thành công!",\n  bookingId: 8829\n}
+    
+    UI --> Member : 14. Hiển thị Popup thành công\n& cập nhật thẻ lịch hẹn lên giao diện
+    
+else #FFF1F2 [TRƯỜNG HỢP 2: Có xung đột trùng giờ (PT đã kín lịch)]
+    
+    activate DB
+    Server -> DB : 15. ROLLBACK TRANSACTION\n(Hủy bỏ mọi thay đổi tạm thời)
+    deactivate DB
+    
+    Server --> UI : 16. HTTP 409 Conflict\n{\n  success: false,\n  message: "Khung giờ PT đã có học viên đặt!"\n}
+    deactivate Server
+    
+    UI --> Member : 17. Hiển thị cảnh báo đỏ lỗi 409:\n"Khung giờ đã kín, vui lòng chọn giờ khác!"
+    deactivate UI
+    deactivate Member
+    
+end
+
+@enduml
+    </pre>
+  </div>
+</body>
+</html>
+

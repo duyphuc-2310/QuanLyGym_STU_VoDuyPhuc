@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Mã PlantUML - Hình 3-4: Sơ Đồ Tuần Tự Thanh Toán Webhook</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 p-6 max-w-4xl mx-auto font-sans">
+  <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-200 space-y-4">
+    <div class="flex justify-between items-center pb-4 border-b">
+      <div>
+        <span class="text-xs font-black uppercase text-red-600 tracking-wider">Luận Văn Tốt Nghiệp STU - Chương 3</span>
+        <h1 class="text-2xl font-black text-slate-900">Hình 3-4: Sơ Đồ Tuần Tự Thanh Toán Webhook (PlantUML)</h1>
+        <p class="text-xs text-slate-500">Đã tối ưu hóa ngắt dòng, phân đoạn 3 giai đoạn rõ ràng và không bị dính chữ 100%.</p>
+      </div>
+      <button onclick="navigator.clipboard.writeText(document.getElementById('pumlCode').innerText); alert('Đã sao chép mã PlantUML Hình 3-4 vào clipboard!');" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs shadow">
+        Sao Chép Mã PlantUML
+      </button>
+    </div>
+
+    <div class="flex gap-2 text-xs">
+      <a href="https://www.planttext.com/" target="_blank" class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 font-bold hover:bg-blue-100">
+        Mở trang PlantText.com để dán mã vẽ ngay ↗
+      </a>
+      <a href="http://www.plantuml.com/plantuml/uml/" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-300 font-bold hover:bg-slate-200">
+        Mở trang PlantUML Server chính thức ↗
+      </a>
+    </div>
+
+    <pre id="pumlCode" class="p-5 bg-slate-900 text-slate-100 rounded-2xl text-xs font-mono overflow-x-auto leading-relaxed border border-slate-800">
+@startuml
+!theme plain
+autonumber "<b>[00]</b>"
+
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam sequence {
+    ArrowColor #1E293B
+    ArrowThickness 1.5
+    LifeLineBorderColor #64748B
+    LifeLineBackgroundColor #F1F5F9
+    ParticipantBorderColor #CBD5E1
+    ParticipantBackgroundColor #FFFFFF
+    ParticipantFontStyle bold
+    ParticipantFontSize 12
+    ActorBorderColor #DC2626
+    ActorBackgroundColor #FEF2F2
+    ActorFontStyle bold
+    GroupBorderColor #94A3B8
+    GroupBackgroundColor #FAFAFA
+    GroupHeaderFontStyle bold
+    GroupHeaderFontSize 11
+    BoxPadding 15
+    ParticipantPadding 20
+}
+
+actor "Khách hàng / Hội viên\n(Customer / Member)" as User #FEF2F2
+participant "Frontend React\n(Giao diện Web)" as UI #EFF6FF
+participant "Máy Chủ Backend\n(Express API)" as Server #F0FDF4
+participant "Cổng VietQR / PayOS\n(Payment Gateway)" as Gateway #EDE9FE
+database "CSDL MySQL\n(Database)" as DB #FEF3C7
+
+== GIAI ĐOẠN 1: TẠO ĐƠN HÀNG VÀ MÃ THANH TOÁN VIETQR ==
+
+User -> UI : 1. Chọn gói tập &\nbấm "Thanh toán VietQR"
+activate User
+activate UI
+
+UI -> Server : 2. POST /api/payments/create-order\n{\n  packageId: 3,\n  memberId: 101\n}
+activate Server
+
+Server -> DB : 3. INSERT INTO payments\n(payment_code, amount, status)\nVALUES ('PAY-8829', 5800000, 'PENDING')
+activate DB
+DB --> Server : 4. Ghi nhận hóa đơn tạm thời
+deactivate DB
+
+Server -> Gateway : 5. Tạo giao dịch QR Sandbox\nkèm mã thanh toán & số tiền
+activate Gateway
+Gateway --> Server : 6. Trả về Link ảnh QR\n& paymentCode đối soát
+deactivate Gateway
+
+Server --> UI : 7. Trả về mã VietQR\nkèm kênh WebSocket lắng nghe
+UI --> User : 8. Hiển thị mã QR ngân hàng\nkèm đồng hồ đếm ngược 15 phút
+deactivate UI
+
+== GIAI ĐOẠN 2: KHÁCH HÀNG CHUYỂN KHOẢN MOBILE BANKING ==
+
+User -> Gateway : 9. Mở App ngân hàng quét mã VietQR\n& xác thực chuyển khoản
+activate Gateway
+Gateway -> Gateway : 10. Hệ thống ngân hàng khớp lệnh\nchuyển tiền thành công
+
+== GIAI ĐOẠN 3: XỬ LÝ WEBHOOK TỰ ĐỘNG & KÍCH HOẠT GÓI TẬP ==
+
+Gateway -> Server : 11. POST /api/payments/webhook\n{\n  paymentCode: 'PAY-8829',\n  amount: 5800000,\n  signature: 'hmac_sha256_hash'\n}
+deactivate Gateway
+
+Server -> Server : 12. Kiểm tra tính hợp lệ\ncủa chữ ký số HMAC SHA256
+
+Server -> DB : 13. SELECT status FROM payments\nWHERE payment_code = 'PAY-8829'
+activate DB
+DB --> Server : 14. status = 'PENDING'\n<i>(Chưa đối soát, hợp lệ)</i>
+
+Server -> DB : 15. BEGIN TRANSACTION
+Server -> DB : 16. UPDATE payments\nSET status = 'PAID', paid_at = NOW()\nWHERE payment_code = 'PAY-8829'
+
+Server -> DB : 17. UPDATE memberships\nSET status = 'ACTIVE'\nWHERE id = membershipId
+
+Server -> DB : 18. COMMIT TRANSACTION
+DB --> Server : 19. Giao dịch CSDL hoàn tất
+deactivate DB
+
+Server --> Gateway : 20. HTTP 200 OK\n(Xác nhận đã xử lý Webhook)
+
+Server -> UI : 21. Gửi sự kiện WebSocket (Socket.io):\n{ event: 'PAYMENT_SUCCESS', membershipId: 101 }
+activate UI
+
+UI --> User : 22. Tự động chuyển trang thông báo:\n<b>"Kích hoạt gói tập thành công!"</b>\n& cấp quyền check-in tức thì
+deactivate UI
+deactivate Server
+deactivate User
+
+@enduml
+    </pre>
+  </div>
+</body>
+</html>
+

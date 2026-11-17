@@ -1,0 +1,59 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+skinparam sequence {
+    ArrowColor #DC2626
+    ActorBorderColor #DC2626
+    ActorBackgroundColor #FEF2F2
+}
+
+skinparam usecase {
+    BackgroundColor #FFFFFF
+    BorderColor #1E293B
+    BorderThickness 1.2
+    ArrowColor #475569
+    FontStyle bold
+}
+
+left to right direction
+
+actor "Khách hàng / Hội viên\n(Customer / Member)" as User #FEF2F2
+actor "Cổng Thanh Toán\n(VietQR / PayOS)" as Gateway #EDE9FE
+
+rectangle "Phân Hệ Thanh Toán Trực Tuyến & Webhook (UC-08)" {
+    
+    usecase "UC-08: Thanh toán trực tuyến\n& Kích hoạt gói qua Webhook" as UC_Main #EFF6FF
+    
+    usecase "Khởi tạo đơn hàng thanh toán\n(Trạng thái PENDING)" as UC_CreateOrder
+    usecase "Sinh mã VietQR chuyển khoản\nkèm đồng hồ đếm ngược 15p" as UC_GenVietQR
+    usecase "Quét mã & Chuyển khoản\nqua App Mobile Banking" as UC_BankTransfer
+    usecase "Xử lý nhận Webhook đối soát\ntự động từ Cổng thanh toán" as UC_ProcessWebhook
+    usecase "Xác thực tính toàn vẹn\nchữ ký số HMAC SHA256" as UC_VerifyHMAC
+    usecase "Kiểm tra tính lũy đẳng\n(Idempotency: Tránh ghi đúp)" as UC_Idempotency
+    
+    usecase "Tự động kích hoạt hợp đồng ACTIVE\n& Gửi email biên lai (Biểu mẫu 02)" as UC_Success #F0FDF4
+    usecase "Từ chối Webhook giả mạo\n(Trả về lỗi 403 Forbidden)" as UC_FakeReject #FFF1F2
+}
+
+' Tương tác Actor
+User --> UC_Main
+User --> UC_BankTransfer
+Gateway --> UC_ProcessWebhook
+
+' Mối quan hệ Include
+UC_Main .> UC_CreateOrder : <<include>>
+UC_Main .> UC_GenVietQR : <<include>>
+UC_ProcessWebhook .> UC_VerifyHMAC : <<include>>
+UC_ProcessWebhook .> UC_Idempotency : <<include>>
+
+' Mối quan hệ Extend
+UC_ProcessWebhook .> UC_Main : <<extend>>
+UC_Success .> UC_ProcessWebhook : <<extend>>\n(Hợp lệ & Thành công)
+UC_FakeReject .> UC_ProcessWebhook : <<extend>>\n(Sai chữ ký HMAC)
+
+@enduml
+

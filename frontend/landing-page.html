@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CITYGYM - No Pain No Gain | Hệ Thống Phòng Tập Thể Hình & Yoga Chuẩn 5 Sao</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Be Vietnam Pro & Montserrat chuẩn 100% tiếng Việt -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700;1,800;1,900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'Segoe UI', 'Roboto', 'sans-serif'],
+          },
+          colors: {
+            city: {
+              red: '#DC2626',       // Đỏ thể thao mạnh mẽ
+              darkred: '#991B1B',   // Đỏ thẫm sang trọng
+              lightred: '#FEF2F2',  // Nền đỏ nhạt
+              accent: '#EF4444',
+              dark: '#0F172A',      // Chữ xám đen sắc nét
+              muted: '#64748B',     // Chữ phụ
+              border: '#E2E8F0',    // Viền xám nhạt
+              card: '#FFFFFF',
+              surface: '#F8FAFC',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body, h1, h2, h3, h4, p, span, button, input, select {
+      font-family: 'Be Vietnam Pro', 'Segoe UI', Roboto, sans-serif !important;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #F8FAFC; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #DC2626; }
+    
+    .gradient-red-text {
+      background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-glow-light {
+      background: radial-gradient(circle at 50% 15%, rgba(220, 38, 38, 0.08) 0%, rgba(255, 255, 255, 0) 65%);
+    }
+    
+    /* Athletic Carbon Texture Pattern */
+    .athletic-pattern {
+      background-color: #0F172A;
+      background-image: radial-gradient(#1E293B 1px, transparent 1px), radial-gradient(#1E293B 1px, #0F172A 1px);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+    }
+    
+    .elevation-card {
+      box-shadow: 0 20px 50px -15px rgba(220, 38, 38, 0.12), 0 0 0 1px rgba(226, 232, 240, 0.8);
+    }
+  </style>
+</head>
+<body class="bg-white text-city-dark font-sans antialiased selection:bg-city-red selection:text-white">
+
+  <!-- ==================== HEADER / NAVBAR ==================== -->
+  <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-md border-b border-city-border shadow-sm" id="navbar">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        <!-- Logo -->
+        <a href="#" class="flex items-center gap-3 group">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-city-red to-city-accent flex items-center justify-center text-white shadow-lg shadow-city-red/30 group-hover:scale-105 transition-transform">
+            <i data-lucide="dumbbell" class="w-6 h-6 stroke-[2.5]"></i>
+          </div>
+          <div>
+            <div class="tracking-wider text-2xl font-black uppercase text-city-dark flex items-center gap-1">
+              CITY<span class="text-city-red">GYM</span>
+            </div>
+            <p class="text-[10px] uppercase tracking-widest text-city-muted font-bold -mt-1">Fitness & Yoga Club</p>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-700">
+          <a href="#about" class="hover:text-city-red transition-colors">Giới thiệu</a>
+          <a href="#motivation" class="hover:text-city-red transition-colors text-city-red flex items-center gap-1 font-bold">
+            <i data-lucide="flame" class="w-4 h-4 text-city-red"></i>
+            <span>No Pain No Gain</span>
+          </a>
+          <a href="#packages" class="hover:text-city-red transition-colors">Bảng giá gói</a>
+          <a href="#trainers" class="hover:text-city-red transition-colors">Đội ngũ PT</a>
+          <a href="#classes" class="hover:text-city-red transition-colors">Lịch lớp</a>
+          <a href="#bmi-tool" class="hover:text-city-red transition-colors flex items-center gap-1.5 font-bold">
+            <i data-lucide="calculator" class="w-4 h-4 text-city-red"></i>
+            <span>Tính BMI/TDEE</span>
+          </a>
+        </nav>
+
+        <!-- Right Action Buttons -->
+        <div class="hidden lg:flex items-center gap-4">
+          <a href="#trial-section" class="px-5 py-2.5 rounded-full font-bold text-sm bg-gradient-to-r from-city-red to-city-accent text-white shadow-lg shadow-city-red/30 hover:shadow-city-red/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>Tập Thử Miễn Phí</span>
+          </a>
+          <button onclick="openLoginModal()" class="px-4 py-2.5 rounded-full text-sm font-bold border border-slate-300 hover:border-city-red hover:text-city-red text-slate-700 transition-all flex items-center gap-2">
+            <i data-lucide="user" class="w-4 h-4"></i>
+            <span>Cổng Nội Bộ</span>
+          </button>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button id="mobileMenuBtn" class="md:hidden p-2 text-slate-700 hover:text-city-red focus:outline-none">
+          <i data-lucide="menu" class="w-7 h-7"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown Menu -->
+    <div id="mobileMenu" class="hidden md:hidden bg-white border-b border-city-border px-6 py-6 space-y-3 shadow-xl">
+      <a href="#about" class="block text-slate-800 hover:text-city-red py-2 font-semibold">Giới thiệu</a>
+      <a href="#motivation" class="block text-city-red hover:underline py-2 font-bold">Slogan: No Pain No Gain</a>
+      <a href="#packages" class="block text-slate-800 hover:text-city-red py-2 font-semibold">Gói tập & Bảng giá</a>
+      <a href="#trainers" class="block text-slate-800 hover:text-city-red py-2 font-semibold">Đội ngũ PT</a>
+      <a href="#classes" class="block text-slate-800 hover:text-city-red py-2 font-semibold">Lịch lớp GroupX</a>
+      <a href="#bmi-tool" class="block text-city-red hover:underline py-2 font-bold">Công cụ tính BMI & TDEE</a>
+      <div class="pt-4 border-t border-slate-100 flex flex-col gap-3">
+        <a href="#trial-section" class="w-full text-center py-3 rounded-xl font-bold bg-city-red text-white shadow-md">Tập Thử Miễn Phí (QR E-Pass)</a>
+        <button onclick="openLoginModal()" class="w-full text-center py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold">Đăng Nhập Cổng Nội Bộ</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== HERO SECTION ==================== -->
+  <section class="relative pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden hero-glow-light">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <!-- Left Content -->
+        <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+          
+          <!-- Slogan Badge -->
+          <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-city-lightred border border-city-red/30 text-city-red text-xs sm:text-sm font-black tracking-wider uppercase shadow-sm">
+            <span class="w-2.5 h-2.5 rounded-full bg-city-red animate-ping"></span>
+            SLOGAN: NO PAIN - NO GAIN
+          </div>
+
+          <h1 class="text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-tight text-city-dark leading-[1.12]">
+            CHÀO MỪNG ĐẾN VỚI <br>
+            <span class="gradient-red-text">CITYGYM FITNESS</span>
+          </h1>
+
+          <p class="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
+            Không gian thể hình đẳng cấp hiện đại 1.500m², dàn máy tập chuẩn Olympic cùng đội ngũ Huấn luyện viên cá nhân (PT) chuyên sâu. Hệ thống số hóa quản lý thẻ, check-in mã QR động và đồng hành cùng bạn trên từng nấc thang thay đổi vóc dáng.
+          </p>
+
+          <!-- Action CTA -->
+          <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+            <a href="#trial-section" class="w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-base bg-gradient-to-r from-city-red to-city-accent text-white shadow-xl shadow-city-red/30 hover:shadow-city-red/50 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3">
+              <i data-lucide="qr-code" class="w-5 h-5"></i>
+              <span>Nhận Vé Tập Thử 03 Ngày 0Đ</span>
+            </a>
+            <a href="#bmi-tool" class="w-full sm:w-auto px-7 py-4 rounded-xl font-bold text-base bg-white hover:bg-slate-50 border-2 border-city-red/30 text-city-red hover:border-city-red transition-all flex items-center justify-center gap-2 shadow-sm">
+              <i data-lucide="activity" class="w-5 h-5"></i>
+              <span>Đo Thể Trạng BMI / TDEE</span>
+            </a>
+          </div>
+
+          <!-- Quick Trust Badges -->
+          <div class="pt-6 border-t border-slate-200 grid grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0 text-center lg:text-left">
+            <div>
+              <p class="text-2xl sm:text-3xl font-black text-city-dark">1.500<span class="text-city-red">m²</span></p>
+              <p class="text-xs text-slate-500 font-medium mt-1">Không gian máy tập tiêu chuẩn</p>
+            </div>
+            <div>
+              <p class="text-2xl sm:text-3xl font-black text-city-dark">50<span class="text-city-red">+</span></p>
+              <p class="text-xs text-slate-500 font-medium mt-1">HLV bằng cấp quốc tế</p>
+            </div>
+            <div>
+              <p class="text-2xl sm:text-3xl font-black text-city-dark">10.000<span class="text-city-red">+</span></p>
+              <p class="text-xs text-slate-500 font-medium mt-1">Hội viên tin tưởng đồng hành</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Visual / Interactive Member QR Preview -->
+        <div class="lg:col-span-5 relative">
+          <div class="relative mx-auto max-w-md lg:max-w-none">
+            <!-- Background Glow -->
+            <div class="absolute -inset-2 bg-gradient-to-tr from-city-red/20 to-red-100 rounded-3xl blur-xl opacity-70"></div>
+            
+            <!-- Main Hero Card (Clean White with Red Accents) -->
+            <div class="relative rounded-3xl bg-white p-6 sm:p-8 space-y-6 border border-slate-200 shadow-2xl">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-2xl bg-city-lightred border border-city-red/30 flex items-center justify-center text-city-red font-bold text-xl">
+                    <i data-lucide="shield-check" class="w-6 h-6 stroke-[2.5]"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-extrabold text-city-dark text-base">Check-in Điện Tử CITYGYM</h3>
+                    <p class="text-xs text-slate-500">Mã QR động bảo mật tự làm mới</p>
+                  </div>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Realtime
+                </span>
+              </div>
+
+              <!-- Interactive Mock Card -->
+              <div class="bg-gradient-to-br from-city-dark to-slate-800 text-white p-5 rounded-2xl shadow-lg space-y-4">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-city-red bg-white/10 px-2 py-0.5 rounded">Hội viên chính thức</span>
+                    <p class="text-lg font-black mt-2 text-white">Võ Duy Phúc</p>
+                    <p class="text-xs text-slate-300 font-medium">Gói CityGold 12 Tháng + PT 1-1</p>
+                  </div>
+                  <div class="w-16 h-16 bg-white p-1 rounded-xl flex items-center justify-center shadow">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=CITYGYM-MEMBER-DEMO-2026" alt="QR Demo" class="w-full h-full object-contain" />
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 pt-3 text-xs border-t border-slate-700">
+                  <div>
+                    <span class="text-slate-400">Thời hạn gói:</span>
+                    <p class="text-emerald-400 font-bold">Còn 286 ngày</p>
+                  </div>
+                  <div>
+                    <span class="text-slate-400">Buổi tập cùng PT:</span>
+                    <p class="text-amber-400 font-bold">18 / 20 buổi</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Live Benefits List -->
+              <div class="space-y-3 text-xs text-slate-600">
+                <div class="flex items-center gap-2.5">
+                  <i data-lucide="check-circle-2" class="w-4 h-4 text-city-red shrink-0"></i>
+                  <span>Tự động nhận diện hạn thẻ & bảo lưu không lo mất ngày tập</span>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <i data-lucide="check-circle-2" class="w-4 h-4 text-city-red shrink-0"></i>
+                  <span>Đặt lịch PT 1-1 trực tuyến chống trùng lịch tuyệt đối</span>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <i data-lucide="check-circle-2" class="w-4 h-4 text-city-red shrink-0"></i>
+                  <span>Theo dõi lịch sử đo InBody & biểu đồ tiến độ cơ thể</span>
+                </div>
+              </div>
+
+              <div class="pt-2">
+                <a href="#trial-section" class="w-full py-3 rounded-xl font-bold text-sm bg-city-lightred hover:bg-red-100 text-city-red border border-city-red/30 flex items-center justify-center gap-2 transition-all">
+                  <span>Trải Nghiệm Với Vé Tập Thử 0Đ</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== MOTIVATION & SLOGAN SECTION (NÂNG CẤP CHUYÊN NGHIỆP & TRUYỀN CẢM HỨNG) ==================== -->
+  <section id="motivation" class="py-24 bg-gradient-to-b from-slate-50 via-white to-slate-50 border-y border-city-border relative overflow-hidden">
+    
+    <!-- Background Athletic Watermark -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none pointer-events-none opacity-[0.03] text-black font-black text-[18vw] whitespace-nowrap leading-none z-0">
+      NO PAIN NO GAIN
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      
+      <!-- Section Header -->
+      <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-city-lightred text-city-red text-xs font-black tracking-widest uppercase border border-city-red/20 shadow-sm">
+          <i data-lucide="flame" class="w-4 h-4 text-city-red stroke-[2.5]"></i>
+          <span>TRIẾT LÝ RÈN LUYỆN Ý CHÍ</span>
+        </div>
+        <h2 class="text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-tight text-city-dark leading-none">
+          "NO PAIN - <span class="gradient-red-text">NO GAIN</span>"
+        </h2>
+        <p class="text-slate-500 text-sm sm:text-base font-normal max-w-xl mx-auto">
+          Mỗi giọt mồ hôi rơi xuống là một bước tiến đến phiên bản mạnh mẽ, tự tin và quyến rũ hơn của chính bạn.
+        </p>
+      </div>
+
+      <!-- Master Journey Transformation Card -->
+      <div class="max-w-5xl mx-auto bg-white rounded-3xl elevation-card overflow-hidden border border-slate-200">
+        
+        <!-- Top Editorial Hero Quote -->
+        <div class="relative px-6 py-12 sm:px-12 sm:py-16 text-center border-b border-slate-100 bg-gradient-to-b from-white to-slate-50/60">
+          
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-city-lightred text-city-red mx-auto mb-6 shadow-sm border border-city-red/20">
+            <i data-lucide="quote" class="w-6 h-6 stroke-[2.5]"></i>
+          </div>
+
+          <!-- Highlighted Typography Hierarchy -->
+          <div class="space-y-4 max-w-3xl mx-auto">
+            <p class="text-2xl sm:text-3xl md:text-4xl font-black text-city-dark tracking-tight leading-snug">
+              “Mất <span class="text-city-red bg-city-lightred px-2.5 py-0.5 rounded-lg border border-city-red/30">1 THÁNG</span> để bạn tự nhận ra sự thay đổi của cơ thể.
+            </p>
+            <p class="text-2xl sm:text-3xl md:text-4xl font-black text-city-dark tracking-tight leading-snug">
+              Mất <span class="text-city-red bg-city-lightred px-2.5 py-0.5 rounded-lg border border-city-red/30">2 THÁNG</span> để bạn bè và gia đình nhận ra.
+            </p>
+            <p class="text-2xl sm:text-3xl md:text-4xl font-black text-city-dark tracking-tight leading-snug">
+              Và mất <span class="text-white bg-gradient-to-r from-city-red to-city-accent px-3 py-1 rounded-xl shadow-md">3 THÁNG</span> để cả thế giới nhìn thấy điều đó.”
+            </p>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-400 font-semibold tracking-wider uppercase mt-6">
+            — Lộ trình chuyển hóa vóc dáng 90 ngày tại CITYGYM —
+          </p>
+        </div>
+
+        <!-- Middle: 3-Stage Progress Timeline Cards -->
+        <div class="p-6 sm:p-10 bg-slate-50/70">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+            
+            <!-- Timeline connector line (visible on desktop) -->
+            <div class="hidden md:block absolute top-12 left-1/6 right-1/6 h-1 bg-gradient-to-r from-city-red/20 via-city-red/50 to-city-red z-0"></div>
+
+            <!-- Stage 1 -->
+            <div class="relative z-10 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:border-city-red hover:shadow-md transition-all group">
+              <div class="flex items-center justify-between mb-4">
+                <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-800 font-black text-sm flex items-center justify-center border border-slate-200 group-hover:bg-city-lightred group-hover:text-city-red transition-colors">
+                  01
+                </span>
+                <span class="text-[11px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200">
+                  MỐC 30 NGÀY
+                </span>
+              </div>
+              <h4 class="text-lg font-black text-city-dark mb-2 flex items-center gap-2">
+                <span>Bản Thân Cảm Nhận</span>
+              </h4>
+              <p class="text-xs text-slate-500 leading-relaxed mb-4">
+                Hình thành thói quen rèn luyện kỷ luật, tăng năng lượng tích cực, cải thiện giấc ngủ và giải phóng sức nặng cơ thể.
+              </p>
+              <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="font-bold text-city-red flex items-center gap-1"><i data-lucide="zap" class="w-3.5 h-3.5"></i> +40% Thể lực</span>
+                <span>Thích nghi</span>
+              </div>
+            </div>
+
+            <!-- Stage 2 -->
+            <div class="relative z-10 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:border-city-red hover:shadow-md transition-all group">
+              <div class="flex items-center justify-between mb-4">
+                <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-800 font-black text-sm flex items-center justify-center border border-slate-200 group-hover:bg-city-lightred group-hover:text-city-red transition-colors">
+                  02
+                </span>
+                <span class="text-[11px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200">
+                  MỐC 60 NGÀY
+                </span>
+              </div>
+              <h4 class="text-lg font-black text-city-dark mb-2 flex items-center gap-2">
+                <span>Người Thân Nhận Ra</span>
+              </h4>
+              <p class="text-xs text-slate-500 leading-relaxed mb-4">
+                Cơ bắp bắt đầu săn chắc, mỡ thừa thu gọn rõ rệt. Gia đình và bạn bè bất ngờ trước sự thay đổi vóc dáng của bạn.
+              </p>
+              <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="font-bold text-city-red flex items-center gap-1"><i data-lucide="trending-down" class="w-3.5 h-3.5"></i> -5 đến 8cm Eo</span>
+                <span>Chuyển biến</span>
+              </div>
+            </div>
+
+            <!-- Stage 3 (Champion Milestone) -->
+            <div class="relative z-10 bg-gradient-to-b from-city-lightred/60 to-white rounded-2xl p-6 border-2 border-city-red shadow-lg transform md:-translate-y-1">
+              <div class="flex items-center justify-between mb-4">
+                <span class="w-10 h-10 rounded-xl bg-city-red text-white font-black text-sm flex items-center justify-center shadow-md shadow-city-red/30">
+                  03
+                </span>
+                <span class="text-[11px] font-black uppercase tracking-wider text-white bg-city-red px-2.5 py-1 rounded-full shadow-sm">
+                  CỘT MỐC ĐỘT PHÁ
+                </span>
+              </div>
+              <h4 class="text-lg font-black text-city-red mb-2 flex items-center gap-2">
+                <span>Cả Thế Giới Nhìn Thấy</span>
+                <i data-lucide="crown" class="w-4 h-4 text-city-red"></i>
+              </h4>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4 font-medium">
+                Tự tin lột xác hoàn toàn! Vóc dáng mơ ước được khắc họa sắc nét, thần thái đỉnh cao và bản lĩnh không lùi bước.
+              </p>
+              <div class="pt-3 border-t border-city-red/20 flex items-center justify-between text-[11px] text-city-dark font-black">
+                <span class="text-city-red flex items-center gap-1"><i data-lucide="award" class="w-3.5 h-3.5"></i> 100% Tự Tin</span>
+                <span>Chinh phục đỉnh cao</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Bottom: High-Impact Athletic Callout Banner -->
+        <div class="athletic-pattern text-white p-8 sm:p-12 relative overflow-hidden">
+          <!-- Ambient Red Radial Glow -->
+          <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-city-red/25 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
+            
+            <div class="space-y-2 max-w-2xl">
+              <span class="inline-block text-[11px] font-black uppercase tracking-widest text-city-accent px-3 py-1 bg-white/10 rounded-full border border-white/10">
+                CAM KẾT CỦA BẠN VỚI CHÍNH MÌNH
+              </span>
+              <h3 class="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-white leading-tight">
+                "HÃY Ở LẠI ĐÂY LÂU NHẤT CÓ THỂ ĐỂ ĐẠT ĐƯỢC MỤC TIÊU CỦA MÌNH. VÌ VẬY, ĐỪNG BAO GIỜ BỎ CUỘC!"
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
+                Đội ngũ HLV và hệ thống CITYGYM luôn sẵn sàng đồng hành hỗ trợ bạn 365 ngày mỗi năm.
+              </p>
+            </div>
+
+            <!-- Direct CTA to Trial Form -->
+            <div class="shrink-0 w-full md:w-auto">
+              <a href="#trial-section" class="inline-flex w-full md:w-auto items-center justify-center gap-3 px-8 py-4 rounded-xl font-black text-sm bg-gradient-to-r from-city-red to-city-accent hover:from-city-accent hover:to-city-red text-white shadow-xl shadow-city-red/40 hover:scale-105 active:scale-95 transition-all">
+                <span>Bắt Đầu Hành Trình 90 Ngày</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </a>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== HIGHLIGHT FEATURES ==================== -->
+  <section id="about" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+        <span class="text-xs font-black uppercase tracking-widest text-city-red">TRẢI NGHIỆM CHUẨN 5 SAO</span>
+        <h2 class="text-3xl sm:text-4xl font-black uppercase tracking-tight text-city-dark">
+          VÌ SAO BẠN NÊN CHỌN <span class="gradient-red-text">CITYGYM</span>?
+        </h2>
+        <p class="text-slate-600 text-sm sm:text-base">
+          Môi trường thể thao năng động, thiết bị hiện đại hàng đầu cùng công nghệ quản lý thông minh giúp bạn tối ưu hóa kết quả tập luyện.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Feature 1 -->
+        <div class="bg-city-surface p-7 rounded-2xl space-y-4 border border-city-border hover:border-city-red hover:shadow-xl transition-all duration-300 group">
+          <div class="w-12 h-12 rounded-xl bg-city-lightred text-city-red flex items-center justify-center group-hover:scale-110 group-hover:bg-city-red group-hover:text-white transition-all shadow-sm">
+            <i data-lucide="flame" class="w-6 h-6 stroke-[2.5]"></i>
+          </div>
+          <h3 class="text-lg font-extrabold text-city-dark">Thiết Bị Chuẩn Thi Đấu</h3>
+          <p class="text-slate-500 text-xs sm:text-sm leading-relaxed">
+            100% dàn máy tập tạ khối và tạ rời cao cấp từ Hammer Strength, Life Fitness đáp ứng mọi nhóm cơ.
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="bg-city-surface p-7 rounded-2xl space-y-4 border border-city-border hover:border-city-red hover:shadow-xl transition-all duration-300 group">
+          <div class="w-12 h-12 rounded-xl bg-city-lightred text-city-red flex items-center justify-center group-hover:scale-110 group-hover:bg-city-red group-hover:text-white transition-all shadow-sm">
+            <i data-lucide="user-check" class="w-6 h-6 stroke-[2.5]"></i>
+          </div>
+          <h3 class="text-lg font-extrabold text-city-dark">HLV Cá Nhân Tận Tâm</h3>
+          <p class="text-slate-500 text-xs sm:text-sm leading-relaxed">
+            Đội ngũ PT có chứng chỉ quốc tế NASM/ACE, thiết kế giáo án chuyên biệt và theo sát từng động tác.
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="bg-city-surface p-7 rounded-2xl space-y-4 border border-city-border hover:border-city-red hover:shadow-xl transition-all duration-300 group">
+          <div class="w-12 h-12 rounded-xl bg-city-lightred text-city-red flex items-center justify-center group-hover:scale-110 group-hover:bg-city-red group-hover:text-white transition-all shadow-sm">
+            <i data-lucide="smartphone" class="w-6 h-6 stroke-[2.5]"></i>
+          </div>
+          <h3 class="text-lg font-extrabold text-city-dark">Cổng Hội Viên 4.0</h3>
+          <p class="text-slate-500 text-xs sm:text-sm leading-relaxed">
+            Quét mã QR check-in qua điện thoại, tự đặt lịch PT không cần nhắn tin, quản lý bảo lưu linh hoạt.
+          </p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="bg-city-surface p-7 rounded-2xl space-y-4 border border-city-border hover:border-city-red hover:shadow-xl transition-all duration-300 group">
+          <div class="w-12 h-12 rounded-xl bg-city-lightred text-city-red flex items-center justify-center group-hover:scale-110 group-hover:bg-city-red group-hover:text-white transition-all shadow-sm">
+            <i data-lucide="sparkle" class="w-6 h-6 stroke-[2.5]"></i>
+          </div>
+          <h3 class="text-lg font-extrabold text-city-dark">Tiện Ích Xông Hơi 5 Sao</h3>
+          <p class="text-slate-500 text-xs sm:text-sm leading-relaxed">
+            Phòng xông khô Sauna đá muối Himalaya, xông ướt thảo dược, phòng tắm nóng lạnh và tủ locker miễn phí.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== INTERACTIVE LEAD MAGNET: BMI & TDEE CALCULATOR ==================== -->
+  <section id="bmi-tool" class="py-20 bg-city-surface border-y border-city-border">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <!-- Text intro -->
+        <div class="lg:col-span-5 space-y-5">
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white text-city-red text-xs font-black uppercase tracking-wider border border-city-red/30 shadow-sm">
+            <i data-lucide="cpu" class="w-4 h-4"></i>
+            CÔNG CỤ PHÂN TÍCH THỂ TRẠNG
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-black uppercase tracking-tight text-city-dark leading-tight">
+            TÍNH NHANH <span class="gradient-red-text">BMI & TDEE</span><br>
+            THIẾT LẬP LỘ TRÌNH CHUẨN
+          </h2>
+          <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+            Chỉ với 30 giây nhập thông tin cơ bản, hệ thống sẽ tính toán lượng calo tiêu thụ hàng ngày (TDEE) theo công thức khoa học Mifflin-St Jeor và gợi ý mức năng lượng để giảm mỡ hoặc tăng cơ tối ưu.
+          </p>
+          <div class="p-4 rounded-2xl bg-white border border-slate-200 space-y-2 text-xs text-slate-600 shadow-sm">
+            <p class="font-bold text-city-dark flex items-center gap-2">
+              <i data-lucide="info" class="w-4 h-4 text-city-red"></i>
+              Công thức khoa học ứng dụng trong đề tài:
+            </p>
+            <p>• <strong>BMR (Mifflin-St Jeor):</strong> Mức năng lượng tối thiểu để duy trì sự sống khi nghỉ ngơi.</p>
+            <p>• <strong>TDEE:</strong> Tổng calo đốt cháy trong ngày (BMR × Hệ số vận động).</p>
+          </div>
+        </div>
+
+        <!-- Calculator Form & Live Gauge Card -->
+        <div class="lg:col-span-7">
+          <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xl space-y-6">
+            <form id="calculatorForm" class="space-y-6">
+              
+              <!-- Gender & Age -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Giới tính</label>
+                  <div class="grid grid-cols-2 gap-2">
+                    <button type="button" id="btnMale" onclick="setGender('male')" class="py-2.5 rounded-xl font-bold text-sm border-2 border-city-red bg-city-red text-white flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                      <i data-lucide="user" class="w-4 h-4"></i> Nam
+                    </button>
+                    <button type="button" id="btnFemale" onclick="setGender('female')" class="py-2.5 rounded-xl font-bold text-sm border border-slate-200 bg-slate-50 text-slate-700 hover:text-city-red flex items-center justify-center gap-1.5 transition-all">
+                      <i data-lucide="user" class="w-4 h-4"></i> Nữ
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label for="calcAge" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Tuổi</label>
+                  <input type="number" id="calcAge" value="23" min="12" max="90" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-city-dark font-bold focus:outline-none focus:border-city-red" />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Mục tiêu</label>
+                  <select id="calcGoal" onchange="updateCalculations()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-city-dark font-semibold text-xs focus:outline-none focus:border-city-red">
+                    <option value="lose">Giảm mỡ (-500 kcal)</option>
+                    <option value="maintain" selected>Giữ cân & Vóc dáng</option>
+                    <option value="gain">Tăng cơ & Cân nặng (+400 kcal)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Height & Weight Sliders -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="calcHeight" class="flex justify-between text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                    <span>Chiều cao (cm)</span>
+                    <span id="heightVal" class="text-city-red font-black text-sm">172 cm</span>
+                  </label>
+                  <input type="range" id="calcHeight" min="130" max="210" value="172" class="w-full accent-city-red cursor-pointer" oninput="updateCalculations()" />
+                </div>
+
+                <div>
+                  <label for="calcWeight" class="flex justify-between text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                    <span>Cân nặng (kg)</span>
+                    <span id="weightVal" class="text-city-dark font-black text-sm">68 kg</span>
+                  </label>
+                  <input type="range" id="calcWeight" min="35" max="140" value="68" class="w-full accent-city-dark cursor-pointer" oninput="updateCalculations()" />
+                </div>
+              </div>
+
+              <!-- Activity Level -->
+              <div>
+                <label for="calcActivity" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Mức độ vận động hàng ngày</label>
+                <select id="calcActivity" onchange="updateCalculations()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-city-dark text-xs font-semibold focus:outline-none focus:border-city-red">
+                  <option value="1.2">Ít vận động (Dân văn phòng, ngồi nhiều)</option>
+                  <option value="1.375" selected>Vận động nhẹ (Tập thể thao 1 - 3 buổi/tuần)</option>
+                  <option value="1.55">Vận động vừa (Tập luyện 3 - 5 buổi/tuần)</option>
+                  <option value="1.725">Vận động cao (Tập luyện cường độ cao 6 - 7 buổi/tuần)</option>
+                </select>
+              </div>
+
+              <!-- Live Results Display Box -->
+              <div class="pt-4 border-t border-slate-200">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                  
+                  <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                    <p class="text-[11px] uppercase tracking-wider text-slate-500 font-bold">Chỉ số BMI</p>
+                    <p id="resBMI" class="text-2xl font-black text-city-dark mt-1">23.0</p>
+                    <span id="resBMILabel" class="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Bình thường</span>
+                  </div>
+
+                  <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                    <p class="text-[11px] uppercase tracking-wider text-slate-500 font-bold">Chỉ số BMR</p>
+                    <p id="resBMR" class="text-2xl font-black text-slate-700 mt-1">1.625</p>
+                    <span class="text-[10px] text-slate-500 font-semibold">kcal/ngày</span>
+                  </div>
+
+                  <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                    <p class="text-[11px] uppercase tracking-wider text-slate-500 font-bold">Tổng đốt TDEE</p>
+                    <p id="resTDEE" class="text-2xl font-black text-slate-700 mt-1">2.234</p>
+                    <span class="text-[10px] text-slate-500 font-semibold">kcal/ngày</span>
+                  </div>
+
+                  <div class="bg-city-lightred p-3.5 rounded-2xl border-2 border-city-red/40">
+                    <p class="text-[11px] uppercase tracking-wider text-city-red font-black">Calo Mục Tiêu</p>
+                    <p id="resTargetCalo" class="text-2xl font-black text-city-red mt-1">2.234</p>
+                    <span class="text-[10px] text-city-red font-bold">kcal/ngày</span>
+                  </div>
+                </div>
+
+                <!-- Call To Action with Pre-fill data -->
+                <div class="mt-5 flex flex-col sm:flex-row items-center justify-between gap-3 bg-city-surface p-4 rounded-2xl border border-slate-200">
+                  <div class="text-xs text-slate-600">
+                    <p class="font-bold text-city-dark flex items-center gap-1.5">
+                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+                      Đã lưu kết quả thể trạng của bạn!
+                    </p>
+                    <p class="text-slate-500 mt-0.5">Đặt lịch tập thử để PT đo lại InBody đa tần số và thiết kế giáo án tập miễn phí.</p>
+                  </div>
+                  <button type="button" onclick="applyBmiToTrial()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-black bg-city-red hover:bg-city-darkred text-white shrink-0 transition-all flex items-center justify-center gap-1.5 shadow-md">
+                    <span>Nhận Lộ Trình & Tập Thử</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== PACKAGES & PRICING ==================== -->
+  <section id="packages" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-14 space-y-3">
+        <span class="text-xs font-black uppercase tracking-widest text-city-red">BẢNG GIÁ MINH BẠCH</span>
+        <h2 class="text-3xl sm:text-4xl font-black uppercase tracking-tight text-city-dark">
+          GÓI TẬP <span class="gradient-red-text">CITYGYM</span> PHÙ HỢP VỚI BẠN
+        </h2>
+        <p class="text-slate-600 text-sm">
+          Chính sách bảo lưu và chuyển nhượng linh hoạt, không chi phí ẩn, hỗ trợ thanh toán trực tuyến qua VietQR.
+        </p>
+
+        <!-- Category Tabs -->
+        <div class="inline-flex p-1.5 rounded-2xl bg-city-surface border border-slate-200 gap-1 mt-4">
+          <button onclick="switchTab('membership')" id="tab-membership" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-city-red text-white transition-all shadow-md">
+            Gói Hội Viên (Gym & Yoga)
+          </button>
+          <button onclick="switchTab('pt')" id="tab-pt" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold text-slate-600 hover:text-city-red transition-all">
+            Gói Kèm 1-1 Cùng PT
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Content: Membership Packages -->
+      <div id="content-membership" class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+        
+        <!-- Package 1: Basic 1 Month -->
+        <div class="bg-white rounded-3xl p-7 flex flex-col justify-between space-y-6 border border-slate-200 shadow-md hover:border-slate-400 transition-all">
+          <div class="space-y-4">
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Gói Khởi Động</span>
+            <h3 class="text-2xl font-black text-city-dark">CityBasic 1 Tháng</h3>
+            <p class="text-xs text-slate-500 leading-relaxed">Thích hợp cho người mới bắt đầu làm quen với không gian tập luyện.</p>
+            <div class="pt-2">
+              <span class="text-3xl sm:text-4xl font-black text-city-dark">650.000</span>
+              <span class="text-slate-500 text-sm font-semibold">đ / tháng</span>
+            </div>
+            <ul class="space-y-3 pt-4 border-t border-slate-100 text-xs text-slate-700">
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Tập luyện không giới hạn khung giờ</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Check-in mã QR động trên điện thoại</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Miễn phí tủ locker & nước uống</li>
+              <li class="flex items-center gap-2 text-slate-400"><i data-lucide="x" class="w-4 h-4"></i> Không hỗ trợ bảo lưu gói</li>
+            </ul>
+          </div>
+          <button onclick="openCheckoutModal('Gói CityBasic 1 Tháng', '650.000đ')" class="w-full py-3.5 rounded-xl font-bold text-sm bg-city-surface hover:bg-slate-100 text-city-dark border border-slate-300 transition-all">
+            Đăng Ký Gói Này
+          </button>
+        </div>
+
+        <!-- Package 2: 6 Months (Popular - Highlight Red) -->
+        <div class="relative bg-white rounded-3xl p-7 flex flex-col justify-between space-y-6 border-2 border-city-red shadow-2xl scale-105">
+          <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-city-red to-city-accent text-white text-[11px] font-black uppercase tracking-wider shadow-lg">
+            HỘI VIÊN CHỌN NHIỀU NHẤT
+          </div>
+          <div class="space-y-4">
+            <span class="text-xs font-black uppercase tracking-widest text-city-red">Cam Kết Thay Đổi</span>
+            <h3 class="text-2xl font-black text-city-dark">CityPro 6 Tháng</h3>
+            <p class="text-xs text-slate-500 leading-relaxed">Thời gian vàng để chinh phục triết lý "No Pain No Gain" và lột xác vóc dáng.</p>
+            <div class="pt-2">
+              <span class="text-3xl sm:text-4xl font-black text-city-red">2.890.000</span>
+              <span class="text-slate-500 text-sm font-semibold">đ (~480k/tháng)</span>
+            </div>
+            <ul class="space-y-3 pt-4 border-t border-slate-100 text-xs text-slate-700">
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Toàn quyền sử dụng Gym, Yoga & GroupX</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Tặng 02 buổi tập định hướng 1-1 với PT</li>
+              <li class="flex items-center gap-2 font-bold text-city-red"><i data-lucide="check" class="w-4 h-4 text-city-red"></i> Được bảo lưu tối đa 30 ngày</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Miễn phí phòng xông hơi Sauna đá muối</li>
+            </ul>
+          </div>
+          <button onclick="openCheckoutModal('Gói CityPro 6 Tháng', '2.890.000đ')" class="w-full py-3.5 rounded-xl font-black text-sm bg-gradient-to-r from-city-red to-city-accent text-white shadow-lg shadow-city-red/30 hover:scale-[1.02] transition-all">
+            Đăng Ký Ngay (Ưu Đãi)
+          </button>
+        </div>
+
+        <!-- Package 3: VIP 12 Months -->
+        <div class="bg-white rounded-3xl p-7 flex flex-col justify-between space-y-6 border border-slate-200 shadow-md hover:border-slate-400 transition-all">
+          <div class="space-y-4">
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-700">Đặc Quyền VIP</span>
+            <h3 class="text-2xl font-black text-city-dark">CityVIP 12 Tháng</h3>
+            <p class="text-xs text-slate-500 leading-relaxed">Đồng hành lâu dài với mức chi phí tối ưu nhất và đặc quyền chuyển nhượng.</p>
+            <div class="pt-2">
+              <span class="text-3xl sm:text-4xl font-black text-city-dark">4.990.000</span>
+              <span class="text-slate-500 text-sm font-semibold">đ (~415k/tháng)</span>
+            </div>
+            <ul class="space-y-3 pt-4 border-t border-slate-100 text-xs text-slate-700">
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Toàn quyền tất cả dịch vụ tại CITYGYM</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Tặng 05 buổi tập kèm PT + Đo InBody định kỳ</li>
+              <li class="flex items-center gap-2 font-bold text-city-dark"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Bảo lưu 60 ngày & Hỗ trợ chuyển nhượng</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Tặng 03 thẻ mời bạn bè trải nghiệm</li>
+            </ul>
+          </div>
+          <button onclick="openCheckoutModal('Gói CityVIP 12 Tháng', '4.990.000đ')" class="w-full py-3.5 rounded-xl font-bold text-sm bg-city-surface hover:bg-slate-100 text-city-dark border border-slate-300 transition-all">
+            Đăng Ký Gói VIP
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Tab Content: PT Packages (Hidden by default) -->
+      <div id="content-pt" class="hidden grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+        <!-- PT 12 Sessions -->
+        <div class="bg-white rounded-3xl p-7 flex flex-col justify-between space-y-6 border border-slate-200 shadow-md">
+          <div class="space-y-4">
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Khóa Cơ Bản</span>
+            <h3 class="text-2xl font-black text-city-dark">Gói PT 12 Buổi</h3>
+            <p class="text-xs text-slate-500 leading-relaxed">Nắm vững kỹ thuật chuẩn và hạn chế chấn thương khi tập luyện.</p>
+            <div class="pt-2">
+              <span class="text-3xl sm:text-4xl font-black text-city-dark">4.200.000</span>
+              <span class="text-slate-500 text-sm font-semibold">đ (350k/buổi)</span>
+            </div>
+            <ul class="space-y-3 pt-4 border-t border-slate-100 text-xs text-slate-700">
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Kèm 1-1 trong 60 phút mỗi buổi</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Tự chủ động đặt lịch trên Cổng Hội Viên</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Thiết kế thực đơn dinh dưỡng cá nhân</li>
+            </ul>
+          </div>
+          <button onclick="openCheckoutModal('Gói PT 12 Buổi', '4.200.000đ')" class="w-full py-3.5 rounded-xl font-bold text-sm bg-city-surface hover:bg-slate-100 text-city-dark border border-slate-300 transition-all">
+            Chọn Gói PT 12 Buổi
+          </button>
+        </div>
+
+        <!-- PT 36 Sessions -->
+        <div class="relative bg-white rounded-3xl p-7 flex flex-col justify-between space-y-6 border-2 border-city-red shadow-2xl">
+          <div class="space-y-4">
+            <span class="text-xs font-black uppercase tracking-widest text-city-red">Khóa Chuyển Hóa Vóc Dáng</span>
+            <h3 class="text-2xl font-black text-city-dark">Gói PT 36 Buổi</h3>
+            <p class="text-xs text-slate-500 leading-relaxed">Đạt kết quả rõ rệt về giảm mỡ bụng, siết cơ hoặc tăng cân khoa học trong 3 tháng.</p>
+            <div class="pt-2">
+              <span class="text-3xl sm:text-4xl font-black text-city-red">10.800.000</span>
+              <span class="text-slate-500 text-sm font-semibold">đ (300k/buổi)</span>
+            </div>
+            <ul class="space-y-3 pt-4 border-t border-slate-100 text-xs text-slate-700">
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Lộ trình chuyên sâu 3 tháng liên tục</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Đo InBody hàng tuần & tinh chỉnh calo</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Hỗ trợ giãn cơ chuyên sâu sau buổi tập</li>
+            </ul>
+          </div>
+          <button onclick="openCheckoutModal('Gói PT 36 Buổi', '10.800.000đ')" class="w-full py-3.5 rounded-xl font-black text-sm bg-city-red hover:bg-city-darkred text-white transition-all shadow-md">
+            Chọn Gói PT 36 Buổi
+          </button>
+        </div>
+
+        <!-- PT 60 Sessions -->
+        <div class="bg-white rounded-3xl p-7 flex flex-col justify-between space-y-6 border border-slate-200 shadow-md">
+          <div class="space-y-4">
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Khóa Toàn Diện</span>
+            <h3 class="text-2xl font-black text-city-dark">Gói PT 60 Buổi</h3>
+            <p class="text-xs text-slate-500 leading-relaxed">Đồng hành lâu dài để xây dựng lối sống thể thao khỏe khoắn bền vững.</p>
+            <div class="pt-2">
+              <span class="text-3xl sm:text-4xl font-black text-city-dark">16.200.000</span>
+              <span class="text-slate-500 text-sm font-semibold">đ (270k/buổi)</span>
+            </div>
+            <ul class="space-y-3 pt-4 border-t border-slate-100 text-xs text-slate-700">
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Đơn giá tối ưu nhất trên từng buổi dạy</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Thời hạn sử dụng kéo dài đến 12 tháng</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Miễn phí đổi HLV khi có nhu cầu</li>
+            </ul>
+          </div>
+          <button onclick="openCheckoutModal('Gói PT 60 Buổi', '16.200.000đ')" class="w-full py-3.5 rounded-xl font-bold text-sm bg-city-surface hover:bg-slate-100 text-city-dark border border-slate-300 transition-all">
+            Chọn Gói PT 60 Buổi
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== TRAINERS SHOWCASE ==================== -->
+  <section id="trainers" class="py-20 bg-city-surface border-t border-city-border">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6">
+        <div class="space-y-2 max-w-2xl">
+          <span class="text-xs font-black uppercase tracking-widest text-city-red">ĐỘI NGŨ CHUYÊN MÔN</span>
+          <h2 class="text-3xl sm:text-4xl font-black uppercase tracking-tight text-city-dark">
+            HUẤN LUYỆN VIÊN <span class="gradient-red-text">CHỨNG CHỈ QUỐC TẾ</span>
+          </h2>
+          <p class="text-slate-600 text-sm">
+            Tận tâm, giàu kinh nghiệm thực chiến và kiên định theo đuổi mục tiêu thể hình cùng học viên.
+          </p>
+        </div>
+        <a href="#trial-section" class="inline-flex items-center gap-2 text-sm font-bold text-city-red hover:underline">
+          <span>Đăng ký tập thử cùng PT</span>
+          <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <!-- PT 1 -->
+        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-md group hover:border-city-red hover:shadow-xl transition-all">
+          <div class="h-64 bg-slate-100 relative overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80" alt="HLV Minh Tuấn" class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" />
+            <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-md text-[11px] font-bold text-city-red flex items-center gap-1 shadow">
+              <i data-lucide="star" class="w-3 h-3 fill-city-red text-city-red"></i> 4.9 (120+ buổi)
+            </span>
+          </div>
+          <div class="p-5 space-y-3">
+            <div>
+              <h3 class="text-lg font-black text-city-dark">Nguyễn Minh Tuấn</h3>
+              <p class="text-xs text-city-red font-bold">Master Trainer • 6 năm kinh nghiệm</p>
+            </div>
+            <p class="text-xs text-slate-500 line-clamp-2">Chuyên gia tăng cơ Hypertrophy, điều chỉnh tư thế cột sống và phục hồi vận động.</p>
+            <div class="pt-2 flex items-center justify-between border-t border-slate-100 text-[11px] text-slate-600">
+              <span class="font-semibold">Bằng: NASM-CPT</span>
+              <button onclick="selectTrainer('Nguyễn Minh Tuấn')" class="text-city-red hover:underline font-bold">Đặt lịch ngay</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PT 2 -->
+        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-md group hover:border-city-red hover:shadow-xl transition-all">
+          <div class="h-64 bg-slate-100 relative overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=600&q=80" alt="HLV Hoàng Yến" class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" />
+            <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-md text-[11px] font-bold text-city-red flex items-center gap-1 shadow">
+              <i data-lucide="star" class="w-3 h-3 fill-city-red text-city-red"></i> 5.0 (98+ buổi)
+            </span>
+          </div>
+          <div class="p-5 space-y-3">
+            <div>
+              <h3 class="text-lg font-black text-city-dark">Trần Hoàng Yến</h3>
+              <p class="text-xs text-city-red font-bold">Senior PT & Yoga Master • 5 năm kn</p>
+            </div>
+            <p class="text-xs text-slate-500 line-clamp-2">Chuyên gia siết mỡ nữ, định hình đường cong vóc dáng và thực đơn dinh dưỡng lành mạnh.</p>
+            <div class="pt-2 flex items-center justify-between border-t border-slate-100 text-[11px] text-slate-600">
+              <span class="font-semibold">Bằng: ACE-CPT & Yoga</span>
+              <button onclick="selectTrainer('Trần Hoàng Yến')" class="text-city-red hover:underline font-bold">Đặt lịch ngay</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PT 3 -->
+        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-md group hover:border-city-red hover:shadow-xl transition-all">
+          <div class="h-64 bg-slate-100 relative overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1567013127542-490d757e51fc?auto=format&fit=crop&w=600&q=80" alt="HLV Quốc Bảo" class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" />
+            <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-md text-[11px] font-bold text-city-red flex items-center gap-1 shadow">
+              <i data-lucide="star" class="w-3 h-3 fill-city-red text-city-red"></i> 4.9 (145+ buổi)
+            </span>
+          </div>
+          <div class="p-5 space-y-3">
+            <div>
+              <h3 class="text-lg font-black text-city-dark">Lê Quốc Bảo</h3>
+              <p class="text-xs text-city-red font-bold">Boxing & HIIT Coach • 4 năm kn</p>
+            </div>
+            <p class="text-xs text-slate-500 line-clamp-2">Huấn luyện sức bền tim mạch, Kickboxing giải tỏa stress và đốt calo cường độ cao.</p>
+            <div class="pt-2 flex items-center justify-between border-t border-slate-100 text-[11px] text-slate-600">
+              <span class="font-semibold">Bằng: WAKO Boxing</span>
+              <button onclick="selectTrainer('Lê Quốc Bảo')" class="text-city-red hover:underline font-bold">Đặt lịch ngay</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PT 4 -->
+        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-md group hover:border-city-red hover:shadow-xl transition-all">
+          <div class="h-64 bg-slate-100 relative overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1548690312-e3b507d8c110?auto=format&fit=crop&w=600&q=80" alt="HLV Thùy Trang" class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" />
+            <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-md text-[11px] font-bold text-city-red flex items-center gap-1 shadow">
+              <i data-lucide="star" class="w-3 h-3 fill-city-red text-city-red"></i> 4.8 (80+ buổi)
+            </span>
+          </div>
+          <div class="p-5 space-y-3">
+            <div>
+              <h3 class="text-lg font-black text-city-dark">Đặng Thùy Trang</h3>
+              <p class="text-xs text-city-red font-bold">Pilates & Posture • 4 năm kn</p>
+            </div>
+            <p class="text-xs text-slate-500 line-clamp-2">Cải thiện vẹo cột sống, đau mỏi thắt lưng cổ vai gáy cho dân văn phòng và mẹ bỉm sữa.</p>
+            <div class="pt-2 flex items-center justify-between border-t border-slate-100 text-[11px] text-slate-600">
+              <span class="font-semibold">Bằng: Polestar Pilates</span>
+              <button onclick="selectTrainer('Đặng Thùy Trang')" class="text-city-red hover:underline font-bold">Đặt lịch ngay</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== GROUP CLASSES SCHEDULE ==================== -->
+  <section id="classes" class="py-20 bg-white border-t border-city-border">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-14 space-y-3">
+        <span class="text-xs font-black uppercase tracking-widest text-city-red">LỊCH LỚP GROUPX NĂNG ĐỘNG</span>
+        <h2 class="text-3xl sm:text-4xl font-black uppercase tracking-tight text-city-dark">
+          LỚP TẬP NHÓM <span class="gradient-red-text">HÀNG TUẦN</span>
+        </h2>
+        <p class="text-slate-600 text-sm">
+          Được tổ chức liên tục từ sáng sớm đến tối muộn với âm nhạc sống động và HLV truyền lửa.
+        </p>
+
+        <!-- Day Filter -->
+        <div class="flex flex-wrap justify-center gap-2 pt-3" id="dayFilter">
+          <button onclick="filterDay('all')" class="day-btn px-4 py-1.5 rounded-full text-xs font-bold bg-city-red text-white shadow-sm">Tất cả</button>
+          <button onclick="filterDay('t2')" class="day-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:text-city-red">Thứ 2</button>
+          <button onclick="filterDay('t3')" class="day-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:text-city-red">Thứ 3</button>
+          <button onclick="filterDay('t4')" class="day-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:text-city-red">Thứ 4</button>
+          <button onclick="filterDay('t5')" class="day-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:text-city-red">Thứ 5</button>
+          <button onclick="filterDay('t6')" class="day-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:text-city-red">Thứ 6</button>
+          <button onclick="filterDay('t7-cn')" class="day-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:text-city-red">Cuối tuần</button>
+        </div>
+      </div>
+
+      <!-- Classes Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="classesList">
+        
+        <!-- Class 1 -->
+        <div class="bg-white p-6 rounded-2xl space-y-4 border border-slate-200 shadow-sm hover:border-city-red transition-all" data-day="t2,t4,t6">
+          <div class="flex items-center justify-between">
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">Yoga Vinyasa</span>
+            <span class="text-xs text-slate-500 font-semibold">Thứ 2, 4, 6</span>
+          </div>
+          <h3 class="text-xl font-black text-city-dark">Yoga Thải Độc & Cân Bằng Thân Tâm</h3>
+          <p class="text-xs text-slate-500 leading-relaxed">Thư giãn tâm trí, giải tỏa stress công việc và tăng độ dẻo dai toàn thân.</p>
+          <div class="flex items-center justify-between text-xs pt-3 border-t border-slate-100 text-slate-600">
+            <span class="flex items-center gap-1.5 font-semibold"><i data-lucide="clock" class="w-4 h-4 text-city-red"></i> 06:30 - 07:30</span>
+            <span class="flex items-center gap-1.5 font-semibold"><i data-lucide="user" class="w-4 h-4 text-city-red"></i> HLV Hoàng Yến</span>
+          </div>
+        </div>
+
+        <!-- Class 2 -->
+        <div class="bg-white p-6 rounded-2xl space-y-4 border border-slate-200 shadow-sm hover:border-city-red transition-all" data-day="t3,t5">
+          <div class="flex items-center justify-between">
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-city-lightred text-city-red border border-city-red/30">HIIT Burn Fat</span>
+            <span class="text-xs text-slate-500 font-semibold">Thứ 3, 5</span>
+          </div>
+          <h3 class="text-xl font-black text-city-dark">HIIT Đốt Mỡ Cực Hạn (No Pain No Gain)</h3>
+          <p class="text-xs text-slate-500 leading-relaxed">Tập ngắt quãng cường độ cao, đốt cháy lên đến 600 - 800 kcal mỗi buổi tập.</p>
+          <div class="flex items-center justify-between text-xs pt-3 border-t border-slate-100 text-slate-600">
+            <span class="flex items-center gap-1.5 font-semibold"><i data-lucide="clock" class="w-4 h-4 text-city-red"></i> 18:00 - 19:00</span>
+            <span class="flex items-center gap-1.5 font-semibold"><i data-lucide="user" class="w-4 h-4 text-city-red"></i> HLV Quốc Bảo</span>
+          </div>
+        </div>
+
+        <!-- Class 3 -->
+        <div class="bg-white p-6 rounded-2xl space-y-4 border border-slate-200 shadow-sm hover:border-city-red transition-all" data-day="t2,t4,t6,t7-cn">
+          <div class="flex items-center justify-between">
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-pink-50 text-pink-700 border border-pink-200">Zumba Dance</span>
+            <span class="text-xs text-slate-500 font-semibold">Thứ 2, 4, 6, CN</span>
+          </div>
+          <h3 class="text-xl font-black text-city-dark">Zumba Vũ Điệu Năng Lượng</h3>
+          <p class="text-xs text-slate-500 leading-relaxed">Hòa mình vào âm nhạc Latin sôi động, đốt mỡ sảng khoái và gắn kết bạn bè.</p>
+          <div class="flex items-center justify-between text-xs pt-3 border-t border-slate-100 text-slate-600">
+            <span class="flex items-center gap-1.5 font-semibold"><i data-lucide="clock" class="w-4 h-4 text-city-red"></i> 19:15 - 20:15</span>
+            <span class="flex items-center gap-1.5 font-semibold"><i data-lucide="user" class="w-4 h-4 text-city-red"></i> HLV Minh Thư</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== TRIAL BOOKING FORM WITH INSTANT QR E-PASS ==================== -->
+  <section id="trial-section" class="py-20 bg-city-surface border-t border-city-border relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="bg-white rounded-3xl p-8 sm:p-12 border-2 border-city-red/40 relative overflow-hidden shadow-2xl">
+        <!-- Decorative Background Blob -->
+        <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-city-lightred rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          
+          <!-- Left Instructions -->
+          <div class="lg:col-span-5 space-y-6">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-city-lightred text-city-red text-xs font-black uppercase tracking-wider border border-city-red/30">
+              <i data-lucide="gift" class="w-4 h-4"></i>
+              ĐẶC QUYỀN KHÁCH VÃNG LAI
+            </div>
+            
+            <h2 class="text-3xl sm:text-4xl font-black uppercase tracking-tight text-city-dark leading-tight">
+              ĐĂNG KÝ TẬP THỬ <br><span class="gradient-red-text">MIỄN PHÍ 03 NGÀY</span>
+            </h2>
+
+            <p class="text-slate-600 text-sm leading-relaxed">
+              Trải nghiệm toàn bộ phòng tập 1.500m², tham gia lớp Yoga/GroupX và nhận 01 buổi đo phân tích chỉ số cơ thể InBody cùng HLV cá nhân mà không tốn bất kỳ chi phí nào.
+            </p>
+
+            <div class="space-y-3 pt-2 text-xs text-slate-700 font-medium">
+              <div class="flex items-center gap-3">
+                <div class="w-7 h-7 rounded-lg bg-city-red text-white flex items-center justify-center font-black shadow-sm">1</div>
+                <span>Điền thông tin và chọn khung giờ hẹn mong muốn</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-7 h-7 rounded-lg bg-city-red text-white flex items-center justify-center font-black shadow-sm">2</div>
+                <span>Hệ thống sinh <strong>Mã QR Vé Tập Thử (E-Pass)</strong> tức thì</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-7 h-7 rounded-lg bg-city-red text-white flex items-center justify-center font-black shadow-sm">3</div>
+                <span>Đưa mã QR cho Lễ tân quét Check-in để bắt đầu tập</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Booking Form -->
+          <div class="lg:col-span-7 bg-city-surface p-6 sm:p-8 rounded-2xl border border-slate-200">
+            <form id="trialForm" onsubmit="handleTrialSubmit(event)" class="space-y-4">
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="trialName" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Họ và tên *</label>
+                  <input type="text" id="trialName" required placeholder="Nguyễn Văn A" class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-city-dark text-sm font-semibold focus:outline-none focus:border-city-red" />
+                </div>
+                <div>
+                  <label for="trialPhone" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Số điện thoại *</label>
+                  <input type="tel" id="trialPhone" required placeholder="0901 234 567" class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-city-dark text-sm font-semibold focus:outline-none focus:border-city-red" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="trialEmail" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email nhận vé</label>
+                  <input type="email" id="trialEmail" placeholder="email@example.com" class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-city-dark text-sm font-semibold focus:outline-none focus:border-city-red" />
+                </div>
+                <div>
+                  <label for="trialService" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Dịch vụ quan tâm nhất</label>
+                  <select id="trialService" class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-city-dark text-sm font-semibold focus:outline-none focus:border-city-red">
+                    <option value="gym">Tập Gym tự do & Máy tạ</option>
+                    <option value="pt">Kèm riêng cùng Huấn luyện viên (PT)</option>
+                    <option value="yoga">Lớp Yoga & Pilates</option>
+                    <option value="groupx">Lớp GroupX & HIIT đốt mỡ</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="trialDate" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Ngày dự kiến đến</label>
+                  <input type="date" id="trialDate" class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-city-dark text-sm font-semibold focus:outline-none focus:border-city-red" />
+                </div>
+                <div>
+                  <label for="trialTime" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Khung giờ hẹn</label>
+                  <select id="trialTime" class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-city-dark text-sm font-semibold focus:outline-none focus:border-city-red">
+                    <option value="morning">Sáng (06:00 - 09:00)</option>
+                    <option value="noon">Trưa (11:30 - 13:30)</option>
+                    <option value="afternoon">Chiều (16:30 - 18:30)</option>
+                    <option value="evening" selected>Tối (18:30 - 21:00)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Note from BMI Tool (Hidden input) -->
+              <input type="hidden" id="trialBmiData" value="" />
+
+              <div class="pt-2">
+                <button type="submit" class="w-full py-4 rounded-xl font-black text-base bg-gradient-to-r from-city-red to-city-accent text-white shadow-xl shadow-city-red/30 hover:scale-[1.01] transition-all flex items-center justify-center gap-2">
+                  <i data-lucide="ticket" class="w-5 h-5"></i>
+                  <span>Nhận Ngay Vé Tập Thử E-Pass QR</span>
+                </button>
+                <p class="text-[11px] text-center text-slate-500 mt-2 font-medium">Thông tin sẽ tự động kết nối vào bảng CRM Lễ tân CITYGYM để chuẩn bị đón tiếp.</p>
+              </div>
+
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-city-dark text-slate-300 pt-16 pb-12 text-xs border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+        <div class="space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-city-red flex items-center justify-center text-white">
+              <i data-lucide="dumbbell" class="w-5 h-5"></i>
+            </div>
+            <span class="font-black text-xl text-white">CITYGYM</span>
+          </div>
+          <p class="text-slate-400 leading-relaxed">
+            Hệ thống phòng tập thể hình và yoga hiện đại. Nơi tôi luyện ý chí theo triết lý <strong>No Pain No Gain</strong>.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-black text-white text-sm mb-4 uppercase tracking-wider">Thông Tin Liên Hệ</h4>
+          <p class="mb-2 flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-city-red"></i> 180 Cao Lỗ, Phường 4, Quận 8, TP.HCM</p>
+          <p class="mb-2 flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4 text-city-red"></i> Hotline: 1900 6868 - 0901 234 567</p>
+          <p class="flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4 text-city-red"></i> contact@citygym.vn</p>
+        </div>
+
+        <div>
+          <h4 class="font-black text-white text-sm mb-4 uppercase tracking-wider">Giờ Hoạt Động</h4>
+          <p class="mb-2">Thứ 2 - Thứ 6: <strong class="text-white">05:30 - 22:00</strong></p>
+          <p class="mb-2">Thứ 7 - Chủ Nhật: <strong class="text-white">06:00 - 21:30</strong></p>
+          <p class="text-slate-400">Mở cửa tất cả các ngày lễ Tết</p>
+        </div>
+
+        <div>
+          <h4 class="font-black text-white text-sm mb-4 uppercase tracking-wider">Đề Tài Luận Văn Tốt Nghiệp</h4>
+          <p class="leading-relaxed mb-1.5">Sinh viên: <strong class="text-white">Võ Duy Phúc</strong></p>
+          <p class="leading-relaxed mb-1.5">GVHD: <strong class="text-white">ThS. Bùi Nhật Bằng</strong></p>
+          <p class="text-slate-400">Trường Đại học Công nghệ Sài Gòn (STU) - 2026</p>
+        </div>
+      </div>
+
+      <div class="pt-8 border-t border-slate-800 text-center text-slate-500">
+        <p>© 2026 CITYGYM FITNESS & YOGA. Bản quyền thuộc đề tài Luận văn tốt nghiệp STU.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== MODAL 1: TICKET QR E-PASS RESULT POPUP ==================== -->
+  <div id="ticketModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+    <div class="bg-white border-2 border-city-red rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
+      <button onclick="closeModal('ticketModal')" class="absolute top-4 right-4 text-slate-400 hover:text-city-dark p-2">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+
+      <div class="text-center space-y-2">
+        <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
+          <i data-lucide="check" class="w-6 h-6 stroke-[3]"></i>
+        </div>
+        <h3 class="text-2xl font-black uppercase tracking-tight text-city-dark">ĐĂNG KÝ THÀNH CÔNG!</h3>
+        <p class="text-xs text-slate-600">Vé tập thử điện tử (E-Pass) đã được tạo và gửi đến quầy Lễ tân CITYGYM.</p>
+      </div>
+
+      <!-- E-Pass Ticket Design -->
+      <div class="bg-city-surface rounded-2xl p-5 border border-slate-200 space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <div>
+            <span class="text-[10px] uppercase tracking-widest text-city-red font-black">CITYGYM E-PASS VÉ TẬP THỬ</span>
+            <p id="ticketCode" class="text-base font-black text-city-dark">TRIAL-882910</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-300">HỢP LỆ (3 NGÀY)</span>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <!-- QR Code Container -->
+          <div id="qrcode" class="w-28 h-28 bg-white p-2 rounded-xl flex items-center justify-center shrink-0 border border-slate-200 shadow-sm"></div>
+          
+          <div class="text-xs space-y-1.5 text-slate-600">
+            <p>Khách hàng: <strong id="ticketCustomer" class="text-city-dark">Nguyễn Văn A</strong></p>
+            <p>Số điện thoại: <span id="ticketPhone" class="text-city-dark font-semibold">0901234567</span></p>
+            <p>Dịch vụ: <span id="ticketService" class="text-city-red font-bold">Gym & Máy tạ</span></p>
+            <p>Ngày hẹn: <span id="ticketDateText" class="text-city-dark">Hôm nay</span></p>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-center text-slate-500 pt-2 border-t border-slate-200">
+          Vui lòng xuất trình mã QR này tại quầy Lễ tân để quét check-in bắt đầu buổi tập.
+        </p>
+      </div>
+
+      <button onclick="closeModal('ticketModal')" class="w-full py-3.5 rounded-xl font-black text-sm bg-city-red text-white shadow-md">
+        Hoàn Tất & Đóng
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: CHECKOUT / BUY PACKAGE MODAL ==================== -->
+  <div id="checkoutModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+    <div class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
+      <button onclick="closeModal('checkoutModal')" class="absolute top-4 right-4 text-slate-400 hover:text-city-dark p-2">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+
+      <div class="space-y-1">
+        <span class="text-xs text-city-red font-black uppercase tracking-wider">Thanh Toán Trực Tuyến</span>
+        <h3 id="checkoutPkgName" class="text-xl font-black text-city-dark">Gói CityPro 6 Tháng</h3>
+        <p id="checkoutPkgPrice" class="text-2xl font-black text-city-red">2.890.000 đ</p>
+      </div>
+
+      <!-- Payment Method Preview (VietQR Sandbox) -->
+      <div class="bg-city-surface p-4 rounded-2xl border border-slate-200 space-y-4 text-center">
+        <p class="text-xs text-slate-700 font-bold flex items-center justify-center gap-1.5">
+          <i data-lucide="scan" class="w-4 h-4 text-city-red"></i>
+          Quét mã VietQR Sandbox để kích hoạt gói tức thì
+        </p>
+        <div class="w-48 h-48 mx-auto bg-white p-2 rounded-2xl shadow border border-slate-200 flex items-center justify-center">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=00020101021238540010A000000727012400069704220110CITYGYM20265303704540728900005802VN62180814CITYGYM-ORDER" alt="VietQR Sandbox" class="w-full h-full object-contain" />
+        </div>
+        <p class="text-[11px] text-slate-500">
+          Mô phỏng Webhook tự động kích hoạt tài khoản và gửi hợp đồng điện tử qua Email sau khi nhận thanh toán.
+        </p>
+      </div>
+
+      <div class="flex gap-3">
+        <button onclick="simulateSuccessfulPayment()" class="flex-1 py-3.5 rounded-xl font-black text-sm bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-600/20">
+          Mô Phỏng Thanh Toán Thành Công
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: LOGIN MODAL (CỔNG NỘI BỘ) ==================== -->
+  <div id="loginModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+    <div class="bg-white border border-slate-200 rounded-3xl max-w-sm w-full p-6 sm:p-8 space-y-5 shadow-2xl relative">
+      <button onclick="closeModal('loginModal')" class="absolute top-4 right-4 text-slate-400 hover:text-city-dark p-2">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+
+      <div class="text-center space-y-1">
+        <h3 class="text-xl font-black uppercase tracking-tight text-city-dark">CỔNG ĐĂNG NHẬP NỘI BỘ</h3>
+        <p class="text-xs text-slate-500">Hội viên, PT, Lễ tân & Quản trị viên</p>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Tài khoản / Số điện thoại</label>
+          <input type="text" id="loginUser" value="admin" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-city-dark text-sm font-semibold focus:outline-none focus:border-city-red" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Mật khẩu</label>
+          <input type="password" id="loginPass" value="123456" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-city-dark text-sm font-semibold focus:outline-none focus:border-city-red" />
+        </div>
+
+        <div class="pt-2">
+          <button onclick="handleLoginDemo()" class="w-full py-3 rounded-xl font-black text-sm bg-city-red text-white shadow-md">
+            Đăng Nhập
+          </button>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-[11px] text-slate-600 space-y-1">
+          <p class="font-bold text-city-dark">Tài khoản demo kịch bản:</p>
+          <p>• Admin: <code>admin / 123456</code></p>
+          <p>• Lễ tân: <code>staff / 123456</code></p>
+          <p>• Huấn luyện viên (PT): <code>pt / 123456</code></p>
+          <p>• Hội viên: <code>member / 123456</code></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Mobile menu toggle
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // Gender State
+    let currentGender = 'male';
+    function setGender(gender) {
+      currentGender = gender;
+      const btnM = document.getElementById('btnMale');
+      const btnF = document.getElementById('btnFemale');
+      if (gender === 'male') {
+        btnM.className = 'py-2.5 rounded-xl font-bold text-sm border-2 border-city-red bg-city-red text-white flex items-center justify-center gap-1.5 transition-all shadow-sm';
+        btnF.className = 'py-2.5 rounded-xl font-bold text-sm border border-slate-200 bg-slate-50 text-slate-700 hover:text-city-red flex items-center justify-center gap-1.5 transition-all';
+      } else {
+        btnF.className = 'py-2.5 rounded-xl font-bold text-sm border-2 border-city-red bg-city-red text-white flex items-center justify-center gap-1.5 transition-all shadow-sm';
+        btnM.className = 'py-2.5 rounded-xl font-bold text-sm border border-slate-200 bg-slate-50 text-slate-700 hover:text-city-red flex items-center justify-center gap-1.5 transition-all';
+      }
+      updateCalculations();
+    }
+
+    // BMI / BMR / TDEE Calculation (Mifflin-St Jeor formula)
+    function updateCalculations() {
+      const h = parseFloat(document.getElementById('calcHeight').value);
+      const w = parseFloat(document.getElementById('calcWeight').value);
+      const age = parseFloat(document.getElementById('calcAge').value) || 23;
+      const act = parseFloat(document.getElementById('calcActivity').value) || 1.375;
+      const goal = document.getElementById('calcGoal').value;
+
+      document.getElementById('heightVal').innerText = h + ' cm';
+      document.getElementById('weightVal').innerText = w + ' kg';
+
+      // 1. BMI = W / (H_m ^ 2)
+      const hm = h / 100;
+      const bmi = (w / (hm * hm)).toFixed(1);
+      document.getElementById('resBMI').innerText = bmi;
+
+      const lbl = document.getElementById('resBMILabel');
+      if (bmi < 18.5) {
+        lbl.innerText = 'Thiếu cân';
+        lbl.className = 'inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700';
+      } else if (bmi < 24.9) {
+        lbl.innerText = 'Bình thường';
+        lbl.className = 'inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700';
+      } else if (bmi < 29.9) {
+        lbl.innerText = 'Thừa cân';
+        lbl.className = 'inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700';
+      } else {
+        lbl.innerText = 'Béo phì';
+        lbl.className = 'inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700';
+      }
+
+      // 2. BMR (Mifflin-St Jeor)
+      let bmr = 10 * w + 6.25 * h - 5 * age;
+      if (currentGender === 'male') {
+        bmr += 5;
+      } else {
+        bmr -= 161;
+      }
+      bmr = Math.round(bmr);
+      document.getElementById('resBMR').innerText = bmr.toLocaleString('vi-VN');
+
+      // 3. TDEE
+      const tdee = Math.round(bmr * act);
+      document.getElementById('resTDEE').innerText = tdee.toLocaleString('vi-VN');
+
+      // 4. Target Calo based on goal
+      let target = tdee;
+      if (goal === 'lose') target = tdee - 500;
+      if (goal === 'gain') target = tdee + 400;
+      document.getElementById('resTargetCalo').innerText = target.toLocaleString('vi-VN');
+    }
+
+    // Call once on load
+    updateCalculations();
+
+    // Auto-fill BMI result to Trial Form
+    function applyBmiToTrial() {
+      const h = document.getElementById('calcHeight').value;
+      const w = document.getElementById('calcWeight').value;
+      const bmi = document.getElementById('resBMI').innerText;
+      const target = document.getElementById('resTargetCalo').innerText;
+
+      document.getElementById('trialBmiData').value = `H:${h}cm, W:${w}kg, BMI:${bmi}, Target:${target}kcal`;
+      
+      const trialSection = document.getElementById('trial-section');
+      trialSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Tab Switcher for Packages
+    function switchTab(type) {
+      const tabMem = document.getElementById('tab-membership');
+      const tabPt = document.getElementById('tab-pt');
+      const contMem = document.getElementById('content-membership');
+      const contPt = document.getElementById('content-pt');
+
+      if (type === 'membership') {
+        tabMem.className = 'px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-city-red text-white transition-all shadow-md';
+        tabPt.className = 'px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold text-slate-600 hover:text-city-red transition-all';
+        contMem.classList.remove('hidden');
+        contPt.classList.add('hidden');
+      } else {
+        tabPt.className = 'px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-city-red text-white transition-all shadow-md';
+        tabMem.className = 'px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold text-slate-600 hover:text-city-red transition-all';
+        contPt.classList.remove('hidden');
+        contMem.classList.add('hidden');
+      }
+      lucide.createIcons();
+    }
+
+    // Filter GroupX Classes
+    function filterDay(day) {
+      document.querySelectorAll('.day-btn').forEach(btn => {
+        btn.className = 'day-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:text-city-red';
+      });
+      event.target.className = 'day-btn px-4 py-1.5 rounded-full text-xs font-bold bg-city-red text-white shadow-sm';
+
+      const cards = document.querySelectorAll('#classesList > div');
+      cards.forEach(card => {
+        const d = card.getAttribute('data-day');
+        if (day === 'all' || d.includes(day)) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+
+    // Modal Handlers
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function openLoginModal() {
+      document.getElementById('loginModal').classList.remove('hidden');
+    }
+
+    function selectTrainer(name) {
+      const serviceSelect = document.getElementById('trialService');
+      serviceSelect.value = 'pt';
+      document.getElementById('trial-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Checkout Modal
+    function openCheckoutModal(pkgName, pkgPrice) {
+      document.getElementById('checkoutPkgName').innerText = pkgName;
+      document.getElementById('checkoutPkgPrice').innerText = pkgPrice;
+      document.getElementById('checkoutModal').classList.remove('hidden');
+    }
+
+    function simulateSuccessfulPayment() {
+      closeModal('checkoutModal');
+      alert('Mô phỏng Webhook thanh toán thành công! Giao dịch đã được ghi nhận vào CSDL MySQL (Bảng Payments & Memberships) của CITYGYM.');
+    }
+
+    function handleLoginDemo() {
+      closeModal('loginModal');
+      alert('Đăng nhập thành công! Hệ thống sẽ chuyển hướng bạn đến Dashboard tương ứng với vai trò của tài khoản.');
+    }
+
+    // Trial Form Submit -> Generate Instant QR Code
+    function handleTrialSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('trialName').value;
+      const phone = document.getElementById('trialPhone').value;
+      const service = document.getElementById('trialService').options[document.getElementById('trialService').selectedIndex].text;
+      const date = document.getElementById('trialDate').value || 'Hôm nay';
+      
+      const code = 'TRIAL-' + Math.floor(100000 + Math.random() * 900000);
+
+      document.getElementById('ticketCode').innerText = code;
+      document.getElementById('ticketCustomer').innerText = name;
+      document.getElementById('ticketPhone').innerText = phone;
+      document.getElementById('ticketService').innerText = service;
+      document.getElementById('ticketDateText').innerText = date;
+
+      // Clear & Generate QR Code
+      const qrContainer = document.getElementById('qrcode');
+      qrContainer.innerHTML = '';
+      new QRCode(qrContainer, {
+        text: JSON.stringify({ brand: 'CITYGYM', code: code, name: name, phone: phone, type: 'FREE_TRIAL' }),
+        width: 112,
+        height: 112,
+        colorDark: "#DC2626",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      // Save lead simulation to localStorage for Lễ tân check
+      const leadData = {
+        code,
+        name,
+        phone,
+        service,
+        date,
+        createdAt: new Date().toISOString(),
+        status: 'NEW'
+      };
+      const existingLeads = JSON.parse(localStorage.getItem('citygym_leads') || '[]');
+      existingLeads.unshift(leadData);
+      localStorage.setItem('citygym_leads', JSON.stringify(existingLeads));
+
+      // Open Modal
+      document.getElementById('ticketModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    // Set default date for trial booking (tomorrow)
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('trialDate').value = tomorrow.toISOString().split('T')[0];
+  </script>
+</body>
+</html>

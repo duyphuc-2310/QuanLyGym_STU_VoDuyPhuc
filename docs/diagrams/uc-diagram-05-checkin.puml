@@ -1,0 +1,56 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+skinparam sequence {
+    ArrowColor #DC2626
+    ActorBorderColor #DC2626
+    ActorBackgroundColor #FEF2F2
+}
+
+skinparam usecase {
+    BackgroundColor #FFFFFF
+    BorderColor #1E293B
+    BorderThickness 1.2
+    ArrowColor #475569
+    FontStyle bold
+}
+
+left to right direction
+
+actor "Hội viên\n(Member)" as Member #FEF2F2
+actor "Lễ tân tại quầy\n(Staff)" as Staff #FEF3C7
+
+rectangle "Phân Hệ Kiểm Soát Ra Vào Cửa Khẩu (UC-05)" {
+    
+    usecase "UC-05: Kiểm soát Check-in\nbằng mã QR động" as UC_Main #EFF6FF
+    
+    usecase "Lấy mã QR động\n(JWT 60 giây)" as UC_GenQR
+    usecase "Quét giải mã QR\nqua Camera quầy" as UC_Scan
+    usecase "Kiểm tra trạng thái\nhợp đồng & hạn gói" as UC_Validate
+    
+    usecase "Mở cửa Turnstile &\nChuông xanh Realtime" as UC_Success #F0FDF4
+    usecase "Cảnh báo từ chối &\nChuông đỏ (Bảo lưu/Hết hạn)" as UC_Denied #FFF1F2
+    usecase "Check-in vé tập thử\nE-Pass (Khách vãng lai)" as UC_Trial
+}
+
+' Tương tác Actor
+Member --> UC_Main
+Staff --> UC_Main
+Staff --> UC_Scan
+
+' Mối quan hệ Include
+UC_Main .> UC_GenQR : <<include>>
+UC_Main .> UC_Scan : <<include>>
+UC_Main .> UC_Validate : <<include>>
+
+' Mối quan hệ Extend
+UC_Success .> UC_Main : <<extend>>\n(Hợp lệ: ACTIVE & Còn hạn)
+UC_Denied .> UC_Main : <<extend>>\n(Từ chối: FROZEN / EXPIRED)
+UC_Trial .> UC_Main : <<extend>>\n(Áp dụng cho vé tập thử)
+
+@enduml
+

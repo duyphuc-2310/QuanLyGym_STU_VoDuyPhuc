@@ -1,0 +1,387 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------
+// ENUMS
+// ---------------------------------------------------------
+
+enum Role {
+  ADMIN
+  STAFF
+  PT
+  MEMBER
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  PENDING
+}
+
+enum PackageType {
+  TIME_BASED
+  PT_SESSION
+  COMBO
+}
+
+enum MembershipStatus {
+  ACTIVE
+  FROZEN
+  EXPIRED
+  TRANSFERRED
+  CANCELLED
+}
+
+enum FreezeStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  VIETQR
+  BANK_TRANSFER
+  VNPAY_SANDBOX
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum CheckinType {
+  MEMBER
+  TRIAL_GUEST
+}
+
+enum CheckinStatus {
+  SUCCESS
+  DENIED
+}
+
+enum BookingStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED_ON_TIME
+  CANCELLED_LATE
+  NO_SHOW
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  TRIAL_BOOKED
+  TRIAL_CHECKED_IN
+  CONVERTED
+  LOST
+}
+
+// ---------------------------------------------------------
+// MODELS
+// ---------------------------------------------------------
+
+model User {
+  id            Int         @id @default(autoincrement())
+  email         String?     @unique @db.VarChar(120)
+  phone         String      @unique @db.VarChar(15)
+  passwordHash  String      @map("password_hash") @db.VarChar(255)
+  fullName      String      @map("full_name") @db.VarChar(100)
+  avatarUrl     String?     @map("avatar_url") @db.VarChar(255)
+  role          Role        @default(MEMBER)
+  status        UserStatus  @default(ACTIVE)
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  // Relationships
+  memberProfile      MemberProfile?
+  ptProfile          PTProfile?
+  memberships        Membership[]       @relation("MemberMemberships")
+  ptMemberships      Membership[]       @relation("PTMemberships")
+  createdMemberships Membership[]       @relation("StaffCreatedMemberships")
+  approvedFreezes    MembershipFreeze[] @relation("ApprovedFreezes")
+  processedPayments  Payment[]          @relation("StaffPayments")
+  checkIns           CheckIn[]          @relation("MemberCheckIns")
+  staffCheckIns      CheckIn[]          @relation("StaffCheckIns")
+  memberBookings     PTBooking[]        @relation("MemberPTBookings")
+  ptBookings         PTBooking[]        @relation("TrainerPTBookings")
+  groupClasses       GroupClass[]       @relation("TrainerGroupClasses")
+  classEnrollments   ClassEnrollment[]
+  studentMetrics     BodyMetric[]       @relation("StudentMetrics")
+  measuredMetrics    BodyMetric[]       @relation("TrainerMetrics")
+  assignedLeads      Lead[]             @relation("AssignedStaffLeads")
+  notifications      Notification[]
+
+  @@map("users")
+}
+
+model MemberProfile {
+  userId           Int      @id @map("user_id")
+  gender           String?  @db.VarChar(10) // 'male', 'female', 'other'
+  dob              DateTime? @db.Date
+  address          String?  @db.VarChar(255)
+  emergencyContact String?  @map("emergency_contact") @db.VarChar(50)
+  qrSecret         String   @unique @default(uuid()) @map("qr_secret") @db.VarChar(64)
+  notes            String?  @db.Text
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("member_profiles")
+}
+
+model PTProfile {
+  userId          Int      @id @map("user_id")
+  specialty       String   @db.VarChar(150)
+  bio             String?  @db.Text
+  experienceYears Int      @default(1) @map("experience_years")
+  certNames       String?  @map("cert_names") @db.VarChar(255) // NASM-CPT, ACE, etc.
+  baseSalary      Decimal  @default(0.00) @map("base_salary") @db.Decimal(12, 2)
+  commissionRate  Decimal  @default(0.20) @map("commission_rate") @db.Decimal(4, 2) // 20%
+  ratingAvg       Decimal  @default(5.0) @map("rating_avg") @db.Decimal(3, 2)
+  isAvailable     Boolean  @default(true) @map("is_available")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("pt_profiles")
+}
+
+model Lead {
+  id              Int        @id @default(autoincrement())
+  fullName        String     @map("full_name") @db.VarChar(100)
+  phone           String     @db.VarChar(15)
+  email           String?    @db.VarChar(120)
+  interestService String     @default("gym") @map("interest_service") @db.VarChar(50)
+  goal            String?    @db.VarChar(100)
+  initialBmi      Decimal?   @map("initial_bmi") @db.Decimal(4, 1)
+  initialTdee     Int?       @map("initial_tdee")
+  source          String     @default("LANDING_PAGE") @db.VarChar(50)
+  status          LeadStatus @default(NEW)
+  assignedStaffId Int?       @map("assigned_staff_id")
+  createdAt       DateTime   @default(now()) @map("created_at")
+
+  assignedStaff User?          @relation("AssignedStaffLeads", fields: [assignedStaffId], references: [id])
+  trialBookings TrialBooking[]
+
+  @@index([phone])
+  @@map("leads")
+}
+
+model TrialBooking {
+  id            Int       @id @default(autoincrement())
+  leadId        Int       @map("lead_id")
+  ticketCode    String    @unique @map("ticket_code") @db.VarChar(30)
+  scheduledDate DateTime  @map("scheduled_date") @db.Date
+  timeSlot      String    @default("evening") @map("time_slot") @db.VarChar(30)
+  status        String    @default("VALID") @db.VarChar(20) // VALID, CHECKED_IN, EXPIRED
+  checkedInAt   DateTime? @map("checked_in_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  lead     Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  checkIns CheckIn[]
+
+  @@map("trial_bookings")
+}
+
+model Package {
+  id            Int         @id @default(autoincrement())
+  code          String      @unique @db.VarChar(30)
+  name          String      @db.VarChar(120)
+  packageType   PackageType @default(TIME_BASED) @map("package_type")
+  durationDays  Int         @default(30) @map("duration_days")
+  ptSessions    Int         @default(0) @map("pt_sessions")
+  price         Decimal     @db.Decimal(12, 2)
+  maxFreezeDays Int         @default(0) @map("max_freeze_days")
+  description   String?     @db.Text
+  isActive      Boolean     @default(true) @map("is_active")
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  memberships Membership[]
+
+  @@map("packages")
+}
+
+model Membership {
+  id                Int              @id @default(autoincrement())
+  contractCode      String           @unique @map("contract_code") @db.VarChar(50)
+  memberId          Int              @map("member_id")
+  packageId         Int              @map("package_id")
+  assignedPtId      Int?             @map("assigned_pt_id")
+  startDate         DateTime         @map("start_date") @db.Date
+  endDate           DateTime         @map("end_date") @db.Date
+  remainingSessions Int              @default(0) @map("remaining_sessions")
+  status            MembershipStatus @default(ACTIVE)
+  totalAmount       Decimal          @map("total_amount") @db.Decimal(12, 2)
+  paidAmount        Decimal          @default(0.00) @map("paid_amount") @db.Decimal(12, 2)
+  createdBy         Int              @map("created_by")
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+
+  member           User               @relation("MemberMemberships", fields: [memberId], references: [id])
+  package          Package            @relation(fields: [packageId], references: [id])
+  assignedPt       User?              @relation("PTMemberships", fields: [assignedPtId], references: [id])
+  staff            User               @relation("StaffCreatedMemberships", fields: [createdBy], references: [id])
+  freezes          MembershipFreeze[]
+  payments         Payment[]
+  checkIns         CheckIn[]
+  ptBookings       PTBooking[]
+  classEnrollments ClassEnrollment[]
+
+  @@index([memberId])
+  @@index([status])
+  @@map("memberships")
+}
+
+model MembershipFreeze {
+  id                 Int          @id @default(autoincrement())
+  membershipId       Int          @map("membership_id")
+  freezeStart        DateTime     @map("freeze_start") @db.Date
+  freezeEnd          DateTime     @map("freeze_end") @db.Date
+  actualUnfreezeDate DateTime?    @map("actual_unfreeze_date") @db.Date
+  daysCount          Int          @default(0) @map("days_count")
+  reason             String?      @db.VarChar(255)
+  approvedBy         Int          @map("approved_by")
+  status             FreezeStatus @default(ACTIVE)
+  createdAt          DateTime     @default(now()) @map("created_at")
+
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  approver   User       @relation("ApprovedFreezes", fields: [approvedBy], references: [id])
+
+  @@map("membership_freezes")
+}
+
+model Payment {
+  id             Int           @id @default(autoincrement())
+  membershipId   Int           @map("membership_id")
+  paymentCode    String        @unique @map("payment_code") @db.VarChar(50)
+  amount         Decimal       @db.Decimal(12, 2)
+  paymentMethod  PaymentMethod @default(CASH) @map("payment_method")
+  gatewayTransId String?       @map("gateway_trans_id") @db.VarChar(100)
+  status         PaymentStatus @default(PENDING)
+  paidAt         DateTime?     @map("paid_at")
+  note           String?       @db.VarChar(255)
+  processedBy    Int           @map("processed_by")
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  processor  User       @relation("StaffPayments", fields: [processedBy], references: [id])
+
+  @@map("payments")
+}
+
+model CheckIn {
+  id             Int           @id @default(autoincrement())
+  memberId       Int?          @map("member_id")
+  membershipId   Int?          @map("membership_id")
+  trialBookingId Int?          @map("trial_booking_id")
+  checkType      CheckinType   @default(MEMBER) @map("check_type")
+  checkinTime    DateTime      @default(now()) @map("checkin_time")
+  status         CheckinStatus @default(SUCCESS)
+  denyReason     String?       @map("deny_reason") @db.VarChar(255)
+  staffId        Int           @map("staff_id")
+
+  member       User?         @relation("MemberCheckIns", fields: [memberId], references: [id])
+  membership   Membership?   @relation(fields: [membershipId], references: [id])
+  trialBooking TrialBooking? @relation(fields: [trialBookingId], references: [id])
+  staff        User          @relation("StaffCheckIns", fields: [staffId], references: [id])
+
+  @@index([checkinTime])
+  @@map("check_ins")
+}
+
+model PTBooking {
+  id           Int           @id @default(autoincrement())
+  membershipId Int           @map("membership_id")
+  memberId     Int           @map("member_id")
+  ptId         Int           @map("pt_id")
+  bookingDate  DateTime      @map("booking_date") @db.Date
+  startTime    String        @map("start_time") @db.VarChar(10) // '18:00'
+  endTime      String        @map("end_time") @db.VarChar(10)   // '19:00'
+  status       BookingStatus @default(SCHEDULED)
+  ptNote       String?       @map("pt_note") @db.Text
+  completedAt  DateTime?     @map("completed_at")
+  createdAt    DateTime      @default(now()) @map("created_at")
+
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  member     User       @relation("MemberPTBookings", fields: [memberId], references: [id])
+  trainer    User       @relation("TrainerPTBookings", fields: [ptId], references: [id])
+
+  @@index([ptId, bookingDate, startTime])
+  @@map("pt_bookings")
+}
+
+model GroupClass {
+  id            Int      @id @default(autoincrement())
+  className     String   @map("class_name") @db.VarChar(100)
+  ptId          Int      @map("pt_id")
+  roomName      String   @default("Studio 1") @map("room_name") @db.VarChar(50)
+  classDate     DateTime @map("class_date") @db.Date
+  startTime     String   @map("start_time") @db.VarChar(10)
+  endTime       String   @map("end_time") @db.VarChar(10)
+  maxCapacity   Int      @default(25) @map("max_capacity")
+  enrolledCount Int      @default(0) @map("enrolled_count")
+  status        String   @default("OPEN") @db.VarChar(20)
+
+  trainer     User              @relation("TrainerGroupClasses", fields: [ptId], references: [id])
+  enrollments ClassEnrollment[]
+
+  @@map("group_classes")
+}
+
+model ClassEnrollment {
+  id           Int      @id @default(autoincrement())
+  classId      Int      @map("class_id")
+  membershipId Int      @map("membership_id")
+  memberId     Int      @map("member_id")
+  status       String   @default("CONFIRMED") @db.VarChar(20)
+  enrolledAt   DateTime @default(now()) @map("enrolled_at")
+
+  groupClass GroupClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  member     User       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, memberId])
+  @@map("class_enrollments")
+}
+
+model BodyMetric {
+  id              Int      @id @default(autoincrement())
+  memberId        Int      @map("member_id")
+  ptId            Int?     @map("pt_id")
+  weight          Decimal  @db.Decimal(5, 2) // kg
+  height          Decimal  @db.Decimal(5, 2) // cm
+  bodyFatPct      Decimal? @map("body_fat_pct") @db.Decimal(4, 1) // %
+  muscleMassKg    Decimal? @map("muscle_mass_kg") @db.Decimal(5, 2) // kg
+  bmi             Decimal  @db.Decimal(4, 1)
+  bmr             Int
+  tdee            Int
+  recommendations String?  @db.Text
+  measuredAt      DateTime @default(now()) @map("measured_at")
+
+  member  User  @relation("StudentMetrics", fields: [memberId], references: [id], onDelete: Cascade)
+  trainer User? @relation("TrainerMetrics", fields: [ptId], references: [id])
+
+  @@index([memberId, measuredAt])
+  @@map("body_metrics")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  title     String   @db.VarChar(150)
+  content   String   @db.Text
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
