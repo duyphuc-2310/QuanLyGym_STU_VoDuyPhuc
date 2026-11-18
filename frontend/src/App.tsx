@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   User, UserRole, PortalType, Membership, Lead, 
   CheckInLog, PtBooking, InBodyMetric 
@@ -22,7 +22,20 @@ export default function App() {
   // Active Management Tab when inside the internal dashboard
   const [currentTab, setCurrentTab] = useState<PortalType>('checkin');
 
-  // Shared State for Entire Gym Operations
+  // Support separate URL routing via hash (#admin, #login, #portal)
+  useEffect(() => {
+    const checkHashRoute = () => {
+      const hash = window.location.hash.toLowerCase();
+      if (hash === '#admin' || hash === '#login' || hash === '#portal') {
+        setIsLoginModalOpen(true);
+      }
+    };
+    checkHashRoute();
+    window.addEventListener('hashchange', checkHashRoute);
+    return () => window.removeEventListener('hashchange', checkHashRoute);
+  }, []);
+
+  // Shared State for Entire Gym Operations (Theo chuẩn Luận văn STU)
   const [memberships, setMemberships] = useState<Membership[]>([
     {
       id: 1,
@@ -114,6 +127,15 @@ export default function App() {
     },
     {
       id: 3,
+      name: 'Nguyễn Thị Bích',
+      type: 'HỘI VIÊN',
+      status: 'DENIED',
+      note: 'Từ chối: Gói tập đang đóng băng bảo lưu',
+      time: '09:40:11',
+      contractCode: 'HD-2026-0002',
+    },
+    {
+      id: 4,
       name: 'Lê Hoàng Nam',
       type: 'HỘI VIÊN',
       status: 'DENIED',
@@ -192,6 +214,12 @@ export default function App() {
     else if (user.role === 'TRAINER') setCurrentTab('pt_portal');
     else if (user.role === 'MEMBER') setCurrentTab('member_portal');
     else setCurrentTab('analytics');
+    setIsLoginModalOpen(false);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    window.location.hash = '';
   };
 
   // Cross-portal Handlers
@@ -239,30 +267,32 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       
-      {/* 1. Quick Role & Portal Switcher Bar */}
-      <RoleSwitcher
-        currentUser={currentUser}
-        onSelectRole={handleSelectRole}
-        onGoLanding={() => setCurrentUser(null)}
-      />
+      {/* 1. Thanh Role Switcher: CHỈ HIỂN THỊ KHI ĐÃ ĐĂNG NHẬP VÀO HỆ THỐNG NỘI BỘ */}
+      {currentUser !== null && (
+        <RoleSwitcher
+          currentUser={currentUser}
+          onSelectRole={handleSelectRole}
+          onGoLanding={handleLogout}
+        />
+      )}
 
       {/* 2. Main Viewport */}
       {currentUser === null ? (
-        /* ==================== PUBLIC LANDING PAGE ==================== */
+        /* ==================== 100% PURE PUBLIC LANDING PAGE ==================== */
         <LandingPage
           onRegisterTrial={handleRegisterTrial}
           onOpenLogin={() => setIsLoginModalOpen(true)}
         />
       ) : (
-        /* ==================== INTERNAL MANAGEMENT DASHBOARD (RBAC) ==================== */
+        /* ==================== INTERNAL MANAGEMENT DASHBOARD (PORTALS) ==================== */
         <DashboardLayout
           currentUser={currentUser}
           currentTab={currentTab}
           onChangeTab={setCurrentTab}
-          onLogout={() => setCurrentUser(null)}
-          onGoHome={() => setCurrentUser(null)}
+          onLogout={handleLogout}
+          onGoHome={handleLogout}
         >
-          {/* Phân hệ Lễ tân Check-in */}
+          {/* Phân hệ 1: Lễ tân Check-in Realtime */}
           {currentTab === 'checkin' && (
             <CheckinScanner
               memberships={memberships}
@@ -273,7 +303,7 @@ export default function App() {
             />
           )}
 
-          {/* Phân hệ Lễ tân Quản lý Hợp đồng & Bảo lưu */}
+          {/* Phân hệ 2: Quản lý Hợp đồng & Bảo lưu bù ngày */}
           {currentTab === 'memberships' && (
             <ContractsManager
               memberships={memberships}
@@ -282,7 +312,7 @@ export default function App() {
             />
           )}
 
-          {/* Phân hệ Lễ tân CRM Khách tập thử */}
+          {/* Phân hệ 3: CRM Phễu Lead khách tập thử */}
           {currentTab === 'leads' && (
             <LeadCRM
               leads={leads}
@@ -291,7 +321,7 @@ export default function App() {
             />
           )}
 
-          {/* Phân hệ Cổng Huấn Luyện Viên PT */}
+          {/* Phân hệ 4: Cổng Huấn Luyện Viên PT */}
           {currentTab === 'pt_portal' && (
             <TrainerPortal
               ptBookings={ptBookings}
@@ -300,7 +330,7 @@ export default function App() {
             />
           )}
 
-          {/* Phân hệ Cổng Hội Viên (QR động 60s) */}
+          {/* Phân hệ 5: Cổng Hội Viên (QR động 60s) */}
           {currentTab === 'member_portal' && (
             <MemberPortal
               member={memberships[0]}
@@ -309,15 +339,20 @@ export default function App() {
             />
           )}
 
-          {/* Phân hệ Quản Trị Cấp Cao BI Dashboard */}
+          {/* Phân hệ 6: Quản Trị Cấp Cao BI Dashboard */}
           {currentTab === 'analytics' && <AnalyticsDashboard />}
         </DashboardLayout>
       )}
 
-      {/* 3. Login Modal */}
+      {/* 3. Modal Đăng nhập an toàn */}
       <LoginModal
         isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
+        onClose={() => {
+          setIsLoginModalOpen(false);
+          if (window.location.hash) {
+            history.pushState('', document.title, window.location.pathname + window.location.search);
+          }
+        }}
         onLoginSuccess={handleLoginSuccess}
       />
 

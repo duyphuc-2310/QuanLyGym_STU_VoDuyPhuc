@@ -1,26 +1,25 @@
 @echo off
-cd /d "%~dp0"
-title CAP NHAT FIX LOI VERCEL LEN GITHUB
-
-echo =========================================================
-echo       CITYGYM - DANG DAY MA NGUON FIX LOI LEN GITHUB
-echo =========================================================
+chcp 65001 >nul
+title DONG BO CODE MOI LEN GITHUB - CITYGYM STU
+echo ========================================================
+echo   HE THONG QUAN LY PHONG GYM - LUAN VAN TOT NGHIEP STU
+echo   Tac gia: Vo Duy Phuc ^| GVHD: ThS. Bui Nhat Bang
+echo ========================================================
 echo.
-
+echo [1/3] Dang kiem tra va them toan bo file thay doi...
 git add -A
-git commit -m "Fix Vercel deployment: move vite and plugins to dependencies"
+
+echo.
+echo [2/3] Dang tao commit moi: An thanh quan tri, tinh gon Landing Page...
+git commit -m "An thanh quan tri khoi Landing Page, toi uu form dang ky 0D tinh gon va dep mat"
+
+echo.
+echo [3/3] Dang day code len GitHub (duyphuc-2310/QuanLyGym_STU_VoDuyPhuc)...
 git push origin main
 
 echo.
-echo =========================================================
-if %errorlevel% equ 0 (
-    echo [THANH CONG] Da day ban sua loi len GitHub!
-    echo Vercel se TU DONG build lai ngay lap tuc sau 30 giay!
-) else (
-    echo [CHUA XONG] Co loi xay ra khi push, vui long kiem tra.
-)
-echo =========================================================
-echo.
+echo ========================================================
+echo   DA DAY CODE LEN GITHUB THANH CONG!
+echo   Vercel se tu dong bat dau Build va cap nhat website trong 10 giay.
+echo ========================================================
 pause
-(goto) 2>nul & del "%~f0"
-
