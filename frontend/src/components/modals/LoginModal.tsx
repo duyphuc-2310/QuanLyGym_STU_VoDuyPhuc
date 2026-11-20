@@ -6,6 +6,7 @@ interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   onLoginSuccess: (user: User) => void;
+  accounts?: any[];
 }
 
 const PRESET_ACCOUNTS: { role: UserRole; name: string; email: string; title: string; desc: string; icon: any }[] = [
@@ -43,7 +44,7 @@ const PRESET_ACCOUNTS: { role: UserRole; name: string; email: string; title: str
   },
 ];
 
-export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess }) => {
+export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess, accounts }) => {
   const [email, setEmail] = useState('letan@citygym.vn');
   const [password, setPassword] = useState('Staff@123');
 
@@ -51,7 +52,40 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
 
   const handleManualLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const matched = PRESET_ACCOUNTS.find((a) => a.email.toLowerCase() === email.toLowerCase());
+    const cleanInput = email.trim();
+
+    // 1. Kiểm tra trong danh sách tài khoản hệ thống (systemAccounts)
+    if (accounts && accounts.length > 0) {
+      const foundInAccounts = accounts.find(
+        (a) =>
+          a.email.toLowerCase() === cleanInput.toLowerCase() ||
+          a.phone === cleanInput ||
+          (a.username && a.username.toLowerCase() === cleanInput.toLowerCase())
+      );
+
+      if (foundInAccounts) {
+        if (foundInAccounts.status === 'LOCKED') {
+          alert('⚠️ Tài khoản này đang ở trạng thái CHỜ ADMIN DUYỆT KÍCH HOẠT sau khi thanh toán gói tập.\n\nVui lòng đợi Admin kiểm tra kích hoạt hoặc liên hệ Hotline 1900 8899!');
+          return;
+        }
+
+        onLoginSuccess({
+          id: foundInAccounts.id,
+          name: foundInAccounts.name,
+          email: foundInAccounts.email,
+          phone: foundInAccounts.phone,
+          role: foundInAccounts.role,
+          department: foundInAccounts.department,
+          age: foundInAccounts.age,
+          username: foundInAccounts.username,
+        });
+        onClose();
+        return;
+      }
+    }
+
+    // 2. Kiểm tra danh sách tài khoản mặc định
+    const matched = PRESET_ACCOUNTS.find((a) => a.email.toLowerCase() === cleanInput.toLowerCase());
     if (matched) {
       onLoginSuccess({
         id: Date.now(),
@@ -63,14 +97,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
       });
       onClose();
     } else {
-      // Default to receptionist
+      // Default fallback
       onLoginSuccess({
         id: Date.now(),
-        name: 'Nhân Viên Quản Trị',
-        email,
+        name: cleanInput.includes('@') ? cleanInput.split('@')[0] : cleanInput,
+        email: cleanInput.includes('@') ? cleanInput : `${cleanInput}@citygym.vn`,
         phone: '0901234567',
-        role: 'RECEPTION',
-        department: 'Ban Vận Hành',
+        role: 'MEMBER',
+        department: 'Hội Viên Cá Nhân',
       });
       onClose();
     }

@@ -12,6 +12,7 @@ import { MemberAuthModal } from '../../components/modals/MemberAuthModal';
 
 interface LandingPageProps {
   currentUser?: UserType | null;
+  isAccountActive?: boolean;
   onRegisterTrial?: (lead: Lead) => void;
   onOpenLogin?: () => void;
   onMemberAuthSuccess?: (newUser: UserType, rawPassword?: string) => void;
@@ -34,6 +35,7 @@ interface LandingPageProps {
 
 export const LandingPage: React.FC<LandingPageProps> = ({ 
   currentUser,
+  isAccountActive = false,
   onRegisterTrial, 
   onOpenLogin,
   onMemberAuthSuccess,
@@ -417,7 +419,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <span>Tập Thử 0Đ (E-Pass)</span>
             </a>
 
-            {/* Trạng thái xác thực: Khách Vãng Lai vs Khách Đã Đăng Ký (chờ Admin) */}
+            {/* Trạng thái xác thực: Khách Vãng Lai vs Khách Đã Kích Hoạt vs Chờ Duyệt */}
             {!currentUser ? (
               <button
                 onClick={() => {
@@ -429,6 +431,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <UserPlus className="w-3.5 h-3.5 text-[#DC2626]" />
                 <span className="hidden sm:inline">Đăng Ký / Đăng Nhập</span>
               </button>
+            ) : isAccountActive ? (
+              <div className="flex items-center gap-2.5">
+                <div className="text-right hidden md:block">
+                  <p className="text-xs font-black text-slate-900">{currentUser.name}</p>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                    <span>✅ Đã Kích Hoạt Hội Viên</span>
+                  </span>
+                </div>
+
+                {onGoToPortal && (
+                  <button
+                    onClick={onGoToPortal}
+                    className="px-4 py-2.5 rounded-full text-xs font-black bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-600/30 flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 animate-pulse"
+                  >
+                    <span>Vào Cổng Hội Viên</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
             ) : (
               <div className="flex items-center gap-2">
                 <div className="text-right hidden md:block">

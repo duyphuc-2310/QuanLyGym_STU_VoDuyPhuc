@@ -17,166 +17,243 @@ import { AccountManagement, INITIAL_ACCOUNTS } from './pages/admin/AccountManage
 import { SmartNutritionPlanner } from './components/nutrition/SmartNutritionPlanner';
 import { CityAICoachModal } from './components/ai/CityAICoachModal';
 
+// Dữ liệu ban đầu mặc định cho hệ thống (Khi chưa có cache trong localStorage)
+const INITIAL_MEMBERSHIPS: Membership[] = [
+  {
+    id: 1,
+    contractCode: 'HD-2026-0001',
+    memberName: 'Võ Duy Phúc',
+    memberPhone: '0901234567',
+    packageName: 'CityVIP 12 Tháng',
+    packagePrice: 5800000,
+    startDate: '2026-01-10',
+    endDate: '2027-01-10',
+    remainingSessions: 18,
+    totalSessions: 20,
+    status: 'ACTIVE',
+    maxFreezeDays: 60,
+    frozenDaysUsed: 0,
+    assignedPtName: 'Nguyễn Minh Tuấn (PT)',
+  },
+  {
+    id: 2,
+    contractCode: 'HD-2026-0002',
+    memberName: 'Nguyễn Thị Bích',
+    memberPhone: '0912333444',
+    packageName: 'CityPro 6 Tháng',
+    packagePrice: 3200000,
+    startDate: '2026-03-01',
+    endDate: '2026-09-01',
+    remainingSessions: 2,
+    totalSessions: 5,
+    status: 'FROZEN',
+    maxFreezeDays: 30,
+    frozenDaysUsed: 15,
+    assignedPtName: 'Trần Hoàng Yến (PT)',
+  },
+  {
+    id: 3,
+    contractCode: 'HD-2025-0899',
+    memberName: 'Lê Hoàng Nam',
+    memberPhone: '0988777666',
+    packageName: 'CityBasic 1 Tháng',
+    packagePrice: 650000,
+    startDate: '2026-01-01',
+    endDate: '2026-02-01',
+    remainingSessions: 0,
+    totalSessions: 0,
+    status: 'EXPIRED',
+    maxFreezeDays: 0,
+    frozenDaysUsed: 0,
+  },
+];
+
+const INITIAL_LEADS: Lead[] = [
+  {
+    id: 1,
+    ticketCode: 'TRIAL-882910',
+    fullName: 'Trần Văn Nam',
+    phone: '0912345678',
+    service: 'Tập cùng PT',
+    status: 'NEW',
+    date: '2026-11-14',
+  },
+  {
+    id: 2,
+    ticketCode: 'TRIAL-554219',
+    fullName: 'Lê Thùy Dung',
+    phone: '0909112233',
+    service: 'Lớp Yoga Vinyasa',
+    status: 'TRIAL_CHECKED_IN',
+    date: '2026-11-13',
+  },
+];
+
+const INITIAL_CHECKIN_LOGS: CheckInLog[] = [
+  {
+    id: 1,
+    name: 'Võ Duy Phúc',
+    type: 'HỘI VIÊN',
+    status: 'SUCCESS',
+    note: 'Gói CityVIP 12 Tháng (Còn 286 ngày)',
+    time: '10:45:12',
+    contractCode: 'HD-2026-0001',
+  },
+  {
+    id: 2,
+    name: 'Lê Thùy Dung',
+    type: 'TẬP THỬ',
+    status: 'SUCCESS',
+    note: 'Vé tập thử QR (TRIAL-554219)',
+    time: '10:30:05',
+  },
+  {
+    id: 3,
+    name: 'Nguyễn Thị Bích',
+    type: 'HỘI VIÊN',
+    status: 'DENIED',
+    note: 'Từ chối: Gói tập đang đóng băng bảo lưu',
+    time: '09:40:11',
+    contractCode: 'HD-2026-0002',
+  },
+  {
+    id: 4,
+    name: 'Lê Hoàng Nam',
+    type: 'HỘI VIÊN',
+    status: 'DENIED',
+    note: 'Từ chối: Gói tập đã hết hạn sử dụng',
+    time: '09:15:20',
+    contractCode: 'HD-2025-0899',
+  },
+];
+
+const INITIAL_PT_BOOKINGS: PtBooking[] = [
+  {
+    id: 1,
+    memberName: 'Võ Duy Phúc',
+    memberPhone: '0901234567',
+    trainerName: 'Nguyễn Minh Tuấn (PT)',
+    date: 'Hôm nay',
+    time: '18:00 - 19:00',
+    status: 'SCHEDULED',
+    goal: 'Hypertrophy Tăng cơ vai & ngực',
+  },
+  {
+    id: 2,
+    memberName: 'Nguyễn Thị Bích',
+    memberPhone: '0912333444',
+    trainerName: 'Trần Hoàng Yến (PT)',
+    date: 'Hôm nay',
+    time: '19:15 - 20:15',
+    status: 'COMPLETED',
+    goal: 'Siết mỡ Body Tone',
+  },
+];
+
 export default function App() {
   // Current Authenticated User (null = Public Guest on Landing Page)
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    try {
+      const saved = localStorage.getItem('citygym_current_user');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return null;
+  });
+
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  // Tài khoản khách vãng lai đã ĐĂNG KÝ (chờ Admin cấp quyền sau thanh toán)
-  // Khác với currentUser (đã vào hệ thống nội bộ) - pendingMemberUser vẫn ở Landing Page
-  const [pendingMemberUser, setPendingMemberUser] = useState<User | null>(null);
+  // Tài khoản khách vãng lai đã ĐĂNG KÝ trên web (Lưu localStorage tránh mất dữ liệu khi chuyển trang)
+  const [pendingMemberUser, setPendingMemberUser] = useState<User | null>(() => {
+    try {
+      const saved = localStorage.getItem('citygym_pending_member');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return null;
+  });
 
-  // Hệ Thống Quản Lý Tài Khoản Toàn Cục (Đồng bộ giữa Landing Page và RBAC Admin)
-  const [systemAccounts, setSystemAccounts] = useState<SystemAccount[]>(INITIAL_ACCOUNTS);
+  // Hệ Thống Quản Lý Tài Khoản Toàn Cục (Lưu localStorage)
+  const [systemAccounts, setSystemAccounts] = useState<SystemAccount[]>(() => {
+    try {
+      const saved = localStorage.getItem('citygym_system_accounts');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return INITIAL_ACCOUNTS;
+  });
 
   // Active Management Tab when inside the internal dashboard
   const [currentTab, setCurrentTab] = useState<PortalType>('checkin');
 
-  // Support separate URL routing via hash (#admin, #login, #portal)
+  // Shared State for Entire Gym Operations (Lưu localStorage)
+  const [memberships, setMemberships] = useState<Membership[]>(() => {
+    try {
+      const saved = localStorage.getItem('citygym_memberships');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return INITIAL_MEMBERSHIPS;
+  });
+
+  const [leads, setLeads] = useState<Lead[]>(() => {
+    try {
+      const saved = localStorage.getItem('citygym_leads');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return INITIAL_LEADS;
+  });
+
+  const [checkinLogs, setCheckinLogs] = useState<CheckInLog[]>(INITIAL_CHECKIN_LOGS);
+
+  const [ptBookings, setPtBookings] = useState<PtBooking[]>(() => {
+    try {
+      const saved = localStorage.getItem('citygym_pt_bookings');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return INITIAL_PT_BOOKINGS;
+  });
+
+  // LƯU DỮ LIỆU TỰ ĐỘNG VÀO LOCALSTORAGE ĐỂ KHÔNG BAO GIỜ MẤT DỮ LIỆU
   useEffect(() => {
-    const checkHashRoute = () => {
-      const hash = window.location.hash.toLowerCase();
-      if (hash === '#admin' || hash === '#login' || hash === '#portal') {
-        setIsLoginModalOpen(true);
+    try {
+      localStorage.setItem('citygym_system_accounts', JSON.stringify(systemAccounts));
+    } catch (e) {}
+  }, [systemAccounts]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('citygym_memberships', JSON.stringify(memberships));
+    } catch (e) {}
+  }, [memberships]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('citygym_leads', JSON.stringify(leads));
+    } catch (e) {}
+  }, [leads]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('citygym_pt_bookings', JSON.stringify(ptBookings));
+    } catch (e) {}
+  }, [ptBookings]);
+
+  useEffect(() => {
+    try {
+      if (pendingMemberUser) {
+        localStorage.setItem('citygym_pending_member', JSON.stringify(pendingMemberUser));
+      } else {
+        localStorage.removeItem('citygym_pending_member');
       }
-    };
-    checkHashRoute();
-    window.addEventListener('hashchange', checkHashRoute);
-    return () => window.removeEventListener('hashchange', checkHashRoute);
-  }, []);
+    } catch (e) {}
+  }, [pendingMemberUser]);
 
-  // Shared State for Entire Gym Operations (Theo chuẩn Luận văn STU)
-  const [memberships, setMemberships] = useState<Membership[]>([
-    {
-      id: 1,
-      contractCode: 'HD-2026-0001',
-      memberName: 'Võ Duy Phúc',
-      memberPhone: '0901234567',
-      packageName: 'CityVIP 12 Tháng',
-      packagePrice: 5800000,
-      startDate: '2026-01-10',
-      endDate: '2027-01-10',
-      remainingSessions: 18,
-      totalSessions: 20,
-      status: 'ACTIVE',
-      maxFreezeDays: 60,
-      frozenDaysUsed: 0,
-      assignedPtName: 'Nguyễn Minh Tuấn (PT)',
-    },
-    {
-      id: 2,
-      contractCode: 'HD-2026-0002',
-      memberName: 'Nguyễn Thị Bích',
-      memberPhone: '0912333444',
-      packageName: 'CityPro 6 Tháng',
-      packagePrice: 3200000,
-      startDate: '2026-03-01',
-      endDate: '2026-09-01',
-      remainingSessions: 2,
-      totalSessions: 5,
-      status: 'FROZEN',
-      maxFreezeDays: 30,
-      frozenDaysUsed: 15,
-      assignedPtName: 'Trần Hoàng Yến (PT)',
-    },
-    {
-      id: 3,
-      contractCode: 'HD-2025-0899',
-      memberName: 'Lê Hoàng Nam',
-      memberPhone: '0988777666',
-      packageName: 'CityBasic 1 Tháng',
-      packagePrice: 650000,
-      startDate: '2026-01-01',
-      endDate: '2026-02-01',
-      remainingSessions: 0,
-      totalSessions: 0,
-      status: 'EXPIRED',
-      maxFreezeDays: 0,
-      frozenDaysUsed: 0,
-    },
-  ]);
-
-  const [leads, setLeads] = useState<Lead[]>([
-    {
-      id: 1,
-      ticketCode: 'TRIAL-882910',
-      fullName: 'Trần Văn Nam',
-      phone: '0912345678',
-      service: 'Tập cùng PT',
-      status: 'NEW',
-      date: '2026-11-14',
-    },
-    {
-      id: 2,
-      ticketCode: 'TRIAL-554219',
-      fullName: 'Lê Thùy Dung',
-      phone: '0909112233',
-      service: 'Lớp Yoga Vinyasa',
-      status: 'TRIAL_CHECKED_IN',
-      date: '2026-11-13',
-    },
-  ]);
-
-  const [checkinLogs, setCheckinLogs] = useState<CheckInLog[]>([
-    {
-      id: 1,
-      name: 'Võ Duy Phúc',
-      type: 'HỘI VIÊN',
-      status: 'SUCCESS',
-      note: 'Gói CityVIP 12 Tháng (Còn 286 ngày)',
-      time: '10:45:12',
-      contractCode: 'HD-2026-0001',
-    },
-    {
-      id: 2,
-      name: 'Lê Thùy Dung',
-      type: 'TẬP THỬ',
-      status: 'SUCCESS',
-      note: 'Vé tập thử QR (TRIAL-554219)',
-      time: '10:30:05',
-    },
-    {
-      id: 3,
-      name: 'Nguyễn Thị Bích',
-      type: 'HỘI VIÊN',
-      status: 'DENIED',
-      note: 'Từ chối: Gói tập đang đóng băng bảo lưu',
-      time: '09:40:11',
-      contractCode: 'HD-2026-0002',
-    },
-    {
-      id: 4,
-      name: 'Lê Hoàng Nam',
-      type: 'HỘI VIÊN',
-      status: 'DENIED',
-      note: 'Từ chối: Gói tập đã hết hạn sử dụng',
-      time: '09:15:20',
-      contractCode: 'HD-2025-0899',
-    },
-  ]);
-
-  const [ptBookings, setPtBookings] = useState<PtBooking[]>([
-    {
-      id: 1,
-      memberName: 'Võ Duy Phúc',
-      memberPhone: '0901234567',
-      trainerName: 'Nguyễn Minh Tuấn (PT)',
-      date: 'Hôm nay',
-      time: '18:00 - 19:00',
-      status: 'SCHEDULED',
-      goal: 'Hypertrophy Tăng cơ vai & ngực',
-    },
-    {
-      id: 2,
-      memberName: 'Nguyễn Thị Bích',
-      memberPhone: '0912333444',
-      trainerName: 'Trần Hoàng Yến (PT)',
-      date: 'Hôm nay',
-      time: '19:15 - 20:15',
-      status: 'COMPLETED',
-      goal: 'Siết mỡ Body Tone',
-    },
-  ]);
+  useEffect(() => {
+    try {
+      if (currentUser) {
+        localStorage.setItem('citygym_current_user', JSON.stringify(currentUser));
+      } else {
+        localStorage.removeItem('citygym_current_user');
+      }
+    } catch (e) {}
+  }, [currentUser]);
 
   // Handle Login Role Switch
   const handleSelectRole = (role: UserRole) => {
@@ -449,7 +526,7 @@ export default function App() {
     );
   };
 
-  // Toggle trạng thái tài khoản trong RBAC
+  // Toggle trạng thái tài khoản trong RBAC (Mở khóa / Kích hoạt hội viên)
   const handleToggleAccountStatus = (accountId: number) => {
     const target = systemAccounts.find((a) => a.id === accountId);
     if (!target) return;
@@ -458,10 +535,96 @@ export default function App() {
       return;
     }
     const nextStatus = target.status === 'ACTIVE' ? 'LOCKED' : 'ACTIVE';
+    
+    // 1. Cập nhật systemAccounts
     setSystemAccounts((prev) =>
       prev.map((a) => (a.id === accountId ? { ...a, status: nextStatus } : a))
     );
-    alert(`Đã ${nextStatus === 'LOCKED' ? 'TẠM KHÓA' : 'KÍCH HOẠT LẠI'} tài khoản của ${target.name}!`);
+
+    // 2. NẾU MỞ KHÓA / KÍCH HOẠT HỘI VIÊN (ACTIVE):
+    if (nextStatus === 'ACTIVE') {
+      const relatedLead = leads.find((l) => l.phone === target.phone || (target.username && l.username === target.username));
+      const pkgName = relatedLead?.packageName || (target.department.includes('VIP') ? 'CityVIP 12 Tháng' : target.department.includes('Pro') ? 'CityPro 6 Tháng' : 'CityBasic 1 Tháng');
+      const ptSessions = pkgName.includes('VIP') ? 20 : pkgName.includes('Pro') ? 5 : 0;
+      const pkgPrice = pkgName.includes('VIP') ? 5800000 : pkgName.includes('Pro') ? 3200000 : 650000;
+      const durationDays = pkgName.includes('12') ? 365 : pkgName.includes('6') ? 180 : 30;
+
+      // Tạo Hợp đồng nếu chưa có
+      setMemberships((prev) => {
+        const existingIdx = prev.findIndex((m) => m.memberPhone === target.phone || m.memberName === target.name);
+        if (existingIdx >= 0) {
+          const copy = [...prev];
+          copy[existingIdx] = { ...copy[existingIdx], status: 'ACTIVE' };
+          return copy;
+        }
+        const newM: Membership = {
+          id: Date.now(),
+          contractCode: 'HD-2026-' + Math.floor(1000 + Math.random() * 9000),
+          memberName: target.name,
+          memberPhone: target.phone,
+          memberEmail: target.email,
+          packageName: pkgName,
+          packagePrice: pkgPrice,
+          startDate: new Date().toISOString().split('T')[0],
+          endDate: new Date(Date.now() + durationDays * 86400000).toISOString().split('T')[0],
+          remainingSessions: ptSessions,
+          totalSessions: ptSessions,
+          status: 'ACTIVE',
+          maxFreezeDays: durationDays > 100 ? 60 : 30,
+          frozenDaysUsed: 0,
+          assignedPtName: ptSessions > 0 ? 'Nguyễn Minh Tuấn (PT)' : undefined,
+        };
+        return [newM, ...prev];
+      });
+
+      // Lên lịch PT buổi đầu tiên
+      if (ptSessions > 0) {
+        setPtBookings((prev) => {
+          const exists = prev.some((b) => b.memberPhone === target.phone);
+          if (exists) return prev;
+          return [
+            {
+              id: Date.now() + 10,
+              memberName: target.name,
+              memberPhone: target.phone,
+              trainerName: 'Nguyễn Minh Tuấn (PT)',
+              date: 'Hôm nay',
+              time: '19:15 - 20:15 (Buổi 1)',
+              status: 'SCHEDULED',
+              goal: `Kèm 1-1 (${pkgName})`,
+            },
+            ...prev,
+          ];
+        });
+      }
+
+      // Cập nhật Lead thành CONVERTED
+      setLeads((prev) =>
+        prev.map((l) =>
+          l.phone === target.phone || (target.username && l.username === target.username)
+            ? { ...l, status: 'CONVERTED' }
+            : l
+        )
+      );
+
+      // Cập nhật pendingMemberUser
+      if (pendingMemberUser && (pendingMemberUser.phone === target.phone || pendingMemberUser.username === target.username)) {
+        setPendingMemberUser({
+          ...pendingMemberUser,
+          department: `Hội Viên Chính Thức (${pkgName})`,
+        });
+      }
+
+      alert(
+        `✅ ĐÃ KÍCH HOẠT HỘI VIÊN THÀNH CÔNG!\n\n` +
+        `• Khách hàng: ${target.name} (${target.phone})\n` +
+        `• Gói tập: ${pkgName}\n` +
+        `• Hợp đồng đã được kích hoạt ở trạng thái ACTIVE.\n` +
+        `• Hội viên có thể đăng nhập hoặc bấm 'Vào Cổng Hội Viên' ngay!`
+      );
+    } else {
+      alert(`Đã TẠM KHÓA tài khoản của ${target.name}!`);
+    }
   };
 
   // Admin cấp tài khoản thủ công
@@ -529,6 +692,16 @@ export default function App() {
     }
   };
 
+  // Kiểm tra tài khoản khách đăng ký web đã được Admin kích hoạt chưa
+  const isPendingMemberActive = pendingMemberUser
+    ? systemAccounts.some(
+        (a) =>
+          (a.phone === pendingMemberUser.phone ||
+            (pendingMemberUser.username && a.username === pendingMemberUser.username)) &&
+          a.status === 'ACTIVE'
+      )
+    : false;
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       
@@ -546,11 +719,41 @@ export default function App() {
         /* ==================== 100% PURE PUBLIC LANDING PAGE ==================== */
         <LandingPage
           currentUser={pendingMemberUser}
+          isAccountActive={isPendingMemberActive}
           onRegisterTrial={handleRegisterTrial}
           onOpenLogin={() => setIsLoginModalOpen(true)}
           onMemberAuthSuccess={handleMemberAuthSuccess}
           onPackagePurchased={handlePackagePurchased}
-          onLogout={() => setPendingMemberUser(null)}
+          onGoToPortal={() => {
+            if (pendingMemberUser) {
+              const fullUser = systemAccounts.find(
+                (a) =>
+                  a.phone === pendingMemberUser.phone ||
+                  (pendingMemberUser.username && a.username === pendingMemberUser.username)
+              );
+              if (fullUser) {
+                setCurrentUser({
+                  id: fullUser.id,
+                  name: fullUser.name,
+                  email: fullUser.email,
+                  phone: fullUser.phone,
+                  role: 'MEMBER',
+                  department: fullUser.department,
+                  age: fullUser.age,
+                  username: fullUser.username,
+                });
+              } else {
+                setCurrentUser(pendingMemberUser);
+              }
+              setCurrentTab('member_portal');
+            }
+          }}
+          onLogout={() => {
+            setPendingMemberUser(null);
+            try {
+              localStorage.removeItem('citygym_pending_member');
+            } catch (e) {}
+          }}
         />
       ) : (
         /* ==================== INTERNAL MANAGEMENT DASHBOARD (PORTALS) ==================== */
@@ -639,6 +842,7 @@ export default function App() {
       {/* 3. Modal Đăng nhập an toàn */}
       <LoginModal
         isOpen={isLoginModalOpen}
+        accounts={systemAccounts}
         onClose={() => {
           setIsLoginModalOpen(false);
           if (window.location.hash) {
