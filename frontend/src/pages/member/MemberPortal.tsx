@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Membership, PtBooking, InBodyMetric } from '../../types';
 import { SmartNutritionPlanner } from '../../components/nutrition/SmartNutritionPlanner';
+import { InBodyProgression } from '../../components/member/InBodyProgression';
 
 interface MemberPortalProps {
   member: Membership;
@@ -317,6 +318,9 @@ export const MemberPortal: React.FC<MemberPortalProps> = ({
                 </div>
               </div>
             </div>
+
+            {/* InBody Progression 3-Month Tracker */}
+            <InBodyProgression />
 
           </div>
 

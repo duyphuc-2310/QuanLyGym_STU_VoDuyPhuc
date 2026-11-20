@@ -6,7 +6,8 @@ import {
   MapPin, Heart, Compass, Smartphone, Calendar, Search, Activity, Users, 
   Shield, Timer, RefreshCw, Camera, Utensils, Apple
 } from 'lucide-react';
-import { Lead } from '../../types';
+import { Lead, ZaloZnsMessage } from '../../types';
+import { ZaloNotificationModal } from '../../components/modals/ZaloNotificationModal';
 
 interface LandingPageProps {
   onRegisterTrial?: (lead: Lead) => void;
@@ -36,6 +37,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onRegisterTrial, onOpe
 
   // Ticket Modal State
   const [showTicketModal, setShowTicketModal] = useState<boolean>(false);
+  const [showZaloModal, setShowZaloModal] = useState<boolean>(false);
+  const [zaloMessage, setZaloMessage] = useState<ZaloZnsMessage | null>(null);
   const [ticketData, setTicketData] = useState<{
     code: string;
     name: string;
@@ -109,6 +112,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onRegisterTrial, onOpe
 
     setTicketData(newTicket);
     setShowTicketModal(true);
+
+    // Tự động kích hoạt tin nhắn Zalo ZNS mô phỏng gửi về điện thoại hội viên
+    const newZns: ZaloZnsMessage = {
+      id: 'ZNS-' + Date.now(),
+      recipientName: bookingForm.name,
+      recipientPhone: bookingForm.phone,
+      templateType: 'TRIAL_EPASS',
+      ticketCode: code,
+      branchName: bookingForm.branch,
+      sentAt: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      status: 'DELIVERED',
+    };
+    setZaloMessage(newZns);
+    setTimeout(() => {
+      setShowZaloModal(true);
+    }, 600);
 
     if (onRegisterTrial) {
       const newLead: Lead = {
@@ -1299,15 +1318,32 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onRegisterTrial, onOpe
               <p className="text-[10px] text-slate-500">Xuất trình mã này tại quầy Lễ tân hoặc cổng xoay để quét vào tập.</p>
             </div>
 
-            <button
-              onClick={() => setShowTicketModal(false)}
-              className="w-full py-3 bg-gradient-to-r from-[#DC2626] to-[#EF4444] text-white font-bold rounded-2xl text-xs shadow-lg shadow-[#DC2626]/30 hover:scale-[1.01] transition-all"
-            >
-              Lưu & Đóng
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={() => setShowZaloModal(true)}
+                className="w-full py-2.5 bg-[#0068ff] hover:bg-[#0052cc] text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 shadow transition-all"
+              >
+                <Smartphone className="w-4 h-4" />
+                <span>📱 Mở Tin Nhắn Zalo ZNS Tự Động (Tích Xanh)</span>
+              </button>
+
+              <button
+                onClick={() => setShowTicketModal(false)}
+                className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-2xl text-xs transition-all"
+              >
+                Đóng
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      {/* ==================== 12.1 ZALO ZNS NOTIFICATION MODAL ==================== */}
+      <ZaloNotificationModal
+        isOpen={showZaloModal}
+        onClose={() => setShowZaloModal(false)}
+        message={zaloMessage}
+      />
 
       {/* ==================== 13. VIETQR CHECKOUT MODAL ==================== */}
       {showCheckoutModal && selectedPackage && (

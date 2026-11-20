@@ -160,3 +160,42 @@ export interface DailyMealPlan {
   waterIntakeLiters: number;
   meals: MealRecommendation[];
 }
+
+// ==================== ZALO ZNS & NOTIFICATION TYPES ====================
+export interface ZaloZnsMessage {
+  id: string;
+  recipientName: string;
+  recipientPhone: string;
+  templateType: 'TRIAL_EPASS' | 'CONTRACT_ACTIVATED' | 'PT_REMINDER';
+  ticketCode?: string;
+  contractCode?: string;
+  branchName?: string;
+  sentAt: string;
+  status: 'DELIVERED' | 'READ';
+  customData?: Record<string, string>;
+}
+
+// ==================== SYSTEM AUDIT LOG TYPES ====================
+export interface AuditLog {
+  id: number;
+  timestamp: string;
+  actorName: string;
+  actorRole: UserRole;
+  action: string;
+  target: string;
+  ipAddress: string;
+  severity: 'INFO' | 'SUCCESS' | 'WARNING' | 'DANGER';
+}
+
+// ==================== INBODY PROGRESSION RECORD ====================
+export interface InBodyHistoricalRecord {
+  date: string;
+  monthLabel: string;
+  weight: number;
+  bodyFatPercent: number;
+  skeletalMuscleKg: number;
+  bmi: number;
+  bmr: number;
+  inbodyScore: number;
+  coachNote: string;
+}

@@ -15,6 +15,7 @@ import { TrainerPortal } from './pages/trainer/TrainerPortal';
 import { AnalyticsDashboard } from './pages/admin/AnalyticsDashboard';
 import { AccountManagement } from './pages/admin/AccountManagement';
 import { SmartNutritionPlanner } from './components/nutrition/SmartNutritionPlanner';
+import { CityAICoachModal } from './components/ai/CityAICoachModal';
 
 export default function App() {
   // Current Authenticated User (null = Public Guest on Landing Page)
@@ -391,6 +392,14 @@ export default function App() {
           }
         }}
         onLoginSuccess={handleLoginSuccess}
+      />
+
+      {/* 4. Trợ Lý Thể Hình & Dinh Dưỡng Thông Minh CityAI Coach (24/7 Live Copilot) */}
+      <CityAICoachModal
+        memberName={currentUser ? currentUser.name : 'Võ Duy Phúc'}
+        memberWeight={68.2}
+        memberBmr={1675}
+        memberBmi={23.1}
       />
 
     </div>

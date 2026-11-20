@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { 
   UserCheck, ShieldAlert, KeyRound, UserPlus, Search, 
   Lock, Unlock, RefreshCw, CheckCircle2, XCircle, 
-  Shield, Users, Dumbbell, User, Filter, AlertCircle, Sparkles
+  Shield, Users, Dumbbell, User, Filter, AlertCircle, Sparkles,
+  History, FileText, Check, Activity
 } from 'lucide-react';
-import { SystemAccount, UserRole } from '../../types';
+import { SystemAccount, UserRole, AuditLog } from '../../types';
 
 interface AccountManagementProps {
   onAccountCreated?: (newAccount: SystemAccount) => void;
@@ -111,8 +112,73 @@ const INITIAL_ACCOUNTS: SystemAccount[] = [
   },
 ];
 
+const SAMPLE_AUDIT_LOGS: AuditLog[] = [
+  {
+    id: 1,
+    timestamp: '2026-11-20 10:35:12',
+    actorName: 'ThS. Bùi Nhật Bằng & Võ Duy Phúc',
+    actorRole: 'ADMIN',
+    action: 'Cấp tài khoản & phân quyền mới',
+    target: 'Hội viên: Lê Thùy Dung (dung.le@gmail.com)',
+    ipAddress: '192.168.1.10 (Máy Quản Trị)',
+    severity: 'SUCCESS',
+  },
+  {
+    id: 2,
+    timestamp: '2026-11-20 10:30:25',
+    actorName: 'Nguyễn Thị Thu (Lễ Tân)',
+    actorRole: 'RECEPTION',
+    action: 'Kích hoạt hợp đồng mới CityVIP 12 Tháng (20 Buổi PT)',
+    target: 'HD-2026-0003 (Lê Thùy Dung)',
+    ipAddress: '192.168.1.25 (Quầy Tiếp Đón STU)',
+    severity: 'SUCCESS',
+  },
+  {
+    id: 3,
+    timestamp: '2026-11-20 10:15:40',
+    actorName: 'Hệ Thống Tự Động (Zalo ZNS Webhook)',
+    actorRole: 'ADMIN',
+    action: 'Bắn tin nhắn Zalo xác nhận vé tập thử E-Pass 0Đ',
+    target: 'Khách hàng: 0909112233 (Mã: TRIAL-884912)',
+    ipAddress: 'API Gateway (Zalo Official)',
+    severity: 'INFO',
+  },
+  {
+    id: 4,
+    timestamp: '2026-11-20 09:45:10',
+    actorName: 'Nguyễn Minh Tuấn (HLV PT)',
+    actorRole: 'TRAINER',
+    action: 'Xác nhận hoàn thành ca tập kèm 1-1 & ghi nhận hoa hồng 150.000đ',
+    target: 'Học viên: Võ Duy Phúc (Buổi 2/20)',
+    ipAddress: '192.168.1.42 (Thiết Bị HLV)',
+    severity: 'SUCCESS',
+  },
+  {
+    id: 5,
+    timestamp: '2026-11-20 09:12:00',
+    actorName: 'Nguyễn Thị Thu (Lễ Tân)',
+    actorRole: 'RECEPTION',
+    action: 'Quét QR Cửa Xoay Tự Động - Check-in thành công',
+    target: 'Hội viên: Võ Duy Phúc (HD-2026-0001)',
+    ipAddress: '192.168.1.15 (Cổng Cửa 1)',
+    severity: 'SUCCESS',
+  },
+  {
+    id: 6,
+    timestamp: '2026-11-19 16:20:00',
+    actorName: 'Nguyễn Thị Thu (Lễ Tân)',
+    actorRole: 'RECEPTION',
+    action: 'Đóng băng bảo lưu thẻ 15 ngày',
+    target: 'Hợp đồng: HD-2026-0002 (Nguyễn Thị Bích)',
+    ipAddress: '192.168.1.25 (Quầy Tiếp Đón STU)',
+    severity: 'WARNING',
+  },
+];
+
 export const AccountManagement: React.FC<AccountManagementProps> = ({ onAccountCreated }) => {
   const [accounts, setAccounts] = useState<SystemAccount[]>(INITIAL_ACCOUNTS);
+  const [auditLogs] = useState<AuditLog[]>(SAMPLE_AUDIT_LOGS);
+  const [activeSubTab, setActiveSubTab] = useState<'ACCOUNTS' | 'RBAC_MATRIX' | 'AUDIT_LOGS'>('ACCOUNTS');
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<'ALL' | UserRole>('ALL');
 
@@ -310,6 +376,47 @@ export const AccountManagement: React.FC<AccountManagementProps> = ({ onAccountC
         </div>
       </div>
 
+      {/* 3 Sub-View Navigation Tabs */}
+      <div className="flex flex-wrap gap-2 pb-1 border-b border-slate-200">
+        <button
+          onClick={() => setActiveSubTab('ACCOUNTS')}
+          className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all ${
+            activeSubTab === 'ACCOUNTS'
+              ? 'bg-city-red text-white shadow-md shadow-city-red/30'
+              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>Danh Sách Tài Khoản & Cấp Quyền ({accounts.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('RBAC_MATRIX')}
+          className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all ${
+            activeSubTab === 'RBAC_MATRIX'
+              ? 'bg-city-red text-white shadow-md shadow-city-red/30'
+              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+          }`}
+        >
+          <Shield className="w-4 h-4" />
+          <span>Ma Trận Phân Quyền RBAC (Báo Cáo Luận Văn)</span>
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('AUDIT_LOGS')}
+          className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all ${
+            activeSubTab === 'AUDIT_LOGS'
+              ? 'bg-city-red text-white shadow-md shadow-city-red/30'
+              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+          }`}
+        >
+          <History className="w-4 h-4" />
+          <span>Nhật Ký Kiểm Toán Hệ Thống (Audit Logs)</span>
+        </button>
+      </div>
+
+      {activeSubTab === 'ACCOUNTS' && (
+        <>
       {/* Search & Filter Bar */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap gap-3 items-center justify-between">
         <div className="flex-1 min-w-[240px] relative">
@@ -454,81 +561,171 @@ export const AccountManagement: React.FC<AccountManagementProps> = ({ onAccountC
           </table>
         </div>
       </div>
+        </>
+      )}
 
-      {/* ==================== BẢNG MA TRẬN PHÂN QUYỀN RBAC (CHUẨN LUẬN VĂN STU) ==================== */}
-      <div className="bg-white p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-        <div>
-          <h3 className="font-black text-slate-900 text-base">Ma Trận Phân Quyền Vai Trò (RBAC Matrix)</h3>
-          <p className="text-xs text-slate-500">
-            Mô hình kiểm soát truy cập phân tầng theo chức năng nghiệp vụ quy định trong Luận văn tốt nghiệp.
-          </p>
-        </div>
+      {/* ==================== VIEW 2: BẢNG MA TRẬN PHÂN QUYỀN RBAC (CHUẨN LUẬN VĂN STU) ==================== */}
+      {activeSubTab === 'RBAC_MATRIX' && (
+        <div className="bg-white p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <div>
+            <h3 className="font-black text-slate-900 text-base">Ma Trận Phân Quyền Vai Trò (RBAC Matrix)</h3>
+            <p className="text-xs text-slate-500">
+              Mô hình kiểm soát truy cập phân tầng theo chức năng nghiệp vụ quy định trong Luận văn tốt nghiệp STU 2026.
+            </p>
+          </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left border border-slate-200 rounded-2xl overflow-hidden">
-            <thead className="bg-slate-900 text-white font-bold uppercase text-[10px]">
-              <tr>
-                <th className="p-3">Chức Năng Hệ Thống</th>
-                <th className="p-3 text-center">Quản Trị Viên (Admin)</th>
-                <th className="p-3 text-center">Nhân Sự Lễ Tân</th>
-                <th className="p-3 text-center">Huấn Luyện Viên (PT)</th>
-                <th className="p-3 text-center">Hội Viên (Member)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
-              <tr>
-                <td className="p-3 font-semibold text-slate-900">Quản lý & Cấp tài khoản (RBAC)</td>
-                <td className="p-3 text-center text-emerald-600 font-black">✓ Toàn quyền</td>
-                <td className="p-3 text-center text-slate-300">✕ Không quyền</td>
-                <td className="p-3 text-center text-slate-300">✕ Không quyền</td>
-                <td className="p-3 text-center text-slate-300">✕ Không quyền</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-semibold text-slate-900">Xem Báo cáo Doanh thu & BI Analytics</td>
-                <td className="p-3 text-center text-emerald-600 font-black">✓ Xem đầy đủ</td>
-                <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
-                <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
-                <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-semibold text-slate-900">Quét Check-in QR Cửa Xoay Realtime</td>
-                <td className="p-3 text-center text-emerald-600 font-black">✓ Xem & Quét</td>
-                <td className="p-3 text-center text-emerald-600 font-black">✓ Chuyên trách</td>
-                <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
-                <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-semibold text-slate-900">Quản lý Hợp đồng & Bảo lưu bù ngày</td>
-                <td className="p-3 text-center text-emerald-600 font-black">✓ Toàn quyền</td>
-                <td className="p-3 text-center text-emerald-600 font-black">✓ Lập & Đóng băng</td>
-                <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
-                <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-semibold text-slate-900">Lịch dạy 1-1, Trừ buổi & Hoa hồng</td>
-                <td className="p-3 text-center text-emerald-600 font-black">✓ Giám sát</td>
-                <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
-                <td className="p-3 text-center text-emerald-600 font-black">✓ Chuyên trách</td>
-                <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-semibold text-slate-900">Thẻ điện tử QR 60s & Đặt lịch PT</td>
-                <td className="p-3 text-center text-emerald-600 font-black">✓ Demo</td>
-                <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
-                <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
-                <td className="p-3 text-center text-emerald-600 font-black">✓ Sử dụng cá nhân</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-semibold text-slate-900">Trợ lý Dinh dưỡng & AI Food Scanner</td>
-                <td className="p-3 text-center text-emerald-600 font-black">✓ Toàn quyền</td>
-                <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
-                <td className="p-3 text-center text-emerald-600 font-black">✓ Tư vấn học viên</td>
-                <td className="p-3 text-center text-emerald-600 font-black">✓ Chụp & Theo dõi</td>
-              </tr>
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-left border border-slate-200 rounded-2xl overflow-hidden">
+              <thead className="bg-slate-900 text-white font-bold uppercase text-[10px]">
+                <tr>
+                  <th className="p-3">Chức Năng Hệ Thống</th>
+                  <th className="p-3 text-center">Quản Trị Viên (Admin)</th>
+                  <th className="p-3 text-center">Nhân Sự Lễ Tân</th>
+                  <th className="p-3 text-center">Huấn Luyện Viên (PT)</th>
+                  <th className="p-3 text-center">Hội Viên (Member)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                <tr>
+                  <td className="p-3 font-semibold text-slate-900">Quản lý & Cấp tài khoản (RBAC)</td>
+                  <td className="p-3 text-center text-emerald-600 font-black">✓ Toàn quyền</td>
+                  <td className="p-3 text-center text-slate-300">✕ Không quyền</td>
+                  <td className="p-3 text-center text-slate-300">✕ Không quyền</td>
+                  <td className="p-3 text-center text-slate-300">✕ Không quyền</td>
+                </tr>
+                <tr>
+                  <td className="p-3 font-semibold text-slate-900">Xem Báo cáo Doanh thu & BI Analytics</td>
+                  <td className="p-3 text-center text-emerald-600 font-black">✓ Xem đầy đủ</td>
+                  <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
+                  <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
+                  <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
+                </tr>
+                <tr>
+                  <td className="p-3 font-semibold text-slate-900">Quét Check-in QR Cửa Xoay Realtime</td>
+                  <td className="p-3 text-center text-emerald-600 font-black">✓ Xem & Quét</td>
+                  <td className="p-3 text-center text-emerald-600 font-black">✓ Chuyên trách</td>
+                  <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
+                  <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
+                </tr>
+                <tr>
+                  <td className="p-3 font-semibold text-slate-900">Quản lý Hợp đồng & Bảo lưu bù ngày</td>
+                  <td className="p-3 text-center text-emerald-600 font-black">✓ Toàn quyền</td>
+                  <td className="p-3 text-center text-emerald-600 font-black">✓ Lập & Đóng băng</td>
+                  <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
+                  <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
+                </tr>
+                <tr>
+                  <td className="p-3 font-semibold text-slate-900">Lịch dạy 1-1, Trừ buổi & Hoa hồng</td>
+                  <td className="p-3 text-center text-emerald-600 font-black">✓ Giám sát</td>
+                  <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
+                  <td className="p-3 text-center text-emerald-600 font-black">✓ Chuyên trách</td>
+                  <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
+                </tr>
+                <tr>
+                  <td className="p-3 font-semibold text-slate-900">Thẻ điện tử QR 60s & Đặt lịch PT</td>
+                  <td className="p-3 text-center text-emerald-600 font-black">✓ Demo</td>
+                  <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
+                  <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
+                  <td className="p-3 text-center text-emerald-600 font-black">✓ Sử dụng cá nhân</td>
+                </tr>
+                <tr>
+                  <td className="p-3 font-semibold text-slate-900">Trợ lý Dinh dưỡng & AI Food Scanner</td>
+                  <td className="p-3 text-center text-emerald-600 font-black">✓ Toàn quyền</td>
+                  <td className="p-3 text-center text-slate-300">✕ Bị ẩn</td>
+                  <td className="p-3 text-center text-emerald-600 font-black">✓ Tư vấn học viên</td>
+                  <td className="p-3 text-center text-emerald-600 font-black">✓ Chụp & Theo dõi</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* ==================== VIEW 3: AUDIT LOGS TRUY VẾT ==================== */}
+      {activeSubTab === 'AUDIT_LOGS' && (
+        <div className="bg-white p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-red-50 text-city-red">
+                  <History className="w-4 h-4" />
+                </span>
+                <h3 className="font-black text-slate-900 text-base">Nhật Ký Kiểm Toán & Truy Vết Hệ Thống (Audit Logs)</h3>
+              </div>
+              <p className="text-xs text-slate-500 mt-1">
+                Ghi vết chi tiết mọi tác vụ nghiệp vụ, thay đổi trạng thái và sự kiện bảo mật theo chuẩn Enterprise ERP.
+              </p>
+            </div>
+
+            <span className="text-[11px] font-bold px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              Ghi vết thời gian thực (Realtime Logging)
+            </span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-left border border-slate-200 rounded-2xl overflow-hidden">
+              <thead className="bg-slate-900 text-white font-bold uppercase text-[10px]">
+                <tr>
+                  <th className="p-3.5">Thời Gian</th>
+                  <th className="p-3.5">Người Thực Hiện</th>
+                  <th className="p-3.5">Vai Trò</th>
+                  <th className="p-3.5">Hành Động / Nghiệp Vụ</th>
+                  <th className="p-3.5">Đối Tượng Tác Động</th>
+                  <th className="p-3.5">IP & Cổng Thiết Bị</th>
+                  <th className="p-3.5 text-center">Trạng Thái</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                {auditLogs.map((log) => (
+                  <tr key={log.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="p-3.5 font-mono text-[11px] text-slate-500 whitespace-nowrap">
+                      {log.timestamp}
+                    </td>
+                    <td className="p-3.5 font-black text-slate-900 whitespace-nowrap">
+                      {log.actorName}
+                    </td>
+                    <td className="p-3.5">
+                      {getRoleBadge(log.actorRole)}
+                    </td>
+                    <td className="p-3.5 font-semibold text-slate-800">
+                      {log.action}
+                    </td>
+                    <td className="p-3.5 font-medium text-slate-600">
+                      {log.target}
+                    </td>
+                    <td className="p-3.5 font-mono text-[11px] text-slate-500">
+                      {log.ipAddress}
+                    </td>
+                    <td className="p-3.5 text-center">
+                      {log.severity === 'SUCCESS' && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                          Thành Công
+                        </span>
+                      )}
+                      {log.severity === 'INFO' && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-800 border border-blue-200">
+                          Thông Tin
+                        </span>
+                      )}
+                      {log.severity === 'WARNING' && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-200">
+                          Cảnh Báo
+                        </span>
+                      )}
+                      {log.severity === 'DANGER' && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-red-100 text-red-800 border border-red-200">
+                          Nguy Hiểm
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* ==================== MODAL CẤP TÀI KHOẢN MỚI ==================== */}
       {isCreateModalOpen && (
