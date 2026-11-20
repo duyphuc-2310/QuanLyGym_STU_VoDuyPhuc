@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   QrCode, CreditCard, Users, Dumbbell, ShieldCheck, 
-  BarChart3, LogOut, Home, User, ChevronRight, Bell, Sparkles
+  BarChart3, LogOut, Home, User, ChevronRight, Bell, Sparkles, KeyRound
 } from 'lucide-react';
 import { PortalType, User as UserType } from '../../types';
 
@@ -35,6 +35,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       label: 'Dashboard BI Admin',
       icon: BarChart3,
       allowedRoles: ['ADMIN'],
+    },
+    {
+      id: 'users',
+      label: 'Cấp Tài Khoản & RBAC',
+      icon: KeyRound,
+      allowedRoles: ['ADMIN'],
+      badge: 'Chỉ Admin',
     },
     {
       id: 'checkin',

@@ -13,6 +13,7 @@ import { LeadCRM } from './pages/sales/LeadCRM';
 import { MemberPortal } from './pages/member/MemberPortal';
 import { TrainerPortal } from './pages/trainer/TrainerPortal';
 import { AnalyticsDashboard } from './pages/admin/AnalyticsDashboard';
+import { AccountManagement } from './pages/admin/AccountManagement';
 import { SmartNutritionPlanner } from './components/nutrition/SmartNutritionPlanner';
 
 export default function App() {
@@ -374,6 +375,9 @@ export default function App() {
 
           {/* Phân hệ 6: Quản Trị Cấp Cao BI Dashboard */}
           {currentTab === 'analytics' && <AnalyticsDashboard />}
+
+          {/* Phân hệ Quản Trị RBAC: Cấp Tài Khoản & Phân Quyền (Chỉ Admin) */}
+          {currentTab === 'users' && <AccountManagement />}
         </DashboardLayout>
       )}
 

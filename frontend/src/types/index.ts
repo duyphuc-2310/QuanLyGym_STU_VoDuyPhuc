@@ -20,7 +20,20 @@ export type PortalType =
   | 'member_portal' 
   | 'nutrition'
   | 'pt_portal' 
-  | 'analytics';
+  | 'analytics'
+  | 'users';
+
+export interface SystemAccount {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  role: UserRole;
+  status: 'ACTIVE' | 'LOCKED';
+  createdAt: string;
+  department: string;
+  permissions: string[];
+}
 
 export type MembershipStatus = 'ACTIVE' | 'FROZEN' | 'EXPIRED' | 'CANCELLED';
 
