@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Dumbbell, Flame, Sparkles, Calculator, QrCode, CheckCircle2, 
+  Dumbbell, Sparkles, Calculator, QrCode, CheckCircle2, 
   ArrowRight, ShieldCheck, Check, X, Clock, User, Star, Ticket, 
-  Zap, TrendingDown, Crown, Award, Phone, Lock, CreditCard, ChevronRight,
-  MapPin, Heart, Compass, Smartphone, Calendar, Search, Activity, Users, 
-  Shield, Timer, RefreshCw, Camera, Utensils, Apple, UserPlus, LogIn, AlertCircle, LogOut
+  Zap, Award, Phone, Lock, CreditCard, ChevronRight,
+  MapPin, Heart, Smartphone, Calendar, Search, Activity, Users, 
+  Shield, Timer, RefreshCw, Camera, Utensils, Apple, UserPlus, LogIn, AlertCircle, LogOut,
+  Layers, HeartPulse, Sparkle, Target, Flame
 } from 'lucide-react';
 import { Lead, ZaloZnsMessage, User as UserType } from '../../types';
 import { ZaloNotificationModal } from '../../components/modals/ZaloNotificationModal';
@@ -55,14 +56,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   // Branch Selector State (Inspired by Anytime Fitness Gym Locator)
   const [selectedBranch, setSelectedBranch] = useState<string>('stu-campus');
-  const [searchBranchQuery, setSearchBranchQuery] = useState<string>('');
 
   // Simple Clean Booking Form State
   const [bookingForm, setBookingForm] = useState({
     name: '',
     phone: '',
     branch: 'STU Campus - 180 Cao Lỗ, Quận 8',
-    service: 'Gym & Thể Hình Chuẩn 5 Sao (24/7 Access)',
+    service: 'Gym & Thể Hình Chuẩn Quốc Tế 24/7',
   });
 
   // Ticket Modal State
@@ -167,7 +167,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     }
   };
 
-  // Cấp vé và bắn Zalo ZNS
+  // Cấp vé và gửi thông báo Zalo ZNS mô phỏng
   const executeBooking = (userName: string, userPhone: string) => {
     const code = 'TRIAL-' + Math.floor(100000 + Math.random() * 900000);
     const newTicket = {
@@ -182,7 +182,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     setTicketData(newTicket);
     setShowTicketModal(true);
 
-    // Tự động kích hoạt tin nhắn Zalo ZNS mô phỏng gửi về điện thoại hội viên
     const newZns: ZaloZnsMessage = {
       id: 'ZNS-' + Date.now(),
       recipientName: userName,
@@ -213,8 +212,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   };
 
   // Xử lý nộp form nhận vé tập thử
-  // BẮT BUỘC ĐĂNG NHẬP / TẠO TÀI KHOẢN để xác thực thông tin nhận vé
-  // Nhưng KHÔNG cấp quyền vào Cổng Hội Viên (chỉ ghi Lead CRM và cấp vé QR tập thử)
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -240,7 +237,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   // Xử lý khi bấm Đăng ký gói tập ở Bảng giá
   const handleOpenCheckout = (pkg: { name: string; price: number; priceStr: string; duration: string; ptSessions: number }) => {
-    // CHẶN KHÁCH VÃNG LAI: Bắt buộc phải đăng nhập hoặc tạo tài khoản mới
     if (!currentUser) {
       setPendingPackage(pkg);
       setPendingBookingType('PACKAGE');
@@ -282,82 +278,82 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     }
   };
 
-  // Branch Data (Hệ thống chi nhánh kiểu Anytime Fitness)
+  // Dữ liệu chi nhánh câu lạc bộ (Chuẩn Anytime Fitness)
   const branches = [
     {
       id: 'stu-campus',
       name: 'CITYGYM STU Campus (Trụ Sở Chính)',
       address: '180 Cao Lỗ, Phường 4, Quận 8, TP.HCM',
-      openHours: 'Mở cửa 24/7 quanh năm',
+      openHours: 'Mở cửa 24/7/365 ngày',
       hotline: '1900 8899 - 028 3850 5520',
-      amenities: ['1.500m² Olympic', 'Máy InBody 270', 'Phòng xông hơi Sauna', 'Cửa xoay QR 60s', 'Lớp GroupX & Yoga'],
+      amenities: ['1.500m² chuẩn Olympic', 'Máy InBody 270', 'Cửa xoay QR 60s', 'Studio GroupX & Yoga', 'Locker điện tử'],
       badge: 'CƠ SỞ CHÍNH',
     },
     {
       id: 'district-1',
       name: 'CITYGYM Central Garden (Quận 1)',
       address: '328 Võ Văn Kiệt, Phường Cô Giang, Quận 1, TP.HCM',
-      openHours: 'Mở cửa 24/7 quanh năm',
+      openHours: 'Mở cửa 24/7/365 ngày',
       hotline: '1900 8899 - Máy lẻ 101',
-      amenities: ['Khu tạ tự do chuẩn Eleiko', 'HLV NASM 1-1', 'Phòng tắm cá nhân riêng tư', 'Bãi đỗ xe ô tô'],
+      amenities: ['Dàn tạ Eleiko Thụy Điển', 'HLV NASM 1-1', 'Phòng tắm cá nhân riêng biệt', 'Bãi đỗ xe ô tô'],
       badge: 'PREMIUM CLUB',
     },
     {
       id: 'district-7',
       name: 'CITYGYM Sunrise Elite (Quận 7)',
       address: '27 Nguyễn Hữu Thọ, Phường Tân Hưng, Quận 7, TP.HCM',
-      openHours: 'Mở cửa 24/7 quanh năm',
+      openHours: 'Mở cửa 24/7/365 ngày',
       hotline: '1900 8899 - Máy lẻ 102',
-      amenities: ['Hồ bơi 4 mùa', 'Khu Functional Turf', 'Studio Spinning đạp xe', 'Tủ Locker FaceID'],
+      amenities: ['Khu Functional Turf', 'Studio Cycling ngắm view', 'Tủ Locker FaceID', 'Phòng xông hơi khô'],
       badge: 'ELITE CLUB',
     },
   ];
 
-  // GroupX Classes Data
+  // Dữ liệu lớp học GroupX & Yoga
   const groupClasses = [
     {
       id: 1,
       name: 'Yoga Vinyasa Cân Bằng Thân Tâm',
-      type: 'Yoga Phục Hồi',
+      type: 'Yoga & Phục Hồi',
       color: 'bg-purple-50 text-purple-700 border-purple-200',
       days: ['t2', 't4', 't6'],
       daysLabel: 'Thứ 2, 4, 6',
       time: '06:30 - 07:30',
       trainer: 'HLV Hoàng Yến (ACE)',
-      desc: 'Thư giãn tâm trí, giải tỏa stress sau giờ làm việc và tăng độ dẻo dai toàn diện cho cột sống.',
+      desc: 'Giải tỏa áp lực cổ vai gáy dân văn phòng, kéo giãn cơ toàn diện và thư thái tinh thần khởi đầu ngày mới.',
     },
     {
       id: 2,
-      name: 'HIIT Burn Fat (No Pain No Gain)',
-      type: 'HIIT Cardio 24/7',
+      name: 'HIIT Metabolic Burn (Đốt Mỡ Năng Động)',
+      type: 'HIIT & Tim Mạch',
       color: 'bg-red-50 text-[#DC2626] border-red-200',
       days: ['t3', 't5', 't7-cn'],
       daysLabel: 'Thứ 3, 5, CN',
       time: '18:00 - 19:00',
-      trainer: 'HLV Quốc Bảo (HIIT Coach)',
-      desc: 'Tập ngắt quãng cường độ cao, kích hoạt cơ chế đốt mỡ EPOC lên đến 600 - 800 kcal mỗi buổi.',
+      trainer: 'HLV Quốc Bảo (HIIT Master)',
+      desc: 'Tập ngắt quãng cường độ cao khoa học, kích hoạt trao đổi chất EPOC tiêu hao đến 600 - 800 kcal.',
     },
     {
       id: 3,
-      name: 'Zumba Vũ Điệu Năng Lượng Đốt Mỡ',
-      type: 'Zumba Dance',
+      name: 'Zumba Vũ Điệu Năng Lượng Tươi Trẻ',
+      type: 'Zumba Fitness',
       color: 'bg-pink-50 text-pink-700 border-pink-200',
       days: ['t2', 't4', 't6', 't7-cn'],
       daysLabel: 'Thứ 2, 4, 6, Thứ 7',
       time: '19:15 - 20:15',
       trainer: 'HLV Minh Thư (Zumba Pro)',
-      desc: 'Hòa mình vào âm nhạc Latin sôi động, đốt cháy năng lượng sảng khoái và gắn kết hội viên.',
+      desc: 'Hòa mình vào giai điệu Latin sôi động, giải phóng endorphin vui vẻ và đốt cháy mỡ thừa tự nhiên.',
     },
     {
       id: 4,
-      name: 'BodyPump Săn Chắc Toàn Thân',
-      type: 'Tập Tạ Với Nhạc',
+      name: 'BodyPump Săn Chắc Định Hình Cơ',
+      type: 'Kháng Lực Với Nhạc',
       color: 'bg-amber-50 text-amber-800 border-amber-200',
       days: ['t3', 't5', 't7-cn'],
       daysLabel: 'Thứ 3, 5, Thứ 7',
       time: '17:30 - 18:30',
       trainer: 'HLV Minh Tuấn (NASM)',
-      desc: 'Tập kháng lực với tạ đòn thông minh theo nhịp điệu, tăng mật độ xương và siết thon gọn cơ thể.',
+      desc: 'Bài tập tạ thanh đòn thông minh phối hợp âm nhạc nhịp điệu, gia tăng mật độ xương và siết thon vóc dáng.',
     },
   ];
 
@@ -369,7 +365,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-[#DC2626] selection:text-white">
       
-      {/* ==================== 1. HEADER CHUẨN THƯƠNG MẠI QUỐC TẾ (ẨN HOÀN TOÀN QUẢN TRỊ) ==================== */}
+      {/* ==================== 1. HEADER CHUẨN THƯƠNG MẠI QUỐC TẾ (INSPIRED BY ANYTIME FITNESS) ==================== */}
       <header className="fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           
@@ -386,28 +382,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
           </a>
 
-          {/* Public Navigation Links (Học hỏi Anytime Fitness) */}
-          <nav className="hidden lg:flex items-center gap-7 text-xs font-bold text-slate-700">
-            <a href="#about" className="hover:text-[#DC2626] transition-colors">Giới thiệu</a>
+          {/* Marketing Navigation Links */}
+          <nav className="hidden xl:flex items-center gap-6 text-xs font-bold text-slate-700">
+            <a href="#about" className="hover:text-[#DC2626] transition-colors">Giới Thiệu 24/7</a>
             <a href="#branches" className="hover:text-[#DC2626] transition-colors flex items-center gap-1 text-[#DC2626]">
               <MapPin className="w-3.5 h-3.5 text-[#DC2626]" />
               <span>Tìm Phòng Tập</span>
             </a>
             <a href="#pillars" className="hover:text-[#DC2626] transition-colors">Lợi Thế 24/7</a>
-            <a href="#motivation" className="hover:text-[#DC2626] transition-colors flex items-center gap-1">
-              <Flame className="w-3.5 h-3.5 text-[#DC2626]" />
-              <span>No Pain No Gain</span>
-            </a>
-            <a href="#packages" className="hover:text-[#DC2626] transition-colors">Bảng giá gói</a>
+            <a href="#amenities" className="hover:text-[#DC2626] transition-colors">Dịch Vụ & Tiện Ích</a>
+            <a href="#coaching" className="hover:text-[#DC2626] transition-colors">HLV Đồng Hành</a>
+            <a href="#packages" className="hover:text-[#DC2626] transition-colors">Bảng Giá Gói</a>
             <a href="#classes" className="hover:text-[#DC2626] transition-colors">Lịch GroupX</a>
-            <a href="#trainers" className="hover:text-[#DC2626] transition-colors">Đội ngũ PT</a>
             <a href="#ai-nutrition" className="hover:text-[#DC2626] transition-colors flex items-center gap-1 font-bold text-[#DC2626]">
               <Sparkles className="w-3.5 h-3.5 text-[#DC2626]" />
               <span>AI Dinh Dưỡng</span>
             </a>
-            <a href="#bmi-tool" className="hover:text-[#DC2626] transition-colors flex items-center gap-1.5 font-bold">
-              <Calculator className="w-3.5 h-3.5 text-[#DC2626]" />
-              <span>Đo BMI / TDEE</span>
+            <a href="#bmi-tool" className="hover:text-[#DC2626] transition-colors flex items-center gap-1.5">
+              <Calculator className="w-3.5 h-3.5 text-slate-500" />
+              <span>Đo BMI/TDEE</span>
             </a>
           </nav>
 
@@ -415,13 +408,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="flex items-center gap-2.5">
             <a 
               href="#trial-section" 
-              className="px-5 py-2.5 rounded-full text-xs font-black bg-gradient-to-r from-[#DC2626] to-[#EF4444] text-white shadow-lg shadow-[#DC2626]/30 hover:shadow-[#DC2626]/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-full text-xs font-black bg-gradient-to-r from-[#DC2626] to-[#EF4444] text-white shadow-lg shadow-[#DC2626]/30 hover:shadow-[#DC2626]/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1.5"
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <Ticket className="w-3.5 h-3.5" />
               <span>Tập Thử 0Đ (E-Pass)</span>
             </a>
 
-            {/* Trạng thái xác thực: Khách Vãng Lai vs Khách Đã Kích Hoạt vs Chờ Duyệt */}
+            {/* Trạng thái tài khoản người dùng */}
             {!currentUser ? (
               <button
                 onClick={() => {
@@ -435,7 +428,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </button>
             ) : isAccountActive ? (
               <div className="flex items-center gap-3">
-                {/* Chỉ hiển thị thông tin tài khoản (Họ tên & Username/SĐT) */}
                 <div className="text-right hidden sm:block">
                   <p className="text-xs font-black text-slate-900">{currentUser.name}</p>
                   <p className="text-[11px] font-semibold text-slate-500">
@@ -443,7 +435,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </p>
                 </div>
 
-                {/* Nút Vào Cổng Hội Viên */}
                 {onGoToPortal && (
                   <button
                     onClick={onGoToPortal}
@@ -454,7 +445,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </button>
                 )}
 
-                {/* Nút Đăng Xuất */}
                 {onLogout && (
                   <button
                     onClick={onLogout}
@@ -491,36 +481,36 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </header>
 
-      {/* ==================== 2. HERO SECTION (INSPIRED BY ANYTIME FITNESS GEOLOCATION & REAL AF) ==================== */}
+      {/* ==================== 2. HERO SECTION (ANYTIME FITNESS REAL AF MARKETING STYLE) ==================== */}
       <section id="about" className="pt-32 pb-20 px-4 max-w-7xl mx-auto text-center lg:text-left grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         <div className="lg:col-span-7 space-y-6">
           
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 border border-[#DC2626]/30 text-[#DC2626] text-xs font-black uppercase tracking-wider shadow-sm">
             <span className="w-2.5 h-2.5 rounded-full bg-[#DC2626] animate-ping" />
-            <span>LET'S MAKE HEALTHY HAPPEN • 24/7 FITNESS CLUB</span>
+            <span>LET'S MAKE HEALTHY HAPPEN • 24/7 FITNESS & COACHING CLUB</span>
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-black uppercase tracking-tight text-slate-900 leading-tight">
-            TẬP LUYỆN BẤT CỨ LÚC NÀO <br />
-            <span className="bg-gradient-to-r from-[#DC2626] to-[#991B1B] bg-clip-text text-transparent">REAL FITNESS • 24/7 OPEN</span>
+            GET TO A HEALTHIER PLACE. <br />
+            <span className="bg-gradient-to-r from-[#DC2626] to-[#991B1B] bg-clip-text text-transparent">PHÒNG TẬP 24/7 CHUẨN MỰC.</span>
           </h1>
 
           <p className="text-slate-600 text-base sm:text-lg max-w-2xl leading-relaxed">
-            Chào mừng bạn đến với **CITYGYM** — Môi trường thể hình chuẩn mực, văn minh và hoàn toàn không phán xét. Tự do tập luyện 24/7 với mã QR thông minh 60s, thiết bị Olympic đỉnh cao cùng đội ngũ HLV đồng hành tận tâm.
+            Chào mừng bạn đến với <strong>CITYGYM</strong> — Không gian rèn luyện thể chất văn minh, không phán xét và hoàn toàn không áp lực. Tự do tập luyện bất kỳ lúc nào với thẻ số thông minh 60s, hệ thống thiết bị chuẩn Olympic và đội ngũ huấn luyện viên đồng hành tận tâm.
           </p>
 
-          {/* Anytime Fitness Style: Interactive Branch Locator Quick Bar */}
-          <div className="bg-slate-50 border border-slate-200 rounded-3xl p-4 sm:p-5 shadow-lg space-y-3">
+          {/* Anytime Fitness Interactive Club Finder Box */}
+          <div className="bg-slate-50 border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-xl space-y-3">
             <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
               <MapPin className="w-4 h-4 text-[#DC2626]" />
-              <span>Tìm cơ sở CITYGYM gần bạn nhất để bắt đầu:</span>
+              <span>Tìm câu lạc bộ CITYGYM gần bạn nhất để bắt đầu:</span>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-3">
               <select
                 value={selectedBranch}
                 onChange={(e) => setSelectedBranch(e.target.value)}
-                className="flex-1 bg-white border border-slate-300 rounded-2xl px-4 py-3 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#DC2626] shadow-sm"
+                className="flex-1 bg-white border border-slate-300 rounded-2xl px-4 py-3.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#DC2626] shadow-sm"
               >
                 <option value="stu-campus">📍 Trụ sở chính: STU Campus (180 Cao Lỗ, Quận 8)</option>
                 <option value="district-1">📍 Chi nhánh: Central Garden (Võ Văn Kiệt, Quận 1)</option>
@@ -529,7 +519,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
               <a
                 href="#trial-section"
-                className="px-6 py-3 rounded-2xl font-black text-xs bg-[#DC2626] hover:bg-red-700 text-white flex items-center justify-center gap-2 shadow-md transition-all whitespace-nowrap"
+                className="px-6 py-3.5 rounded-2xl font-black text-xs bg-[#DC2626] hover:bg-red-700 text-white flex items-center justify-center gap-2 shadow-md transition-all whitespace-nowrap"
               >
                 <Sparkles className="w-4 h-4" />
                 <span>Nhận Vé Tập Thử Tại Đây</span>
@@ -538,8 +528,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-500 font-semibold pt-1">
               <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-emerald-600" /> Mở cửa 24/7 suốt 365 ngày</span>
-              <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-emerald-600" /> Miễn phí đo InBody 270</span>
-              <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-emerald-600" /> Phòng tắm & Locker cá nhân</span>
+              <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-emerald-600" /> Đo chỉ số InBody 270 miễn phí</span>
+              <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-emerald-600" /> Phòng tắm nóng lạnh & Locker riêng tư</span>
             </div>
           </div>
 
@@ -548,19 +538,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               href="#trial-section" 
               className="px-8 py-4 rounded-2xl font-bold bg-gradient-to-r from-[#DC2626] to-[#EF4444] text-white shadow-xl shadow-[#DC2626]/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
             >
-              <QrCode className="w-5 h-5" />
+              <Ticket className="w-5 h-5" />
               <span>Đăng Ký Vé E-Pass 03 Ngày 0Đ</span>
             </a>
             <a 
-              href="#bmi-tool" 
+              href="#packages" 
               className="px-7 py-4 rounded-2xl font-bold bg-white border-2 border-slate-200 text-slate-700 hover:border-[#DC2626] hover:text-[#DC2626] transition-all flex items-center justify-center gap-2 shadow-sm"
             >
-              <Calculator className="w-5 h-5" />
-              <span>Đo Thể Trạng BMI / TDEE</span>
+              <CreditCard className="w-5 h-5" />
+              <span>Xem Bảng Giá Gói Tập</span>
             </a>
           </div>
 
-          {/* Quick Stats */}
+          {/* Quick Marketing Counters */}
           <div className="pt-4 border-t border-slate-200 grid grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0 text-center lg:text-left">
             <div>
               <p className="text-2xl sm:text-3xl font-black text-slate-900">24/7</p>
@@ -651,7 +641,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* ==================== 3. 4 CORE PILLARS (HỌC HỎI TRỰC TIẾP TỪ 4 TRỤ CỘT CỦA ANYTIME FITNESS) ==================== */}
+      {/* ==================== 3. 4 TRỤ CỘT ĐỘT PHÁ (INSPIRED BY ANYTIME FITNESS PILLARS) ==================== */}
       <section id="pillars" className="py-20 bg-slate-50 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
@@ -660,10 +650,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               GIÁ TRỊ KHÁC BIỆT CỦA CITYGYM
             </span>
             <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-slate-900">
-              4 TRỤ CỘT RÈN LUYỆN ĐỈNH CAO
+              4 TRỤ CỘT RÈN LUYỆN TOÀN DIỆN
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 max-w-2xl mx-auto">
-              Thiết kế dựa trên trải nghiệm hội viên toàn diện: từ sự tự do về thời gian, huấn luyện chuyên sâu cho đến môi trường văn minh, tích cực.
+              Thiết kế dựa trên trải nghiệm hội viên toàn diện: từ sự tự do về thời gian, huấn luyện cá nhân chuyên sâu cho đến môi trường văn minh, tích cực.
             </p>
           </div>
 
@@ -689,7 +679,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="w-12 h-12 rounded-2xl bg-red-50 text-[#DC2626] flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Activity className="w-6 h-6 stroke-[2.5]" />
               </div>
-              <h3 className="text-lg font-black text-slate-900">Huấn Luyện 360 Độ</h3>
+              <h3 className="text-lg font-black text-slate-900">Huấn Luyện Viên 360°</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
                 HLV không chỉ đếm số lần nâng tạ. Chúng tôi đo chỉ số InBody 270 định kỳ, thiết kế bài tập kháng lực và thực đơn dinh dưỡng cá nhân bám sát mục tiêu.
               </p>
@@ -714,12 +704,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </div>
             </div>
 
-            {/* Pillar 4: No-Judgment Community */}
+            {/* Pillar 4: Supportive Community */}
             <div className="bg-white p-7 rounded-3xl border border-slate-200 shadow-sm space-y-4 hover:border-[#DC2626] transition-all group">
               <div className="w-12 h-12 rounded-2xl bg-red-50 text-[#DC2626] flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Heart className="w-6 h-6 stroke-[2.5]" />
               </div>
-              <h3 className="text-lg font-black text-slate-900">Không Gian Không Phán Xét</h3>
+              <h3 className="text-lg font-black text-slate-900">Không Gian Thân Thiện</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
                 Xóa tan mọi áp lực tự ti của người mới bắt đầu! CITYGYM chào đón mọi lứa tuổi, vóc dáng và thể trạng bằng sự tôn trọng, văn minh và tận tâm hỗ trợ.
               </p>
@@ -733,7 +723,197 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* ==================== 4. BRANCHES SECTION (HỆ THỐNG PHÒNG TẬP KIỂU ANYTIME FITNESS) ==================== */}
+      {/* ==================== 4. DỊCH VỤ & TIỆN ÍCH TIÊU CHUẨN 5 SAO (AMENITIES - CHUẨN ANYTIME FITNESS) ==================== */}
+      <section id="amenities" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
+            <span className="text-xs font-black uppercase tracking-widest text-[#DC2626] px-3.5 py-1.5 bg-red-50 rounded-full border border-red-200">
+              TRẢI NGHIỆM TIÊU CHUẨN 5 SAO
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-slate-900">
+              TRANG THIẾT BỊ & TIỆN ÍCH ĐỈNH CAO
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 max-w-2xl mx-auto">
+              Không gian được phân chia khoa học thành 6 chuyên khu tập luyện biệt lập, đáp ứng mọi cấp độ từ người mới bắt đầu đến vận động viên chuyên nghiệp.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            {/* Amenity 1 */}
+            <div className="p-7 rounded-3xl bg-slate-50 border border-slate-200 space-y-3 hover:border-[#DC2626] transition-all">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-[#DC2626] flex items-center justify-center shadow-sm">
+                <Dumbbell className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900">Khu Tạ Tự Do (Free Weights)</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Trang bị đầy đủ dàn tạ tay Dumbbell từ 2.5kg đến 50kg, ghế Bench đa góc độ, khung Power Rack và thanh đòn chuẩn Olympic Eleiko.
+              </p>
+              <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Không giới hạn thời gian tập</span>
+              </div>
+            </div>
+
+            {/* Amenity 2 */}
+            <div className="p-7 rounded-3xl bg-slate-50 border border-slate-200 space-y-3 hover:border-[#DC2626] transition-all">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-[#DC2626] flex items-center justify-center shadow-sm">
+                <Layers className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900">Máy Kháng Lực Khối (Pin-Loaded)</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Dàn máy khối cao cấp nhập khẩu (LifeFitness, Hammer Strength) với quỹ đạo chuẩn xác, giúp cô lập cơ bắp an toàn, giảm nguy cơ chấn thương.
+              </p>
+              <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Có sơ đồ hướng dẫn trên từng máy</span>
+              </div>
+            </div>
+
+            {/* Amenity 3 */}
+            <div className="p-7 rounded-3xl bg-slate-50 border border-slate-200 space-y-3 hover:border-[#DC2626] transition-all">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-[#DC2626] flex items-center justify-center shadow-sm">
+                <HeartPulse className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900">Cardio Deck View Toàn Cảnh</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Máy chạy bộ đệm khí chống đau khớp, xe đạp Spinning và cầu thang Stepmill tích hợp màn hình cảm ứng giải trí đa phương tiện.
+              </p>
+              <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Đo nhịp tim và calo đốt cháy liên tục</span>
+              </div>
+            </div>
+
+            {/* Amenity 4 */}
+            <div className="p-7 rounded-3xl bg-slate-50 border border-slate-200 space-y-3 hover:border-[#DC2626] transition-all">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-[#DC2626] flex items-center justify-center shadow-sm">
+                <Target className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900">Khu Chức Năng (Functional Turf)</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Đường băng thảm cỏ nhân tạo, dây kháng lực TRX, tạ chuông Kettlebell, bóng tạ Slam Ball cho các bài tập vận động dẻo dai toàn diện.
+              </p>
+              <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Luyện sức bền và tốc độ bứt phá</span>
+              </div>
+            </div>
+
+            {/* Amenity 5 */}
+            <div className="p-7 rounded-3xl bg-slate-50 border border-slate-200 space-y-3 hover:border-[#DC2626] transition-all">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-[#DC2626] flex items-center justify-center shadow-sm">
+                <Sparkle className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900">Studio GroupX & Yoga Cách Âm</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Sàn gỗ cao cấp đàn hồi bảo vệ khớp gối, hệ thống ánh sáng trị liệu và dàn âm thanh truyền cảm hứng cho các lớp Yoga, Zumba, HIIT.
+              </p>
+              <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Miễn phí vé tham gia cho hội viên VIP</span>
+              </div>
+            </div>
+
+            {/* Amenity 6 */}
+            <div className="p-7 rounded-3xl bg-slate-50 border border-slate-200 space-y-3 hover:border-[#DC2626] transition-all">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-[#DC2626] flex items-center justify-center shadow-sm">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900">Phòng Tắm & Locker Riêng Biệt</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Buồng tắm nước nóng riêng tư, máy sấy tóc hiện đại và tủ locker mã số điện tử bảo mật cao, đảm bảo sự an tâm và thoải mái tối đa.
+              </p>
+              <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Vệ sinh kháng khuẩn liên tục 24/7</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* ==================== 5. REAL COACHING FOR REAL PEOPLE (THAY THẾ HOÀN TOÀN NO PAIN NO GAIN) ==================== */}
+      <section id="coaching" className="py-20 bg-slate-900 text-white border-t border-slate-800 relative overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#DC2626]/10 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
+            <span className="text-xs font-black uppercase tracking-widest text-[#EF4444] px-3.5 py-1.5 bg-red-500/10 rounded-full border border-red-500/20">
+              REAL COACHING FOR REAL PEOPLE
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">
+              HUẤN LUYỆN VIÊN ĐỒNG HÀNH, KẾT QUẢ THẬT
+            </h2>
+            <p className="text-xs sm:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
+              Đi một mình không bao giờ là định nghĩa của sức mạnh. Tại CITYGYM, bạn không bao giờ phải bơ vơ giữa phòng tập. Đội ngũ HLV chứng chỉ quốc tế sẽ đồng hành cùng bạn trên từng bước tiến bộ.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <div className="p-8 rounded-3xl bg-slate-950/80 border border-slate-800 space-y-4 hover:border-[#DC2626] transition-all">
+              <span className="w-10 h-10 rounded-2xl bg-red-500/20 text-[#EF4444] font-black text-sm flex items-center justify-center border border-red-500/30">
+                01
+              </span>
+              <h3 className="text-xl font-black text-white">Khảo Sát & Đo InBody 270</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Đánh giá chính xác tỷ lệ mỡ dưới da, mỡ nội tạng, khối lượng cơ từng chi và tốc độ trao đổi chất cơ bản (BMR) để làm cơ sở khoa học ban đầu.
+              </p>
+              <div className="pt-2 text-[11px] text-emerald-400 font-bold flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-emerald-400" />
+                <span>Không phỏng đoán mơ hồ</span>
+              </div>
+            </div>
+
+            <div className="p-8 rounded-3xl bg-slate-950/80 border border-slate-800 space-y-4 hover:border-[#DC2626] transition-all">
+              <span className="w-10 h-10 rounded-2xl bg-blue-500/20 text-blue-400 font-black text-sm flex items-center justify-center border border-blue-500/30">
+                02
+              </span>
+              <h3 className="text-xl font-black text-white">Lộ Trình Cá Nhân Hóa 100%</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Thiết kế giáo án tập luyện riêng bám sát mục tiêu: giảm mỡ, tăng cơ, cải thiện đau lưng mỏi gáy văn phòng hay nâng cao sức bền thể lực.
+              </p>
+              <div className="pt-2 text-[11px] text-blue-400 font-bold flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-blue-400" />
+                <span>Phù hợp thời gian biểu của bạn</span>
+              </div>
+            </div>
+
+            <div className="p-8 rounded-3xl bg-slate-950/80 border border-slate-800 space-y-4 hover:border-[#DC2626] transition-all">
+              <span className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 font-black text-sm flex items-center justify-center border border-emerald-500/30">
+                03
+              </span>
+              <h3 className="text-xl font-black text-white">Đồng Hành & Dinh Dưỡng AI</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                HLV chỉnh sửa chuẩn từng động tác tránh chấn thương, kết hợp AI Food Scanner gợi ý thực đơn lành mạnh, theo dõi tiến độ mỗi 2 tuần.
+              </p>
+              <div className="pt-2 text-[11px] text-emerald-400 font-bold flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-emerald-400" />
+                <span>Động viên kiên trì mỗi ngày</span>
+              </div>
+            </div>
+
+          </div>
+
+          <div className="mt-12 text-center">
+            <a
+              href="#trial-section"
+              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-[#DC2626] to-[#EF4444] text-white font-bold text-xs shadow-xl shadow-[#DC2626]/30 inline-flex items-center gap-2 hover:scale-105 transition-all"
+            >
+              <Ticket className="w-4 h-4" />
+              <span>Đăng Ký Buổi Trải Nghiệm Cùng Huấn Luyện Viên 0Đ</span>
+            </a>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ==================== 6. HỆ THỐNG CÂU LẠC BỘ (ANYTIME FITNESS CLUB LOCATOR) ==================== */}
       <section id="branches" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
@@ -743,7 +923,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               DANH SÁCH CHI NHÁNH CITYGYM
             </h2>
             <p className="text-xs sm:text-sm text-slate-500">
-              Một thẻ hội viên — Thỏa sức tập luyện tại tất cả các cơ sở trong hệ thống.
+              Một thẻ hội viên — Tự do mở cửa tập luyện tại tất cả các cơ sở trong hệ thống.
             </p>
           </div>
 
@@ -808,54 +988,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* ==================== 5. MOTIVATION SECTION ==================== */}
-      <section id="motivation" className="py-20 bg-slate-50 border-y border-slate-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-12">
-          
-          <div className="space-y-3 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-50 text-[#DC2626] text-xs font-black tracking-widest uppercase border border-red-200">
-              <Flame className="w-4 h-4 text-[#DC2626]" />
-              <span>TRIẾT LÝ RÈN LUYỆN Ý CHÍ</span>
-            </div>
-            <h2 className="text-3xl sm:text-5xl font-black uppercase text-slate-900 leading-tight">
-              "NO PAIN - <span className="bg-gradient-to-r from-[#DC2626] to-[#991B1B] bg-clip-text text-transparent">NO GAIN</span>"
-            </h2>
-            <p className="text-slate-600 text-sm sm:text-base">
-              “Mất 1 tháng để bạn nhận ra, 2 tháng để người thân nhận ra, và 3 tháng để cả thế giới nhìn thấy sự lột xác của bạn.”
-            </p>
-          </div>
-
-          {/* 3 Progress Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-            <div className="bg-white p-7 rounded-3xl border border-slate-200 shadow-sm space-y-3 hover:border-[#DC2626] transition-all">
-              <span className="w-9 h-9 rounded-xl bg-slate-100 text-slate-800 font-black text-sm flex items-center justify-center">01</span>
-              <h4 className="text-lg font-black text-slate-900">Mốc 30 Ngày Khởi Động</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Tạo lập thói quen kỷ luật, tăng năng lượng tích cực, cải thiện giấc ngủ và giải phóng sức nặng cơ thể.
-              </p>
-            </div>
-
-            <div className="bg-white p-7 rounded-3xl border border-slate-200 shadow-sm space-y-3 hover:border-[#DC2626] transition-all">
-              <span className="w-9 h-9 rounded-xl bg-slate-100 text-slate-800 font-black text-sm flex items-center justify-center">02</span>
-              <h4 className="text-lg font-black text-slate-900">Mốc 60 Ngày Bứt Phá</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Cơ bắp bắt đầu săn chắc, mỡ thừa thu gọn rõ rệt. Bạn bè và gia đình bất ngờ trước sự thay đổi vóc dáng của bạn.
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-b from-red-50 to-white p-7 rounded-3xl border-2 border-[#DC2626] shadow-lg space-y-3">
-              <span className="w-9 h-9 rounded-xl bg-[#DC2626] text-white font-black text-sm flex items-center justify-center">03</span>
-              <h4 className="text-lg font-black text-[#DC2626]">Mốc 90 Ngày Lột Xác</h4>
-              <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                Tự tin với vóc dáng mơ ước! Sức khỏe bứt phá, thần thái đỉnh cao và bản lĩnh kiên định trong cuộc sống.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ==================== 6. FORM ĐĂNG KÝ VÉ TẬP THỬ 03 NGÀY 0Đ (E-PASS LEAD MAGNET) ==================== */}
-      <section id="trial-section" className="py-24 bg-white relative overflow-hidden">
+      {/* ==================== 7. FORM ĐĂNG KÝ VÉ TẬP THỬ 03 NGÀY 0Đ (E-PASS LEAD MAGNET) ==================== */}
+      <section id="trial-section" className="py-24 bg-slate-50 border-y border-slate-200 relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-4">
           
           <div className="text-center mb-10 space-y-3">
@@ -866,15 +1000,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               ĐĂNG KÝ VÉ TẬP THỬ 03 NGÀY 0Đ
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto">
-              Chỉ cần nhập tên và số điện thoại để nhận ngay mã vé điện tử <strong className="text-slate-800">E-Pass QR</strong> mở cổng tự do tại phòng tập!
+              Nhập tên và số điện thoại để nhận ngay mã vé điện tử <strong className="text-slate-800">E-Pass QR</strong> mở cổng tự do trải nghiệm tại phòng tập!
             </p>
           </div>
 
-          {/* Form thiết kế tinh giản, sang trọng */}
-          <div className="bg-slate-50 p-8 sm:p-12 rounded-3xl border border-slate-200 shadow-xl max-w-2xl mx-auto relative">
+          <div className="bg-white p-8 sm:p-12 rounded-3xl border border-slate-200 shadow-xl max-w-2xl mx-auto relative">
             <form onSubmit={handleBookingSubmit} className="space-y-5">
 
-              {/* YÊU CẦU ĐĂNG NHẬP / TẠO TÀI KHOẢN ĐỂ XÁC THỰC THÔNG TIN */}
               {!currentUser ? (
                 <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3 text-xs text-left">
                   <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
@@ -884,9 +1016,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </p>
                     <p className="text-[11px] text-amber-800 leading-relaxed">
                       Để đăng ký vé tập thử E-Pass 0Đ hoặc mua gói, bạn cần <strong>Tạo tài khoản hoặc Đăng nhập</strong> (SĐT, Tên đăng nhập, Mật khẩu, Họ tên, Tuổi).
-                    </p>
-                    <p className="text-[10px] text-amber-700 bg-amber-100/70 p-2 rounded-xl border border-amber-200">
-                      ℹ️ <strong>Lưu ý:</strong> Đăng ký tập thử chỉ gửi thông tin về hệ thống và cấp mã vé QR trải nghiệm tại quầy (không truy cập Cổng Hội Viên). Chỉ khi mua gói tập và được Admin duyệt sau thanh toán, bạn mới được cấp quyền vào Cổng Hội Viên.
                     </p>
                     <button
                       type="button"
@@ -909,9 +1038,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <p className="font-bold text-xs uppercase tracking-wide">Đã Xác Thực Thông Tin:</p>
                     <p className="text-[11px] text-emerald-800 mt-0.5">
                       Khách hàng: <strong>{currentUser.name}</strong> {currentUser.age ? `(${currentUser.age} tuổi)` : ''} • SĐT: <strong>{currentUser.phone}</strong> • Tài khoản: <strong>@{currentUser.username || 'member'}</strong>.
-                    </p>
-                    <p className="text-[10px] text-emerald-700 mt-1">
-                      Mã vé E-Pass QR sẽ được cấp và gửi qua Zalo sau khi bấm nút bên dưới.
                     </p>
                   </div>
                 </div>
@@ -969,10 +1095,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   onChange={(e) => setBookingForm({ ...bookingForm, service: e.target.value })}
                   className="w-full bg-white border border-slate-300 rounded-2xl px-4 py-3.5 text-slate-800 text-sm font-semibold focus:outline-none focus:border-[#DC2626] focus:ring-2 focus:ring-[#DC2626]/20 transition-all shadow-sm"
                 >
-                  <option>Gym & Thể Hình Chuẩn 5 Sao (24/7 Access)</option>
+                  <option>Gym & Thể Hình Chuẩn Quốc Tế (24/7 Access)</option>
                   <option>Tập 1-1 Cùng Huấn Luyện Viên Cá Nhân (PT)</option>
                   <option>Lớp Yoga Vinyasa Cân Bằng Thân Tâm</option>
-                  <option>Lớp GroupX & HIIT Burn Fat Đốt Mỡ</option>
+                  <option>Lớp GroupX & HIIT Đốt Mỡ Năng Động</option>
                 </select>
               </div>
 
@@ -997,13 +1123,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* ==================== 7. PACKAGES PRICING SECTION ==================== */}
-      <section id="packages" className="py-20 bg-slate-50 border-t border-slate-200">
+      {/* ==================== 8. BẢNG GIÁ MINH BẠCH (MEMBERSHIP PLANS) ==================== */}
+      <section id="packages" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
             <span className="text-xs font-black uppercase tracking-widest text-[#DC2626]">BẢNG GIÁ MINH BẠCH</span>
             <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-slate-900">
-              CÁC GÓI TẬP HỘI VIÊN CHÍNH THỨC
+              CÁC GÓI HỘI VIÊN CHÍNH THỨC
             </h2>
             <p className="text-xs sm:text-sm text-slate-500">
               Tự do vào tập 24/7, bảo lưu thẻ linh hoạt, đo InBody định kỳ và HLV kèm 1-1 chuyên sâu.
@@ -1012,7 +1138,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {/* Basic */}
-            <div className="bg-white p-7 rounded-3xl border border-slate-200 shadow-sm space-y-5 flex flex-col justify-between">
+            <div className="bg-slate-50 p-7 rounded-3xl border border-slate-200 shadow-sm space-y-5 flex flex-col justify-between">
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Khởi động</span>
                 <h3 className="text-xl font-black text-slate-900 mt-1">CityBasic 1 Tháng</h3>
@@ -1064,7 +1190,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
 
             {/* Pro 6 Months */}
-            <div className="bg-white p-7 rounded-3xl border border-slate-200 shadow-sm space-y-5 flex flex-col justify-between">
+            <div className="bg-slate-50 p-7 rounded-3xl border border-slate-200 shadow-sm space-y-5 flex flex-col justify-between">
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Phổ biến</span>
                 <h3 className="text-xl font-black text-slate-900 mt-1">CityPro 6 Tháng</h3>
@@ -1090,8 +1216,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* ==================== 8. GROUP CLASSES SCHEDULE ==================== */}
-      <section id="classes" className="py-20 bg-white border-t border-slate-200">
+      {/* ==================== 9. GROUP CLASSES SCHEDULE ==================== */}
+      <section id="classes" className="py-20 bg-slate-50 border-t border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-10 space-y-3">
             <span className="text-xs font-black uppercase tracking-widest text-[#DC2626]">THỜI KHÓA BIỂU GROUPX</span>
@@ -1099,7 +1225,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               LỊCH LỚP TẬP NHÓM NĂNG ĐỘNG
             </h2>
             <p className="text-xs sm:text-sm text-slate-500">
-              Được tổ chức liên tục từ sáng sớm đến tối muộn cùng HLV truyền lửa.
+              Được tổ chức liên tục từ sáng sớm đến tối muộn cùng HLV truyền cảm hứng.
             </p>
 
             <div className="flex flex-wrap justify-center gap-2 pt-3">
@@ -1118,7 +1244,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
                     activeDayFilter === tab.id
                       ? 'bg-[#DC2626] text-white shadow-md'
-                      : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                      : 'bg-white hover:bg-slate-200 text-slate-700 border border-slate-200'
                   }`}
                 >
                   {tab.label}
@@ -1129,7 +1255,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {filteredClasses.map((item) => (
-              <div key={item.id} className="bg-slate-50 p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-3">
+              <div key={item.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-3">
                 <div className="space-y-2">
                   <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${item.color}`}>
                     {item.type}
@@ -1147,8 +1273,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* ==================== 9. TRAINERS SECTION ==================== */}
-      <section id="trainers" className="py-20 bg-slate-50 border-t border-slate-200">
+      {/* ==================== 10. HUẤN LUYỆN VIÊN (PT) CHỨNG CHỈ QUỐC TẾ ==================== */}
+      <section id="trainers" className="py-20 bg-white border-t border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
             <span className="text-xs font-black uppercase tracking-widest text-[#DC2626]">CHUYÊN NGHIỆP & TẬN TÂM</span>
@@ -1165,30 +1291,30 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               {
                 name: 'Nguyễn Minh Tuấn',
                 cert: 'NASM Certified CPT',
-                spec: 'Tăng cơ Hypertrophy & Dinh dưỡng',
+                spec: 'Tăng cơ Hypertrophy & Dinh dưỡng thể hình',
                 exp: '6 năm kinh nghiệm',
               },
               {
                 name: 'Trần Hoàng Yến',
                 cert: 'ACE Certified Personal Trainer',
-                spec: 'Siết mỡ Body Tone & Yoga Vinyasa',
+                spec: 'Siết mỡ Body Tone & Yoga Vinyasa phục hồi',
                 exp: '5 năm kinh nghiệm',
               },
               {
                 name: 'Lê Văn Hùng',
                 cert: 'CSCS & Functional Movement',
-                spec: 'Sức mạnh Athletic & Phục hồi cơ',
+                spec: 'Sức mạnh Athletic & Phục hồi cơ xương khớp',
                 exp: '7 năm kinh nghiệm',
               },
             ].map((t) => (
-              <div key={t.name} className="p-6 rounded-3xl bg-white border border-slate-200 text-center space-y-3 shadow-sm hover:border-[#DC2626] transition-all">
+              <div key={t.name} className="p-6 rounded-3xl bg-slate-50 border border-slate-200 text-center space-y-3 shadow-sm hover:border-[#DC2626] transition-all">
                 <div className="w-20 h-20 rounded-full bg-red-50 text-[#DC2626] flex items-center justify-center mx-auto font-black text-2xl border-2 border-[#DC2626]">
                   {t.name.split(' ').pop()?.[0]}
                 </div>
                 <h4 className="text-lg font-black text-slate-900">{t.name}</h4>
                 <p className="text-xs font-bold text-[#DC2626]">{t.cert}</p>
                 <p className="text-xs text-slate-500">{t.spec}</p>
-                <span className="inline-block px-3 py-1 rounded-full text-[10px] font-bold bg-slate-50 border border-slate-200 text-slate-600">
+                <span className="inline-block px-3 py-1 rounded-full text-[10px] font-bold bg-white border border-slate-200 text-slate-600">
                   {t.exp}
                 </span>
               </div>
@@ -1197,8 +1323,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* ==================== 10. INTERACTIVE BMI & TDEE TOOL ==================== */}
-      <section id="bmi-tool" className="py-20 bg-white border-t border-slate-200">
+      {/* ==================== 11. CÔNG CỤ ĐO BMI & TDEE Y KHOA ==================== */}
+      <section id="bmi-tool" className="py-20 bg-slate-50 border-t border-slate-200">
         <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-12 space-y-2">
             <span className="text-xs font-black uppercase tracking-widest text-[#DC2626]">CÔNG CỤ PHÂN TÍCH Y KHOA</span>
@@ -1210,7 +1336,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </p>
           </div>
 
-          <div className="bg-slate-50 rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-xl grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-xl grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4 text-xs">
               <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1">Giới tính:</label>
@@ -1219,7 +1345,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     type="button"
                     onClick={() => setGender('male')}
                     className={`py-2 rounded-xl font-bold border transition-all ${
-                      gender === 'male' ? 'bg-[#DC2626] text-white border-[#DC2626]' : 'bg-white text-slate-700 border-slate-200'
+                      gender === 'male' ? 'bg-[#DC2626] text-white border-[#DC2626]' : 'bg-slate-50 text-slate-700 border-slate-200'
                     }`}
                   >
                     Nam
@@ -1228,7 +1354,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     type="button"
                     onClick={() => setGender('female')}
                     className={`py-2 rounded-xl font-bold border transition-all ${
-                      gender === 'female' ? 'bg-[#DC2626] text-white border-[#DC2626]' : 'bg-white text-slate-700 border-slate-200'
+                      gender === 'female' ? 'bg-[#DC2626] text-white border-[#DC2626]' : 'bg-slate-50 text-slate-700 border-slate-200'
                     }`}
                   >
                     Nữ
@@ -1243,7 +1369,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     type="number"
                     value={height}
                     onChange={(e) => setHeight(Number(e.target.value))}
-                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold"
                   />
                 </div>
                 <div>
@@ -1252,7 +1378,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     type="number"
                     value={weight}
                     onChange={(e) => setWeight(Number(e.target.value))}
-                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold"
                   />
                 </div>
               </div>
@@ -1264,7 +1390,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     type="number"
                     value={age}
                     onChange={(e) => setAge(Number(e.target.value))}
-                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold"
                   />
                 </div>
                 <div>
@@ -1272,7 +1398,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <select
                     value={activity}
                     onChange={(e) => setActivity(Number(e.target.value))}
-                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold"
                   >
                     <option value={1.2}>Ít vận động (1.2)</option>
                     <option value={1.375}>Vừa phải 3-5 buổi/tuần (1.375)</option>
@@ -1294,7 +1420,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       key={g.id}
                       onClick={() => setGoal(g.id as any)}
                       className={`py-2 rounded-xl font-bold border transition-all ${
-                        goal === g.id ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border-slate-200'
+                        goal === g.id ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-700 border-slate-200'
                       }`}
                     >
                       {g.label}
@@ -1305,18 +1431,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
 
             {/* Result Box */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
+            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
               <div>
                 <span className="text-[11px] font-black uppercase text-[#DC2626]">Kết Quả Phân Tích</span>
                 <div className="grid grid-cols-2 gap-3 mt-3">
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                  <div className="p-3 bg-white rounded-xl border border-slate-200">
                     <span className="text-[10px] text-slate-500 uppercase font-bold">Chỉ số BMI</span>
                     <p className="text-2xl font-black text-slate-900 mt-1">{bmi}</p>
                     <span className="text-[10px] font-bold text-emerald-600">
                       {bmiNum < 18.5 ? 'Thiếu cân' : bmiNum <= 24.9 ? 'Cân đối chuẩn' : 'Thừa cân nhẹ'}
                     </span>
                   </div>
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                  <div className="p-3 bg-white rounded-xl border border-slate-200">
                     <span className="text-[10px] text-slate-500 uppercase font-bold">Năng lượng BMR</span>
                     <p className="text-2xl font-black text-slate-900 mt-1">{Math.round(bmr)}</p>
                     <span className="text-[10px] text-slate-400">kcal tiêu hao cơ bản</span>
@@ -1348,7 +1474,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* ==================== 11. AI VISION NUTRITION & MEAL SCANNER SHOWCASE ==================== */}
+      {/* ==================== 12. AI VISION NUTRITION & FOOD SCANNER (STU 2026 INNOVATION) ==================== */}
       <section id="ai-nutrition" className="py-24 bg-slate-900 text-white border-t border-slate-800 relative overflow-hidden">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#DC2626]/10 rounded-full blur-3xl pointer-events-none" />
         
@@ -1484,7 +1610,38 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* ==================== 12. FOOTER ==================== */}
+      {/* ==================== 13. BANNER KÊU GỌI HÀNH ĐỘNG (CTA BANNER) ==================== */}
+      <section className="py-20 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 text-white text-center relative overflow-hidden border-t border-slate-800">
+        <div className="max-w-4xl mx-auto px-4 space-y-6 relative z-10">
+          <span className="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-red-500/10 text-[#EF4444] border border-red-500/20">
+            BẮT ĐẦU NGAY HÔM NAY
+          </span>
+          <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight">
+            SẴN SÀNG CHO HÀNH TRÌNH SỐNG KHỎE CÙNG CITYGYM?
+          </h2>
+          <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+            Hàng ngàn hội viên đã thay đổi vóc dáng và nâng cao chất lượng cuộc sống cùng CITYGYM. Hãy nhận ngay vé trải nghiệm 03 ngày 0Đ và cảm nhận sự khác biệt!
+          </p>
+          <div className="pt-2 flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="#trial-section"
+              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-[#DC2626] to-[#EF4444] hover:from-red-700 hover:to-red-600 text-white font-bold text-xs uppercase tracking-wider shadow-xl shadow-[#DC2626]/30 flex items-center justify-center gap-2 hover:scale-105 transition-all"
+            >
+              <Ticket className="w-4 h-4" />
+              <span>Đăng Ký Vé E-Pass 03 Ngày 0Đ</span>
+            </a>
+            <a
+              href="#packages"
+              className="px-8 py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider border border-slate-700 flex items-center justify-center gap-2 transition-all"
+            >
+              <CreditCard className="w-4 h-4" />
+              <span>Xem Các Gói Hội Viên Ưu Đãi</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== 14. FOOTER CHUẨN DOANH NGHIỆP ==================== */}
       <footer className="bg-slate-950 text-slate-400 py-12 border-t border-slate-800 text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
@@ -1492,7 +1649,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <Dumbbell className="w-5 h-5 text-[#DC2626]" />
               <span>CITYGYM 24/7 FITNESS</span>
             </div>
-            <p className="mt-2 text-slate-500">
+            <p className="mt-2 text-slate-500 leading-relaxed">
               Đề tài Luận văn tốt nghiệp: Xây dựng hệ thống website quản lý phòng gym và hỗ trợ hội viên theo dõi dinh dưỡng, luyện tập thông minh.
             </p>
             <p className="text-[11px] text-[#DC2626] mt-2 font-bold">Sinh viên: Võ Duy Phúc | GVHD: ThS. Bùi Nhật Bằng - STU 2026</p>
@@ -1508,11 +1665,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           <div>
             <h5 className="font-bold text-white uppercase mb-2">Truy Cập Quản Trị Hệ Thống</h5>
-            <p>Dành riêng cho Lễ tân, Huấn luyện viên (PT) và Ban quản trị:</p>
+            <p className="text-slate-500">Dành riêng cho Ban quản trị, Lễ tân và Huấn luyện viên (PT):</p>
             <div className="mt-3">
               <button
                 onClick={onOpenLogin}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all"
+                className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-sm"
               >
                 <Lock className="w-3.5 h-3.5 text-[#DC2626]" />
                 <span>Vào Cổng Đăng Nhập Quản Trị (#admin)</span>
@@ -1522,7 +1679,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </footer>
 
-      {/* ==================== 12. MODAL VÉ E-PASS VIP (SANG TRỌNG, ĐƠN GIẢN) ==================== */}
+      {/* ==================== 15. MODAL VÉ E-PASS VIP (TẬP THỬ) ==================== */}
       {showTicketModal && ticketData && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-900 text-white rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl border border-slate-800 animate-in fade-in zoom-in-95 text-center p-6 space-y-4 relative">
@@ -1539,7 +1696,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <p className="text-[11px] text-emerald-400 font-semibold mt-1">📍 {ticketData.branch}</p>
             </div>
 
-            {/* White QR Container */}
             <div className="bg-white p-4 rounded-2xl shadow-inner space-y-2 text-slate-900">
               <img
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${ticketData.code}`}
@@ -1551,7 +1707,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
 
             <div className="p-2.5 bg-white/5 border border-white/10 rounded-2xl text-[11px] text-slate-300 space-y-1">
-              <p className="font-semibold text-emerald-400">✓ Đã gửi thông tin đăng ký tập thử về hệ thống</p>
+              <p className="font-semibold text-emerald-400">✓ Đã gửi thông tin đăng ký tập thử về hệ thống CRM</p>
               <p className="text-[10px] text-slate-400">
                 Vé chỉ dùng quét tại cổng hoặc quầy Lễ tân. Khi chọn mua gói tập chính thức, Admin sẽ kích hoạt tài khoản truy cập Cổng Hội Viên.
               </p>
@@ -1577,14 +1733,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       )}
 
-      {/* ==================== 12.1 ZALO ZNS NOTIFICATION MODAL ==================== */}
+      {/* ==================== 16. ZALO ZNS NOTIFICATION MODAL ==================== */}
       <ZaloNotificationModal
         isOpen={showZaloModal}
         onClose={() => setShowZaloModal(false)}
         message={zaloMessage}
       />
 
-      {/* ==================== 13. VIETQR CHECKOUT MODAL ==================== */}
+      {/* ==================== 17. VIETQR CHECKOUT MODAL ==================== */}
       {showCheckoutModal && selectedPackage && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 p-6 space-y-4 text-center">
@@ -1693,7 +1849,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       )}
 
-      {/* ==================== 14. MODAL XÁC THỰC / TẠO TÀI KHOẢN HỘI VIÊN MỚI (CHẶN KHÁCH VÃNG LAI) ==================== */}
+      {/* ==================== 18. MODAL XÁC THỰC / TẠO TÀI KHOẢN HỘI VIÊN MỚI ==================== */}
       <MemberAuthModal
         isOpen={showMemberAuthModal}
         onClose={() => setShowMemberAuthModal(false)}
