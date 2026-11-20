@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   User, UserRole, PortalType, Membership, Lead, 
-  CheckInLog, PtBooking, InBodyMetric, SystemAccount 
+  CheckInLog, PtBooking, InBodyMetric, SystemAccount, ZaloZnsMessage 
 } from './types';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { LandingPage } from './pages/public/LandingPage';
@@ -16,6 +16,7 @@ import { SmartNutritionPlanner } from './components/nutrition/SmartNutritionPlan
 import { CityAICoachModal } from './components/ai/CityAICoachModal';
 import { AdminLoginPage } from './pages/auth/AdminLoginPage';
 import { ToastNotification } from './components/common/ToastNotification';
+import { ZaloNotificationModal } from './components/modals/ZaloNotificationModal';
 
 // Dữ liệu ban đầu mặc định cho hệ thống (Khi chưa có cache trong localStorage)
 const INITIAL_MEMBERSHIPS: Membership[] = [
@@ -201,6 +202,10 @@ export default function App() {
     title?: string;
     type?: 'success' | 'error' | 'info' | 'warning';
   } | null>(null);
+
+  // Zalo ZNS Preview khi Admin cấp tài khoản
+  const [approvalZaloMessage, setApprovalZaloMessage] = useState<ZaloZnsMessage | null>(null);
+  const [showApprovalZaloModal, setShowApprovalZaloModal] = useState<boolean>(false);
 
   const showToast = (
     message: string,
@@ -613,9 +618,30 @@ export default function App() {
       });
     }
 
+    // 6. Tự động sinh thông báo Zalo ZNS kèm TK & MK gửi đến số điện thoại khách hàng
+    const zaloMsg: ZaloZnsMessage = {
+      id: 'ZNS-ACC-' + Date.now(),
+      recipientName: lead.fullName,
+      recipientPhone: lead.phone,
+      templateType: 'ACCOUNT_CREDENTIALS',
+      ticketCode: newM.contractCode,
+      contractCode: newM.contractCode,
+      branchName: 'CITYGYM STU Campus (180 Cao Lỗ, Q8)',
+      sentAt: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      status: 'DELIVERED',
+      username: lead.username || lead.phone,
+      password: '123456',
+      customData: {
+        packageName: newM.packageName,
+        price: (lead.packagePrice || 5800000).toLocaleString('vi-VN') + ' đ',
+      },
+    };
+    setApprovalZaloMessage(zaloMsg);
+    setShowApprovalZaloModal(true);
+
     showToast(
-      `Hợp đồng ${newM.contractCode} (${newM.packageName}) đã được kích hoạt. Hội viên ${lead.fullName} có thể vào Cổng Hội Viên ngay!`,
-      'Phê Duyệt & Kích Hoạt Thành Công',
+      `Đã duyệt hợp đồng ${newM.contractCode} (${newM.packageName}) và gửi tin nhắn Zalo kèm TK/MK đến ${lead.phone}!`,
+      '⚡ Đã Cấp Tài Khoản & Gửi Zalo',
       'success'
     );
   };
@@ -1211,6 +1237,13 @@ export default function App() {
           />
         </div>
       )}
+
+      {/* ==================== ZALO ZNS MODAL THÔNG BÁO CẤP TÀI KHOẢN ==================== */}
+      <ZaloNotificationModal
+        isOpen={showApprovalZaloModal}
+        onClose={() => setShowApprovalZaloModal(false)}
+        message={approvalZaloMessage}
+      />
 
       {/* ==================== TOAST NOTIFICATION HỆ THỐNG TOÀN CỤC ==================== */}
       {toast && (

@@ -176,12 +176,15 @@ export interface ZaloZnsMessage {
   id: string;
   recipientName: string;
   recipientPhone: string;
-  templateType: 'TRIAL_EPASS' | 'CONTRACT_ACTIVATED' | 'PT_REMINDER';
+  templateType: 'TRIAL_EPASS' | 'CONTRACT_ACTIVATED' | 'PT_REMINDER' | 'ACCOUNT_CREDENTIALS';
   ticketCode?: string;
   contractCode?: string;
   branchName?: string;
   sentAt: string;
   status: 'DELIVERED' | 'READ';
+  username?: string;
+  password?: string;
+  loginUrl?: string;
   customData?: Record<string, string>;
 }
 

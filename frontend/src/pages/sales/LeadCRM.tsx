@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Users, Search, UserCheck, Flame, Phone, Calendar, 
-  ArrowRight, CheckCircle2, QrCode, Filter, Sparkles
+  ArrowRight, CheckCircle2, QrCode, Filter, Sparkles, Zap
 } from 'lucide-react';
 import { Lead, Membership } from '../../types';
 import { NewContractModal } from '../../components/modals/NewContractModal';
@@ -206,10 +206,11 @@ export const LeadCRM: React.FC<LeadCRMProps> = ({
                             setSelectedLeadForConvert(lead);
                           }
                         }}
-                        className="px-3 py-1.5 rounded-xl font-black bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md flex items-center gap-1.5 ml-auto text-xs hover:scale-105 transition-all"
+                        className="px-3.5 py-1.5 rounded-xl font-black bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white shadow-md flex items-center gap-1.5 ml-auto text-xs hover:scale-105 active:scale-95 transition-all"
+                        title="Duyệt thanh toán, cấp tài khoản & tự động gửi Zalo cho khách"
                       >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Duyệt & Cấp Tài Khoản</span>
+                        <Zap className="w-3.5 h-3.5 fill-current text-amber-300" />
+                        <span>⚡ Cấp TK, MK & Gửi Zalo</span>
                       </button>
                     ) : lead.status !== 'CONVERTED' ? (
                       <button

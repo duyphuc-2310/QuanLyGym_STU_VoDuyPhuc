@@ -764,11 +764,12 @@ export const AccountManagement: React.FC<AccountManagementProps> = ({
                 <label className="block font-bold text-slate-700 uppercase mb-1">
                   Chọn Vai Trò Cần Cấp Quyền:
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {[
-                    { id: 'TRAINER', label: 'HLV (PT)', icon: Dumbbell },
-                    { id: 'MEMBER', label: 'Hội Viên', icon: User },
-                    { id: 'RECEPTION', label: 'Lễ Tân', icon: Shield },
+                    { id: 'ADMIN', label: 'Quản Trị (Admin)', icon: KeyRound, dept: 'Ban Quản Trị Cấp Cao' },
+                    { id: 'RECEPTION', label: 'Lễ Tân', icon: Shield, dept: 'Quầy Lễ Tân & Check-in' },
+                    { id: 'TRAINER', label: 'HLV (PT)', icon: Dumbbell, dept: 'Bộ Phận Huấn Luyện Viên PT' },
+                    { id: 'MEMBER', label: 'Hội Viên', icon: User, dept: 'Hội Viên Thẻ VIP' },
                   ].map((r) => (
                     <button
                       type="button"
@@ -777,21 +778,17 @@ export const AccountManagement: React.FC<AccountManagementProps> = ({
                         setNewAccountForm({
                           ...newAccountForm,
                           role: r.id as UserRole,
-                          department:
-                            r.id === 'TRAINER'
-                              ? 'Bộ Phận Huấn Luyện Viên PT'
-                              : r.id === 'MEMBER'
-                                ? 'Hội Viên Thẻ VIP'
-                                : 'Quầy Lễ Tân & Check-in',
+                          department: r.dept,
                         });
                       }}
-                      className={`py-2.5 rounded-xl font-bold border transition-all flex flex-col items-center justify-center gap-1 ${newAccountForm.role === r.id
-                        ? 'bg-city-red text-white border-city-red shadow-md'
-                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                        }`}
+                      className={`py-2.5 px-2 rounded-xl font-bold border transition-all flex flex-col items-center justify-center gap-1 ${
+                        newAccountForm.role === r.id
+                          ? 'bg-city-red text-white border-city-red shadow-md scale-[1.02]'
+                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
                     >
                       <r.icon className="w-4 h-4" />
-                      <span>{r.label}</span>
+                      <span className="text-[11px]">{r.label}</span>
                     </button>
                   ))}
                 </div>

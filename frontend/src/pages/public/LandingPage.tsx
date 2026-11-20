@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import { Lead, ZaloZnsMessage, User as UserType } from '../../types';
 import { ZaloNotificationModal } from '../../components/modals/ZaloNotificationModal';
-import { MemberAuthModal } from '../../components/modals/MemberAuthModal';
 
 interface LandingPageProps {
   currentUser?: UserType | null;
@@ -54,14 +53,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [activity, setActivity] = useState<number>(1.375);
   const [goal, setGoal] = useState<'lose' | 'maintain' | 'gain'>('maintain');
 
-  // Branch Selector State (Inspired by Anytime Fitness Gym Locator)
+  // Single Gym Branch State
   const [selectedBranch, setSelectedBranch] = useState<string>('stu-campus');
 
   // Simple Clean Booking Form State
   const [bookingForm, setBookingForm] = useState({
     name: '',
     phone: '',
-    branch: 'STU Campus - 180 Cao Lỗ, Quận 8',
+    branch: 'CITYGYM STU Campus - 180 Cao Lỗ, Quận 8',
     service: 'Gym & Thể Hình Chuẩn Quốc Tế 24/7',
   });
 
@@ -78,20 +77,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     date: string;
   } | null>(null);
 
-  // Member Auth Modal State (Chặn khách vãng lai, yêu cầu tạo tài khoản để đăng ký tập)
-  const [showMemberAuthModal, setShowMemberAuthModal] = useState<boolean>(false);
-  const [authActionNotice, setAuthActionNotice] = useState<string>(
-    'Khách vãng lai cần tạo tài khoản (SĐT, Tên đăng nhập, Mật khẩu, Tên, Tuổi) để đăng ký tập.'
-  );
-  const [pendingBookingType, setPendingBookingType] = useState<'TRIAL' | 'PACKAGE' | null>(null);
-  const [pendingPackage, setPendingPackage] = useState<{
-    name: string;
-    price: number;
-    priceStr: string;
-    duration: string;
-    ptSessions: number;
-  } | null>(null);
-
   // Auto fill form when user is logged in
   useEffect(() => {
     if (currentUser) {
@@ -105,6 +90,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   // VietQR Checkout Modal State
   const [showCheckoutModal, setShowCheckoutModal] = useState<boolean>(false);
+  const [checkoutBuyerName, setCheckoutBuyerName] = useState<string>('');
+  const [checkoutBuyerPhone, setCheckoutBuyerPhone] = useState<string>('');
   const [selectedPackage, setSelectedPackage] = useState<{
     name: string;
     price: number;
@@ -150,10 +137,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   // Xác nhận thanh toán VietQR và đồng bộ ngay về CRM Admin
   const handleConfirmPayment = () => {
+    const buyerName = (currentUser?.name || checkoutBuyerName || bookingForm.name).trim();
+    const buyerPhone = (currentUser?.phone || checkoutBuyerPhone || bookingForm.phone).trim();
+
+    if (!buyerName || !buyerPhone) {
+      alert('Vui lòng nhập đầy đủ Họ tên và Số điện thoại để Admin cấp tài khoản hội viên.');
+      return;
+    }
+
     setIsPaidSuccess(true);
     if (selectedPackage && onPackagePurchased) {
-      const buyerName = (currentUser?.name || bookingForm.name).trim() || 'Hội Viên Mới';
-      const buyerPhone = (currentUser?.phone || bookingForm.phone).trim() || '0901234567';
       const buyerUsername = currentUser?.username || buyerPhone;
       const buyerAge = currentUser?.age || 23;
 
@@ -174,7 +167,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       code,
       name: userName,
       phone: userPhone,
-      branch: bookingForm.branch,
+      branch: 'CITYGYM STU Campus - 180 Cao Lỗ, Quận 8',
       service: bookingForm.service,
       date: new Date().toLocaleDateString('vi-VN'),
     };
@@ -188,7 +181,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       recipientPhone: userPhone,
       templateType: 'TRIAL_EPASS',
       ticketCode: code,
-      branchName: bookingForm.branch,
+      branchName: 'CITYGYM STU Campus (Trụ Sở Duy Nhất)',
       sentAt: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
       status: 'DELIVERED',
     };
@@ -203,7 +196,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         ticketCode: code,
         fullName: userName,
         phone: userPhone,
-        service: `${bookingForm.service} (${bookingForm.branch})`,
+        service: `${bookingForm.service} (STU Campus Q8)`,
         status: 'NEW',
         date: new Date().toISOString().split('T')[0],
       };
@@ -211,101 +204,41 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     }
   };
 
-  // Xử lý nộp form nhận vé tập thử
+  // Xử lý nộp form nhận vé tập thử (Khách vãng lai gửi trực tiếp về CRM không cần đăng nhập)
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!currentUser) {
-      setAuthActionNotice(
-        'Vui lòng đăng nhập hoặc tạo tài khoản (SĐT, Tên đăng nhập, Mật khẩu, Họ tên, Tuổi) để hệ thống xác thực và cấp mã vé tập thử E-Pass 0Đ!'
-      );
-      setPendingBookingType('TRIAL');
-      setShowMemberAuthModal(true);
-      return;
-    }
-
-    const userName = (currentUser.name || bookingForm.name).trim();
-    const userPhone = (currentUser.phone || bookingForm.phone).trim();
+    const userName = (currentUser?.name || bookingForm.name).trim();
+    const userPhone = (currentUser?.phone || bookingForm.phone).trim();
 
     if (!userName || !userPhone) {
-      alert('Vui lòng nhập đầy đủ Họ tên và Số điện thoại để nhận vé E-Pass.');
+      alert('Vui lòng nhập đầy đủ Họ tên và Số điện thoại để nhận vé E-Pass 0Đ.');
       return;
     }
 
     executeBooking(userName, userPhone);
   };
 
-  // Xử lý khi bấm Đăng ký gói tập ở Bảng giá
+  // Xử lý khi bấm Đăng ký gói tập ở Bảng giá (Chuyển thẳng sang thanh toán VietQR)
   const handleOpenCheckout = (pkg: { name: string; price: number; priceStr: string; duration: string; ptSessions: number }) => {
-    if (!currentUser) {
-      setPendingPackage(pkg);
-      setPendingBookingType('PACKAGE');
-      setAuthActionNotice(
-        `Bạn đang là khách vãng lai. Vui lòng tạo tài khoản hội viên (gồm: SĐT, Tên đăng nhập, Mật khẩu, Họ tên, Tuổi) để đăng ký gói ${pkg.name}!`
-      );
-      setShowMemberAuthModal(true);
-      return;
-    }
-
     setSelectedPackage(pkg);
+    setCheckoutBuyerName(currentUser?.name || bookingForm.name || '');
+    setCheckoutBuyerPhone(currentUser?.phone || bookingForm.phone || '');
     setCountdown(900);
     setIsPaidSuccess(false);
     setShowCheckoutModal(true);
   };
 
-  // Callback sau khi khách tạo tài khoản hoặc đăng nhập thành công
-  const handleAuthCompleted = (authenticatedUser: UserType, rawPassword?: string) => {
-    if (onMemberAuthSuccess) {
-      onMemberAuthSuccess(authenticatedUser, rawPassword);
-    }
-
-    setBookingForm((prev) => ({
-      ...prev,
-      name: authenticatedUser.name,
-      phone: authenticatedUser.phone,
-    }));
-
-    if (pendingBookingType === 'TRIAL') {
-      executeBooking(authenticatedUser.name, authenticatedUser.phone);
-      setPendingBookingType(null);
-    } else if (pendingBookingType === 'PACKAGE' && pendingPackage) {
-      setSelectedPackage(pendingPackage);
-      setCountdown(900);
-      setIsPaidSuccess(false);
-      setShowCheckoutModal(true);
-      setPendingBookingType(null);
-      setPendingPackage(null);
-    }
-  };
-
-  // Dữ liệu chi nhánh câu lạc bộ (Chuẩn Anytime Fitness)
+  // Dữ liệu duy nhất 1 cơ sở phòng gym theo yêu cầu nghiệp vụ
   const branches = [
     {
       id: 'stu-campus',
-      name: 'CITYGYM STU Campus (Trụ Sở Chính)',
+      name: 'CITYGYM STU Campus (Trụ Sở Duy Nhất)',
       address: '180 Cao Lỗ, Phường 4, Quận 8, TP.HCM',
       openHours: 'Mở cửa 24/7/365 ngày',
       hotline: '1900 8899 - 028 3850 5520',
-      amenities: ['1.500m² chuẩn Olympic', 'Máy InBody 270', 'Cửa xoay QR 60s', 'Studio GroupX & Yoga', 'Locker điện tử'],
-      badge: 'CƠ SỞ CHÍNH',
-    },
-    {
-      id: 'district-1',
-      name: 'CITYGYM Central Garden (Quận 1)',
-      address: '328 Võ Văn Kiệt, Phường Cô Giang, Quận 1, TP.HCM',
-      openHours: 'Mở cửa 24/7/365 ngày',
-      hotline: '1900 8899 - Máy lẻ 101',
-      amenities: ['Dàn tạ Eleiko Thụy Điển', 'HLV NASM 1-1', 'Phòng tắm cá nhân riêng biệt', 'Bãi đỗ xe ô tô'],
-      badge: 'PREMIUM CLUB',
-    },
-    {
-      id: 'district-7',
-      name: 'CITYGYM Sunrise Elite (Quận 7)',
-      address: '27 Nguyễn Hữu Thọ, Phường Tân Hưng, Quận 7, TP.HCM',
-      openHours: 'Mở cửa 24/7/365 ngày',
-      hotline: '1900 8899 - Máy lẻ 102',
-      amenities: ['Khu Functional Turf', 'Studio Cycling ngắm view', 'Tủ Locker FaceID', 'Phòng xông hơi khô'],
-      badge: 'ELITE CLUB',
+      amenities: ['1.500m² chuẩn Olympic', 'Máy InBody 270', 'Cửa xoay QR 60s', 'Studio GroupX & Yoga', 'Locker điện tử & Buồng tắm cá nhân'],
+      badge: 'CƠ SỞ DUY NHẤT',
     },
   ];
 
@@ -414,19 +347,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <span>Tập Thử 0Đ (E-Pass)</span>
             </a>
 
-            {/* Trạng thái tài khoản người dùng */}
-            {!currentUser ? (
-              <button
-                onClick={() => {
-                  setAuthActionNotice('Vui lòng tạo tài khoản hội viên (Họ tên, SĐT, Tuổi, Tên đăng nhập, Mật khẩu) hoặc đăng nhập để đăng ký tập.');
-                  setShowMemberAuthModal(true);
-                }}
-                className="px-4 py-2.5 rounded-full text-xs font-bold bg-white text-slate-800 border border-slate-300 hover:border-[#DC2626] hover:text-[#DC2626] transition-all flex items-center gap-1.5 shadow-sm"
-              >
-                <UserPlus className="w-3.5 h-3.5 text-[#DC2626]" />
-                <span className="hidden sm:inline">Đăng Ký / Đăng Nhập</span>
-              </button>
-            ) : isAccountActive ? (
+            {/* Trạng thái tài khoản người dùng (Do Admin cấp) */}
+            {currentUser && isAccountActive && (
               <div className="flex items-center gap-3">
                 <div className="text-right hidden sm:block">
                   <p className="text-xs font-black text-slate-900">{currentUser.name}</p>
@@ -456,38 +378,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </button>
                 )}
               </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                <div className="text-right hidden sm:block">
-                  <p className="text-xs font-black text-slate-900">{currentUser.name}</p>
-                  <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                    ⏳ Chờ Admin kích hoạt
-                  </span>
-                </div>
-
-                {onLogout && (
-                  <button
-                    onClick={onLogout}
-                    title="Đăng xuất"
-                    className="px-3 py-2.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-[#DC2626] border border-slate-200 hover:border-red-200 transition-all flex items-center gap-1.5 shadow-sm"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Đăng Xuất</span>
-                  </button>
-                )}
-              </div>
             )}
           </div>
         </div>
       </header>
 
-      {/* ==================== 2. HERO SECTION (ANYTIME FITNESS REAL AF MARKETING STYLE) ==================== */}
+      {/* ==================== 2. HERO SECTION (ANYTIME FITNESS MARKETING STYLE) ==================== */}
       <section id="about" className="pt-32 pb-20 px-4 max-w-7xl mx-auto text-center lg:text-left grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         <div className="lg:col-span-7 space-y-6">
           
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 border border-[#DC2626]/30 text-[#DC2626] text-xs font-black uppercase tracking-wider shadow-sm">
             <span className="w-2.5 h-2.5 rounded-full bg-[#DC2626] animate-ping" />
-            <span>LET'S MAKE HEALTHY HAPPEN • 24/7 FITNESS & COACHING CLUB</span>
+            <span>LET'S MAKE HEALTHY HAPPEN • 24/7 FITNESS & COACHING</span>
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-black uppercase tracking-tight text-slate-900 leading-tight">
@@ -496,40 +398,34 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </h1>
 
           <p className="text-slate-600 text-base sm:text-lg max-w-2xl leading-relaxed">
-            Chào mừng bạn đến với <strong>CITYGYM</strong> — Không gian rèn luyện thể chất văn minh, không phán xét và hoàn toàn không áp lực. Tự do tập luyện bất kỳ lúc nào với thẻ số thông minh 60s, hệ thống thiết bị chuẩn Olympic và đội ngũ huấn luyện viên đồng hành tận tâm.
+            Chào mừng bạn đến với <strong>CITYGYM</strong> — Không gian rèn luyện thể chất văn minh, không phán xét và hoàn toàn không áp lực. Tự do tập luyện bất kỳ lúc nào suốt 24 giờ mỗi ngày với hệ thống thiết bị chuẩn Olympic và đội ngũ huấn luyện viên đồng hành tận tâm.
           </p>
 
-          {/* Anytime Fitness Interactive Club Finder Box */}
-          <div className="bg-slate-50 border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-xl space-y-3">
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-              <MapPin className="w-4 h-4 text-[#DC2626]" />
-              <span>Tìm câu lạc bộ CITYGYM gần bạn nhất để bắt đầu:</span>
+          {/* Club Info Callout Box (Single Gym Branch) */}
+          <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-md space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs font-black text-slate-900">
+                <MapPin className="w-4 h-4 text-[#DC2626]" />
+                <span>CƠ SỞ CHÍNH THỨC DUY NHẤT:</span>
+              </div>
+              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1 w-fit">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                Mở Cửa 24/7 Quanh Năm
+              </span>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-3">
-              <select
-                value={selectedBranch}
-                onChange={(e) => setSelectedBranch(e.target.value)}
-                className="flex-1 bg-white border border-slate-300 rounded-2xl px-4 py-3.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#DC2626] shadow-sm"
-              >
-                <option value="stu-campus">📍 Trụ sở chính: STU Campus (180 Cao Lỗ, Quận 8)</option>
-                <option value="district-1">📍 Chi nhánh: Central Garden (Võ Văn Kiệt, Quận 1)</option>
-                <option value="district-7">📍 Chi nhánh: Sunrise Elite (Nguyễn Hữu Thọ, Quận 7)</option>
-              </select>
+            <p className="text-xs font-bold text-slate-800">
+              📍 STU Campus — 180 Cao Lỗ, Phường 4, Quận 8, TP.HCM
+            </p>
+            <p className="text-[11px] text-slate-500">
+              Khuôn viên Đại học Công Nghệ Sài Gòn (STU) • Diện tích 1.500m² mặt sàn tập luyện chuẩn Olympic
+            </p>
 
-              <a
-                href="#trial-section"
-                className="px-6 py-3.5 rounded-2xl font-black text-xs bg-[#DC2626] hover:bg-red-700 text-white flex items-center justify-center gap-2 shadow-md transition-all whitespace-nowrap"
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>Nhận Vé Tập Thử Tại Đây</span>
-              </a>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-500 font-semibold pt-1">
-              <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-emerald-600" /> Mở cửa 24/7 suốt 365 ngày</span>
-              <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-emerald-600" /> Đo chỉ số InBody 270 miễn phí</span>
-              <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-emerald-600" /> Phòng tắm nóng lạnh & Locker riêng tư</span>
+            <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-600 font-semibold pt-2 border-t border-slate-200/80">
+              <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-emerald-600" /> Tự do tập luyện 24/7</span>
+              <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-emerald-600" /> Cửa xoay mã QR thông minh 60s</span>
+              <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-emerald-600" /> Đo InBody 270 miễn phí</span>
+              <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-emerald-600" /> Tắm nóng lạnh & Locker riêng</span>
             </div>
           </div>
 
@@ -561,81 +457,59 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <p className="text-xs text-slate-500 font-medium mt-1">HLV bằng cấp quốc tế</p>
             </div>
             <div>
-              <p className="text-2xl sm:text-3xl font-black text-slate-900">60<span className="text-[#DC2626]">s</span></p>
-              <p className="text-xs text-slate-500 font-medium mt-1">Mã QR động bảo mật</p>
+              <p className="text-2xl sm:text-3xl font-black text-slate-900">1.500<span className="text-[#DC2626]">m²</span></p>
+              <p className="text-xs text-slate-500 font-medium mt-1">Chuẩn Olympic STU</p>
             </div>
           </div>
         </div>
 
-        {/* Hero Card Visual Preview (Digital Membership & 24/7 Access Pass) */}
-        <div className="lg:col-span-5 bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-red-50 border border-[#DC2626]/30 flex items-center justify-center text-[#DC2626]">
-                <Smartphone className="w-6 h-6 stroke-[2.5]" />
-              </div>
-              <div className="text-left">
-                <h3 className="font-black text-slate-900 text-sm">Thẻ Hội Viên Số 24/7</h3>
-                <p className="text-[11px] text-slate-500">Mã QR động tự động làm mới sau 60 giây</p>
-              </div>
-            </div>
-            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              24/7 Realtime
-            </span>
-          </div>
-
-          <div className="bg-slate-900 text-white p-5 rounded-2xl shadow-lg space-y-3 text-left relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#DC2626]/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#EF4444] bg-white/10 px-2.5 py-0.5 rounded-full">
-                  ALL-ACCESS PASS
-                </span>
-                <p className="text-lg font-black text-white mt-1.5">Võ Duy Phúc</p>
-                <p className="text-xs text-slate-300">Gói CityVIP 12 Tháng + PT 1-1</p>
-              </div>
-              <div className="w-16 h-16 bg-white p-1.5 rounded-xl shadow">
-                <img 
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=CITYGYM-STU-VODUYPHUC" 
-                  alt="QR" 
-                  className="w-full h-full object-contain" 
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-800 text-xs">
-              <div>
-                <span className="text-slate-400">Thời hạn gói:</span>
-                <p className="text-emerald-400 font-bold">Còn 286 ngày (Active)</p>
-              </div>
-              <div>
-                <span className="text-slate-400">Số buổi PT 1-1:</span>
-                <p className="text-amber-400 font-bold">18 / 20 buổi</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-1 text-[10px] text-slate-400">
-              <span className="flex items-center gap-1 font-mono">
-                <RefreshCw className="w-3 h-3 text-[#DC2626] animate-spin" />
-                Mã làm mới sau: 42s
+        {/* Hero Visual Showcase (High-Quality Real Gym Photography & Badges) */}
+        <div className="lg:col-span-5 relative group">
+          <div className="relative rounded-3xl overflow-hidden border-2 border-slate-200 shadow-2xl bg-slate-900">
+            <img
+              src="https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=1000&auto=format&fit=crop&q=80"
+              alt="CITYGYM STU Campus 24/7"
+              className="w-full h-[470px] object-cover object-center group-hover:scale-105 transition-transform duration-700 brightness-95"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
+            
+            {/* Floating Top Badge */}
+            <div className="absolute top-5 left-5 right-5 flex justify-between items-center">
+              <span className="px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase bg-[#DC2626] text-white shadow-lg flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                24/7 Premium Fitness Club
               </span>
-              <span className="text-slate-400">Cơ sở: STU Campus (Q8)</span>
+              <span className="px-3 py-1 rounded-full text-[10px] font-black bg-white/95 backdrop-blur-md text-slate-900 shadow">
+                1.500m² STU Campus
+              </span>
             </div>
-          </div>
 
-          <div className="space-y-2 text-xs text-slate-600 text-left">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#DC2626] shrink-0" />
-              <span>Chống chụp màn hình dùng chung thẻ bằng mã động tự hủy 60s</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#DC2626] shrink-0" />
-              <span>Tự do mở cửa phòng tập 24/7 tại toàn bộ chi nhánh thuộc hệ thống</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#DC2626] shrink-0" />
-              <span>Bảo lưu linh hoạt, tự động cộng bù hạn thẻ khi kết thúc bảo lưu</span>
+            {/* Floating Bottom Card Over Image */}
+            <div className="absolute bottom-5 left-5 right-5 p-5 rounded-2xl bg-white/95 backdrop-blur-md border border-white/20 shadow-xl space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-black text-slate-900 text-sm">CITYGYM STU Campus Q8</h4>
+                  <p className="text-[11px] text-slate-500 font-medium">180 Cao Lỗ, Phường 4, Quận 8, TP.HCM</p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-red-50 text-[#DC2626] flex items-center justify-center font-black">
+                  <Dumbbell className="w-5 h-5" />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
+                <div className="bg-slate-50 p-2 rounded-xl">
+                  <p className="text-[10px] text-slate-400 font-bold uppercase">Mở Cửa</p>
+                  <p className="font-black text-xs text-slate-900 mt-0.5">24/7/365</p>
+                </div>
+                <div className="bg-slate-50 p-2 rounded-xl">
+                  <p className="text-[10px] text-slate-400 font-bold uppercase">Cửa Xoay</p>
+                  <p className="font-black text-xs text-[#DC2626] mt-0.5">Mã QR 60s</p>
+                </div>
+                <div className="bg-slate-50 p-2 rounded-xl">
+                  <p className="text-[10px] text-slate-400 font-bold uppercase">Huấn Luyện</p>
+                  <p className="font-black text-xs text-emerald-600 mt-0.5">PT 1-1 NASM</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -742,92 +616,158 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
             {/* Amenity 1 */}
-            <div className="p-7 rounded-3xl bg-slate-50 border border-slate-200 space-y-3 hover:border-[#DC2626] transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-[#DC2626] flex items-center justify-center shadow-sm">
-                <Dumbbell className="w-6 h-6" />
+            <div className="rounded-3xl bg-slate-50 border border-slate-200 overflow-hidden shadow-sm hover:border-[#DC2626] hover:shadow-lg transition-all group flex flex-col">
+              <div className="h-44 overflow-hidden relative">
+                <img 
+                  src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&auto=format&fit=crop&q=80"
+                  alt="Khu Tạ Tự Do"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-[#DC2626] text-white shadow">
+                  Free Weights
+                </span>
               </div>
-              <h3 className="text-lg font-black text-slate-900">Khu Tạ Tự Do (Free Weights)</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Trang bị đầy đủ dàn tạ tay Dumbbell từ 2.5kg đến 50kg, ghế Bench đa góc độ, khung Power Rack và thanh đòn chuẩn Olympic Eleiko.
-              </p>
-              <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Không giới hạn thời gian tập</span>
+              <div className="p-6 space-y-2.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-base font-black text-slate-900">Khu Tạ Tự Do (Free Weights)</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed mt-1">
+                    Trang bị đầy đủ tạ đơn Dumbbell 2.5kg - 50kg, ghế Bench đa góc độ, khung Power Rack và thanh đòn chuẩn Olympic Eleiko.
+                  </p>
+                </div>
+                <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5 border-t border-slate-200/60">
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Tự do tập luyện không giới hạn giờ</span>
+                </div>
               </div>
             </div>
 
             {/* Amenity 2 */}
-            <div className="p-7 rounded-3xl bg-slate-50 border border-slate-200 space-y-3 hover:border-[#DC2626] transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-[#DC2626] flex items-center justify-center shadow-sm">
-                <Layers className="w-6 h-6" />
+            <div className="rounded-3xl bg-slate-50 border border-slate-200 overflow-hidden shadow-sm hover:border-[#DC2626] hover:shadow-lg transition-all group flex flex-col">
+              <div className="h-44 overflow-hidden relative">
+                <img 
+                  src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&auto=format&fit=crop&q=80"
+                  alt="Máy Kháng Lực Khối"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-slate-900 text-white shadow">
+                  Pin-Loaded
+                </span>
               </div>
-              <h3 className="text-lg font-black text-slate-900">Máy Kháng Lực Khối (Pin-Loaded)</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Dàn máy khối cao cấp nhập khẩu (LifeFitness, Hammer Strength) với quỹ đạo chuẩn xác, giúp cô lập cơ bắp an toàn, giảm nguy cơ chấn thương.
-              </p>
-              <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Có sơ đồ hướng dẫn trên từng máy</span>
+              <div className="p-6 space-y-2.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-base font-black text-slate-900">Máy Kháng Lực Khối (Pin-Loaded)</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed mt-1">
+                    Dàn máy khối cao cấp nhập khẩu (LifeFitness, Hammer Strength) với quỹ đạo chuẩn xác, cô lập nhóm cơ an toàn và chống chấn thương.
+                  </p>
+                </div>
+                <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5 border-t border-slate-200/60">
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Sơ đồ và mã QR hướng dẫn trên từng máy</span>
+                </div>
               </div>
             </div>
 
             {/* Amenity 3 */}
-            <div className="p-7 rounded-3xl bg-slate-50 border border-slate-200 space-y-3 hover:border-[#DC2626] transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-[#DC2626] flex items-center justify-center shadow-sm">
-                <HeartPulse className="w-6 h-6" />
+            <div className="rounded-3xl bg-slate-50 border border-slate-200 overflow-hidden shadow-sm hover:border-[#DC2626] hover:shadow-lg transition-all group flex flex-col">
+              <div className="h-44 overflow-hidden relative">
+                <img 
+                  src="https://images.unsplash.com/photo-1576678927484-cc907957088c?w=800&auto=format&fit=crop&q=80"
+                  alt="Cardio Deck"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-[#DC2626] text-white shadow">
+                  Cardio Deck
+                </span>
               </div>
-              <h3 className="text-lg font-black text-slate-900">Cardio Deck View Toàn Cảnh</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Máy chạy bộ đệm khí chống đau khớp, xe đạp Spinning và cầu thang Stepmill tích hợp màn hình cảm ứng giải trí đa phương tiện.
-              </p>
-              <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Đo nhịp tim và calo đốt cháy liên tục</span>
+              <div className="p-6 space-y-2.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-base font-black text-slate-900">Cardio Deck View Thoáng</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed mt-1">
+                    Máy chạy bộ đệm khí chống đau khớp gối, xe đạp Spinning và cầu thang Stepmill tích hợp màn hình cảm ứng đo nhịp tim và calo đốt cháy.
+                  </p>
+                </div>
+                <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5 border-t border-slate-200/60">
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Đo calo & nhịp tim theo thời gian thực</span>
+                </div>
               </div>
             </div>
 
             {/* Amenity 4 */}
-            <div className="p-7 rounded-3xl bg-slate-50 border border-slate-200 space-y-3 hover:border-[#DC2626] transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-[#DC2626] flex items-center justify-center shadow-sm">
-                <Target className="w-6 h-6" />
+            <div className="rounded-3xl bg-slate-50 border border-slate-200 overflow-hidden shadow-sm hover:border-[#DC2626] hover:shadow-lg transition-all group flex flex-col">
+              <div className="h-44 overflow-hidden relative">
+                <img 
+                  src="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800&auto=format&fit=crop&q=80"
+                  alt="Functional Turf"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-slate-900 text-white shadow">
+                  Functional Turf
+                </span>
               </div>
-              <h3 className="text-lg font-black text-slate-900">Khu Chức Năng (Functional Turf)</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Đường băng thảm cỏ nhân tạo, dây kháng lực TRX, tạ chuông Kettlebell, bóng tạ Slam Ball cho các bài tập vận động dẻo dai toàn diện.
-              </p>
-              <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Luyện sức bền và tốc độ bứt phá</span>
+              <div className="p-6 space-y-2.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-base font-black text-slate-900">Khu Chức Năng (Functional Turf)</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed mt-1">
+                    Đường băng thảm cỏ nhân tạo, dây kháng lực TRX, tạ chuông Kettlebell và bóng Slam Ball cho các bài rèn luyện dẻo dai toàn diện.
+                  </p>
+                </div>
+                <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5 border-t border-slate-200/60">
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Tăng cường sức bền và khả năng bứt phá</span>
+                </div>
               </div>
             </div>
 
             {/* Amenity 5 */}
-            <div className="p-7 rounded-3xl bg-slate-50 border border-slate-200 space-y-3 hover:border-[#DC2626] transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-[#DC2626] flex items-center justify-center shadow-sm">
-                <Sparkle className="w-6 h-6" />
+            <div className="rounded-3xl bg-slate-50 border border-slate-200 overflow-hidden shadow-sm hover:border-[#DC2626] hover:shadow-lg transition-all group flex flex-col">
+              <div className="h-44 overflow-hidden relative">
+                <img 
+                  src="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80"
+                  alt="Studio GroupX & Yoga"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-[#DC2626] text-white shadow">
+                  GroupX & Yoga
+                </span>
               </div>
-              <h3 className="text-lg font-black text-slate-900">Studio GroupX & Yoga Cách Âm</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Sàn gỗ cao cấp đàn hồi bảo vệ khớp gối, hệ thống ánh sáng trị liệu và dàn âm thanh truyền cảm hứng cho các lớp Yoga, Zumba, HIIT.
-              </p>
-              <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Miễn phí vé tham gia cho hội viên VIP</span>
+              <div className="p-6 space-y-2.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-base font-black text-slate-900">Studio GroupX & Yoga Cách Âm</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed mt-1">
+                    Sàn gỗ cao cấp đàn hồi bảo vệ khớp gối, hệ thống ánh sáng trị liệu và dàn âm thanh truyền cảm hứng cho Yoga, Zumba, HIIT.
+                  </p>
+                </div>
+                <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5 border-t border-slate-200/60">
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Miễn phí vé tham gia cho hội viên VIP</span>
+                </div>
               </div>
             </div>
 
             {/* Amenity 6 */}
-            <div className="p-7 rounded-3xl bg-slate-50 border border-slate-200 space-y-3 hover:border-[#DC2626] transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-[#DC2626] flex items-center justify-center shadow-sm">
-                <ShieldCheck className="w-6 h-6" />
+            <div className="rounded-3xl bg-slate-50 border border-slate-200 overflow-hidden shadow-sm hover:border-[#DC2626] hover:shadow-lg transition-all group flex flex-col">
+              <div className="h-44 overflow-hidden relative">
+                <img 
+                  src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800&auto=format&fit=crop&q=80"
+                  alt="Phòng Tắm & Locker"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-slate-900 text-white shadow">
+                  Shower & Locker
+                </span>
               </div>
-              <h3 className="text-lg font-black text-slate-900">Phòng Tắm & Locker Riêng Biệt</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Buồng tắm nước nóng riêng tư, máy sấy tóc hiện đại và tủ locker mã số điện tử bảo mật cao, đảm bảo sự an tâm và thoải mái tối đa.
-              </p>
-              <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Vệ sinh kháng khuẩn liên tục 24/7</span>
+              <div className="p-6 space-y-2.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-base font-black text-slate-900">Phòng Tắm & Locker Riêng Biệt</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed mt-1">
+                    Buồng tắm nước nóng riêng tư, máy sấy tóc hiện đại và tủ locker mã số điện tử bảo mật cao, đảm bảo sự an tâm tuyệt đối.
+                  </p>
+                </div>
+                <div className="pt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1.5 border-t border-slate-200/60">
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Vệ sinh kháng khuẩn liên tục suốt 24/7</span>
+                </div>
               </div>
             </div>
 
@@ -913,76 +853,97 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* ==================== 6. HỆ THỐNG CÂU LẠC BỘ (ANYTIME FITNESS CLUB LOCATOR) ==================== */}
+      {/* ==================== 6. THÔNG TIN CƠ SỞ & KHÔNG GIAN TẬP LUYỆN (SINGLE CLUB STU CAMPUS) ==================== */}
       <section id="branches" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
-            <span className="text-xs font-black uppercase tracking-widest text-[#DC2626]">HỆ THỐNG CÂU LẠC BỘ</span>
+            <span className="text-xs font-black uppercase tracking-widest text-[#DC2626]">CƠ SỞ VẬT CHẤT ĐẲNG CẤP</span>
             <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-slate-900">
-              DANH SÁCH CHI NHÁNH CITYGYM
+              KHÔNG GIAN TẬP LUYỆN CITYGYM STU CAMPUS
             </h2>
             <p className="text-xs sm:text-sm text-slate-500">
-              Một thẻ hội viên — Tự do mở cửa tập luyện tại tất cả các cơ sở trong hệ thống.
+              Cơ sở duy nhất tọa lạc tại khuôn viên Đại học Công Nghệ Sài Gòn (STU) — Mở cửa 24/7 suốt 365 ngày quanh năm.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {branches.map((b) => (
-              <div 
-                key={b.id} 
-                className={`p-7 rounded-3xl border transition-all flex flex-col justify-between space-y-4 ${
-                  selectedBranch === b.id 
-                    ? 'border-[#DC2626] shadow-xl bg-gradient-to-b from-red-50/40 to-white' 
-                    : 'border-slate-200 bg-white hover:border-slate-300 shadow-sm'
-                }`}
-              >
-                <div className="space-y-3">
-                  <div className="flex justify-between items-start">
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-[#DC2626] text-white">
-                      {b.badge}
-                    </span>
-                    <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      24/7 Open
-                    </span>
+          <div className="max-w-5xl mx-auto bg-slate-50 border-2 border-slate-200 rounded-3xl overflow-hidden shadow-xl grid grid-cols-1 lg:grid-cols-12">
+            <div className="lg:col-span-6 relative h-72 lg:h-auto min-h-[320px]">
+              <img
+                src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=900&auto=format&fit=crop&q=80"
+                alt="CITYGYM STU Campus"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4 text-white">
+                <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-[#DC2626]">
+                  TRỤ SỞ DUY NHẤT
+                </span>
+                <p className="text-lg font-black mt-1">CITYGYM STU Campus (Quận 8)</p>
+                <p className="text-xs text-slate-300">180 Cao Lỗ, Phường 4, Quận 8, TP.HCM</p>
+              </div>
+            </div>
+
+            <div className="lg:col-span-6 p-6 sm:p-8 flex flex-col justify-between space-y-5">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-[#DC2626]" />
+                    <span className="text-xs font-bold text-slate-700">Thời gian hoạt động:</span>
                   </div>
+                  <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                    24/7/365 Ngày
+                  </span>
+                </div>
 
-                  <h3 className="text-lg font-black text-slate-900">{b.name}</h3>
-                  <p className="text-xs text-slate-600 flex items-start gap-1.5">
-                    <MapPin className="w-4 h-4 text-[#DC2626] shrink-0 mt-0.5" />
-                    <span>{b.address}</span>
-                  </p>
-                  <p className="text-xs text-slate-500 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{b.openHours}</span>
-                  </p>
-
-                  <div className="pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-600">
-                    {b.amenities.map((a, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        <span>{a}</span>
-                      </div>
-                    ))}
+                <div className="flex items-start gap-2 text-xs">
+                  <MapPin className="w-4 h-4 text-[#DC2626] shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-slate-900">Địa chỉ:</strong>
+                    <p className="text-slate-600">180 Cao Lỗ, Phường 4, Quận 8, TP.HCM (Khuôn viên STU)</p>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100">
-                  <a
-                    href="#trial-section"
-                    onClick={() => {
-                      setSelectedBranch(b.id);
-                      setBookingForm({ ...bookingForm, branch: b.name });
-                    }}
-                    className="w-full py-2.5 rounded-xl font-bold text-xs bg-slate-900 hover:bg-[#DC2626] text-white flex items-center justify-center gap-1.5 transition-all shadow"
-                  >
-                    <Ticket className="w-3.5 h-3.5" />
-                    <span>Chọn Tập Thử Tại Đây</span>
-                  </a>
+                <div className="flex items-start gap-2 text-xs">
+                  <Phone className="w-4 h-4 text-[#DC2626] shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-slate-900">Hotline hỗ trợ:</strong>
+                    <p className="text-slate-600 font-mono font-bold">1900 8899 - 028 3850 5520</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-2 border-t border-slate-200 text-xs text-slate-700">
+                  <p className="font-bold text-slate-900 text-[11px] uppercase tracking-wide">Tiện ích đi kèm tại phòng tập:</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                    <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> 1.500m² chuẩn Olympic</span>
+                    <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Đo chỉ số InBody 270</span>
+                    <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Cửa xoay QR tự hủy 60s</span>
+                    <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Studio GroupX & Yoga</span>
+                    <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Locker khóa mã số điện tử</span>
+                    <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Phòng tắm nước nóng riêng</span>
+                  </div>
                 </div>
               </div>
-            ))}
+
+              <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
+                <a
+                  href="#trial-section"
+                  className="flex-1 py-3 rounded-xl font-bold text-xs bg-gradient-to-r from-[#DC2626] to-[#EF4444] text-white flex items-center justify-center gap-2 shadow-md hover:scale-[1.01] transition-all"
+                >
+                  <Ticket className="w-3.5 h-3.5" />
+                  <span>Đăng Ký Tập Thử 0Đ Tại Đây</span>
+                </a>
+                <a
+                  href="https://maps.google.com/?q=180+Cao+Lo+Phuong+4+Quan+8+TPHCM"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-3 px-4 rounded-xl font-semibold text-xs bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 flex items-center justify-center gap-1.5 shadow-sm transition-all"
+                >
+                  <MapPin className="w-3.5 h-3.5 text-[#DC2626]" />
+                  <span>Google Maps</span>
+                </a>
+              </div>
+            </div>
           </div>
 
         </div>
@@ -1000,48 +961,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               ĐĂNG KÝ VÉ TẬP THỬ 03 NGÀY 0Đ
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto">
-              Nhập tên và số điện thoại để nhận ngay mã vé điện tử <strong className="text-slate-800">E-Pass QR</strong> mở cổng tự do trải nghiệm tại phòng tập!
+              Nhập tên và số điện thoại để nhận ngay vé điện tử <strong className="text-slate-800">E-Pass QR</strong> mở cổng tự do trải nghiệm tại phòng tập!
             </p>
           </div>
 
           <div className="bg-white p-8 sm:p-12 rounded-3xl border border-slate-200 shadow-xl max-w-2xl mx-auto relative">
             <form onSubmit={handleBookingSubmit} className="space-y-5">
-
-              {!currentUser ? (
-                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3 text-xs text-left">
-                  <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                  <div className="space-y-1.5">
-                    <p className="font-bold text-xs uppercase tracking-wide text-amber-900">
-                      🔐 Yêu Cầu Xác Thực Tài Khoản:
-                    </p>
-                    <p className="text-[11px] text-amber-800 leading-relaxed">
-                      Để đăng ký vé tập thử E-Pass 0Đ hoặc mua gói, bạn cần <strong>Tạo tài khoản hoặc Đăng nhập</strong> (SĐT, Tên đăng nhập, Mật khẩu, Họ tên, Tuổi).
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAuthActionNotice('Vui lòng tạo tài khoản hoặc đăng nhập để tiếp tục nhận vé tập thử E-Pass 0Đ.');
-                        setPendingBookingType('TRIAL');
-                        setShowMemberAuthModal(true);
-                      }}
-                      className="mt-1 px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] inline-flex items-center gap-1.5 shadow-sm transition-all"
-                    >
-                      <UserPlus className="w-3.5 h-3.5" />
-                      <span>Đăng Nhập / Tạo Tài Khoản Để Nhận Vé</span>
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-start gap-3 text-xs text-left">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-bold text-xs uppercase tracking-wide">Đã Xác Thực Thông Tin:</p>
-                    <p className="text-[11px] text-emerald-800 mt-0.5">
-                      Khách hàng: <strong>{currentUser.name}</strong> {currentUser.age ? `(${currentUser.age} tuổi)` : ''} • SĐT: <strong>{currentUser.phone}</strong> • Tài khoản: <strong>@{currentUser.username || 'member'}</strong>.
-                    </p>
-                  </div>
-                </div>
-              )}
               
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
@@ -1059,7 +984,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                  Số điện thoại nhận mã QR:
+                  Số điện thoại nhận mã vé QR (Gửi qua Zalo):
                 </label>
                 <input
                   type="tel"
@@ -1069,21 +994,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   onChange={(e) => setBookingForm({ ...bookingForm, phone: e.target.value })}
                   className="w-full bg-white border border-slate-300 rounded-2xl px-4 py-3.5 text-slate-900 text-sm font-semibold focus:outline-none focus:border-[#DC2626] focus:ring-2 focus:ring-[#DC2626]/20 transition-all shadow-sm"
                 />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                  Chọn câu lạc bộ muốn trải nghiệm:
-                </label>
-                <select
-                  value={bookingForm.branch}
-                  onChange={(e) => setBookingForm({ ...bookingForm, branch: e.target.value })}
-                  className="w-full bg-white border border-slate-300 rounded-2xl px-4 py-3.5 text-slate-800 text-sm font-semibold focus:outline-none focus:border-[#DC2626] focus:ring-2 focus:ring-[#DC2626]/20 transition-all shadow-sm"
-                >
-                  <option>STU Campus - 180 Cao Lỗ, Quận 8</option>
-                  <option>Central Garden - Võ Văn Kiệt, Quận 1</option>
-                  <option>Sunrise Elite - Nguyễn Hữu Thọ, Quận 7</option>
-                </select>
               </div>
 
               <div>
@@ -1656,10 +1566,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           <div>
-            <h5 className="font-bold text-white uppercase mb-2">Hệ Thống Câu Lạc Bộ</h5>
-            <p className="font-semibold text-slate-300">Cơ sở 1: STU Campus - 180 Cao Lỗ, Q8, TP.HCM</p>
-            <p className="mt-1">Cơ sở 2: Central Garden - 328 Võ Văn Kiệt, Q1, TP.HCM</p>
-            <p className="mt-1">Cơ sở 3: Sunrise Elite - 27 Nguyễn Hữu Thọ, Q7, TP.HCM</p>
+            <h5 className="font-bold text-white uppercase mb-2">Trụ Sở Câu Lạc Bộ</h5>
+            <p className="font-semibold text-slate-300">CITYGYM STU Campus</p>
+            <p className="mt-1 text-slate-400">180 Cao Lỗ, Phường 4, Quận 8, TP.HCM (Khuôn viên STU)</p>
             <p className="mt-2 text-[#EF4444] font-bold">Hotline: 1900 8899 - Giờ mở cửa: 24/7 (365 ngày)</p>
           </div>
 
@@ -1765,6 +1674,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             {!isPaidSuccess ? (
               <>
+                {/* Thông tin gói */}
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-left space-y-1.5 text-xs">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Gói đăng ký:</span>
@@ -1783,6 +1693,40 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <div className="flex justify-between pt-1 border-t border-slate-200 text-sm">
                     <span className="font-bold text-slate-700">Số tiền thanh toán:</span>
                     <span className="font-black text-[#DC2626]">{selectedPackage.priceStr}</span>
+                  </div>
+                </div>
+
+                {/* Thông tin người mua để Admin cấp tài khoản */}
+                <div className="bg-red-50/50 p-4 rounded-2xl border border-red-200 text-left space-y-2.5 text-xs">
+                  <p className="font-bold text-slate-900 uppercase text-[11px] tracking-wide flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-[#DC2626]" />
+                    <span>Thông tin nhận tài khoản hội viên:</span>
+                  </p>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Họ và tên của bạn:
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ví dụ: Võ Duy Phúc"
+                      value={checkoutBuyerName}
+                      onChange={(e) => setCheckoutBuyerName(e.target.value)}
+                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:border-[#DC2626] shadow-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Số điện thoại nhận TK/MK (Gửi qua Zalo):
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      placeholder="Ví dụ: 0901234567"
+                      value={checkoutBuyerPhone}
+                      onChange={(e) => setCheckoutBuyerPhone(e.target.value)}
+                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:border-[#DC2626] shadow-sm"
+                    />
                   </div>
                 </div>
 
@@ -1814,7 +1758,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-2xl text-xs shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition-all"
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Mô Phỏng Ngân Hàng Bắn Webhook (Đã Thanh Toán)</span>
+                    <span>Xác Nhận Đã Chuyển Khoản VietQR</span>
                   </button>
                 </div>
               </>
@@ -1825,22 +1769,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
                 <div className="space-y-2">
                   <h4 className="text-xl font-black text-slate-900">Thanh Toán Thành Công! 🎉</h4>
-                  <p className="text-xs text-slate-500">Hệ thống đã nhận được xác nhận thanh toán từ NAPAS247.</p>
+                  <p className="text-xs text-slate-500">Toàn bộ thông tin đăng ký đã được chuyển về hệ thống Quản trị CRM.</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-left space-y-1.5">
-                  <p className="text-xs font-black text-amber-900 uppercase tracking-wide">⏳ Admin Đang Xử Lý Kích Hoạt</p>
+                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-left space-y-2">
+                  <p className="text-xs font-black text-amber-900 uppercase tracking-wide">⚡ Admin Đang Cấp Tài Khoản</p>
                   <p className="text-[11px] text-amber-800 leading-relaxed">
-                    Tài khoản hội viên của bạn sẽ được <strong>Admin kích hoạt trong vòng 24 giờ</strong> sau khi xác minh thanh toán. Bạn sẽ nhận thông báo qua <strong>Zalo</strong> kèm mật khẩu đăng nhập vào Cổng Hội Viên.
+                    Sau khi đối soát thanh toán gói <strong>{selectedPackage.name}</strong>, Admin sẽ cấp tài khoản, mật khẩu và <strong>tự động gửi tin nhắn Zalo kèm mật khẩu</strong> đến số điện thoại <strong>{checkoutBuyerPhone || currentUser?.phone || 'của bạn'}</strong> để bạn đăng nhập vào Cổng Hội Viên.
                   </p>
                   <p className="text-[11px] text-amber-700 font-semibold mt-1">
-                    📞 Liên hệ hỗ trợ: <strong>1900 8899</strong> (8:00 – 22:00 hàng ngày)
+                    📞 Hotline hỗ trợ: <strong>1900 8899 - 028 3850 5520</strong> (STU Campus - 180 Cao Lỗ, Q8)
                   </p>
                 </div>
                 <button
                   onClick={() => setShowCheckoutModal(false)}
                   className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-all"
                 >
-                  Đóng — Chờ Admin Kích Hoạt
+                  Đóng — Chờ Admin Gửi Tài Khoản Qua Zalo
                 </button>
               </div>
             )}
@@ -1848,16 +1792,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
         </div>
       )}
-
-      {/* ==================== 18. MODAL XÁC THỰC / TẠO TÀI KHOẢN HỘI VIÊN MỚI ==================== */}
-      <MemberAuthModal
-        isOpen={showMemberAuthModal}
-        onClose={() => setShowMemberAuthModal(false)}
-        onRegisterSuccess={handleAuthCompleted}
-        onLoginSuccess={(u) => handleAuthCompleted(u)}
-        pendingActionNotice={authActionNotice}
-        accounts={accounts}
-      />
 
     </div>
   );
