@@ -244,6 +244,20 @@ export default function App() {
 
   const handleAddMembership = (newM: Membership) => {
     setMemberships((prev) => [newM, ...prev]);
+    // Tự động lên lịch hẹn buổi đầu tiên cho HLV phụ trách nếu hợp đồng có buổi PT
+    if (newM.remainingSessions > 0 && newM.assignedPtName) {
+      const newBooking: PtBooking = {
+        id: Date.now() + 10,
+        memberName: newM.memberName,
+        memberPhone: newM.memberPhone,
+        trainerName: newM.assignedPtName,
+        date: 'Hôm nay',
+        time: '19:15 - 20:15 (Buổi 1)',
+        status: 'SCHEDULED',
+        goal: `Kèm 1-1 (${newM.packageName})`,
+      };
+      setPtBookings((prev) => [newBooking, ...prev]);
+    }
   };
 
   const handleUpdateMembership = (updated: Membership) => {
@@ -255,14 +269,19 @@ export default function App() {
   };
 
   const handleCompleteBooking = (bookingId: number) => {
+    const booking = ptBookings.find((b) => b.id === bookingId);
     setPtBookings((prev) =>
       prev.map((b) => (b.id === bookingId ? { ...b, status: 'COMPLETED' } : b))
     );
-    setMemberships((prev) =>
-      prev.map((m) =>
-        m.id === 1 ? { ...m, remainingSessions: Math.max(0, m.remainingSessions - 1) } : m
-      )
-    );
+    if (booking) {
+      setMemberships((prev) =>
+        prev.map((m) =>
+          m.memberName === booking.memberName
+            ? { ...m, remainingSessions: Math.max(0, m.remainingSessions - 1) }
+            : m
+        )
+      );
+    }
   };
 
   return (
@@ -325,9 +344,11 @@ export default function App() {
           {/* Phân hệ 4: Cổng Huấn Luyện Viên PT */}
           {currentTab === 'pt_portal' && (
             <TrainerPortal
+              memberships={memberships}
               ptBookings={ptBookings}
               onCompleteBooking={handleCompleteBooking}
               onSaveInBodyMetric={(m) => console.log('InBody:', m)}
+              onAddBooking={handleBookPtSession}
             />
           )}
 

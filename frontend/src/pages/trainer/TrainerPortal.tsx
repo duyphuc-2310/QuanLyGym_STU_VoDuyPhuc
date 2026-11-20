@@ -1,27 +1,39 @@
 import React, { useState } from 'react';
 import { 
   UserCheck, Calendar, Clock, CheckCircle2, Award, 
-  Activity, Dumbbell, DollarSign, User, ChevronRight, Sparkles
+  Activity, Dumbbell, DollarSign, User, ChevronRight, Sparkles,
+  Phone, PlusCircle, Shield
 } from 'lucide-react';
-import { PtBooking, InBodyMetric } from '../../types';
+import { PtBooking, InBodyMetric, Membership } from '../../types';
 import { InBodyModal } from '../../components/modals/InBodyModal';
 
 interface TrainerPortalProps {
+  memberships?: Membership[];
   ptBookings: PtBooking[];
   onCompleteBooking: (bookingId: number) => void;
   onSaveInBodyMetric: (metric: InBodyMetric) => void;
+  onAddBooking?: (booking: PtBooking) => void;
 }
 
 export const TrainerPortal: React.FC<TrainerPortalProps> = ({
+  memberships = [],
   ptBookings,
   onCompleteBooking,
   onSaveInBodyMetric,
+  onAddBooking,
 }) => {
   const [isInBodyModalOpen, setIsInBodyModalOpen] = useState(false);
-  const [selectedMemberName, setSelectedMemberName] = useState('Võ Duy Phúc');
+  const [selectedMemberName, setSelectedMemberName] = useState('Lê Thùy Dung');
 
   const trainerName = 'Nguyễn Minh Tuấn (PT)';
+
+  // 1. Lọc lịch dạy hẹn của HLV Tuấn
   const trainerBookings = ptBookings.filter((b) => b.trainerName.includes('Tuấn'));
+
+  // 2. Lọc danh sách học viên được phân công cho HLV Tuấn
+  const assignedMembers = memberships.filter(
+    (m) => m.assignedPtName?.includes('Tuấn') || m.remainingSessions > 0
+  );
 
   const completedSessions = trainerBookings.filter((b) => b.status === 'COMPLETED').length;
   const commissionPerSession = 150000; // 150.000 đ/buổi
@@ -30,6 +42,23 @@ export const TrainerPortal: React.FC<TrainerPortalProps> = ({
   const handleOpenInBody = (memberName: string) => {
     setSelectedMemberName(memberName);
     setIsInBodyModalOpen(true);
+  };
+
+  const handleQuickSchedule = (member: Membership) => {
+    const newBooking: PtBooking = {
+      id: Date.now(),
+      memberName: member.memberName,
+      memberPhone: member.memberPhone,
+      trainerName: trainerName,
+      date: 'Hôm nay',
+      time: '19:15 - 20:15 (Buổi tiếp theo)',
+      status: 'SCHEDULED',
+      goal: `Kèm 1-1 gói ${member.packageName}`,
+    };
+    if (onAddBooking) {
+      onAddBooking(newBooking);
+    }
+    alert(`Đã lên lịch tập 1-1 mới cho học viên ${member.memberName} vào 19:15 hôm nay!`);
   };
 
   return (
@@ -65,7 +94,84 @@ export const TrainerPortal: React.FC<TrainerPortalProps> = ({
         </div>
       </div>
 
-      {/* Schedule Agenda */}
+      {/* ==================== PHẦN 1: HỌC VIÊN ĐƯỢC PHÂN CÔNG PHỤ TRÁCH ==================== */}
+      <div className="bg-white p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+        <div className="flex flex-wrap justify-between items-center gap-2 pb-2 border-b border-slate-100">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+              <h3 className="font-black text-base text-slate-900">
+                Danh Sách Học Viên Được Phân Công Kèm 1-1 ({assignedMembers.length})
+              </h3>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Học viên vừa chốt hợp đồng từ quầy Lễ tân / CRM tự động đổ về danh sách phụ trách của bạn.
+            </p>
+          </div>
+          <span className="text-xs font-bold text-emerald-700 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200">
+            Đang hoạt động
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {assignedMembers.map((m) => (
+            <div
+              key={m.id}
+              className="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-city-red/40 hover:shadow-md transition-all space-y-3"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-slate-900 text-base">{m.memberName}</span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">
+                      {m.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                    <Phone className="w-3 h-3 text-slate-400" />
+                    <span>{m.memberPhone}</span>
+                    <span className="text-slate-300">•</span>
+                    <span className="font-semibold text-slate-700">{m.packageName}</span>
+                  </p>
+                </div>
+
+                <div className="text-right">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Số buổi PT</span>
+                  <span className="text-base font-black text-city-red">
+                    {m.remainingSessions} / {m.totalSessions} buổi
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
+                <span className="text-[11px] text-slate-500">
+                  Hạn thẻ: <strong className="text-slate-800">{m.endDate}</strong>
+                </span>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleOpenInBody(m.memberName)}
+                    className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-city-red text-slate-700 font-bold text-xs flex items-center gap-1 shadow-sm transition-all"
+                  >
+                    <Activity className="w-3.5 h-3.5 text-city-red" />
+                    <span>Đo InBody</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleQuickSchedule(m)}
+                    className="px-3 py-1.5 rounded-xl bg-city-red hover:bg-city-darkred text-white font-bold text-xs flex items-center gap-1 shadow-sm transition-all"
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    <span>Lên Lịch Tập</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ==================== PHẦN 2: LỊCH DẠY KÈM 1-1 TRONG NGÀY ==================== */}
       <div className="bg-white p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-sm space-y-5">
         <div className="flex flex-wrap justify-between items-center gap-2">
           <div>
@@ -75,7 +181,7 @@ export const TrainerPortal: React.FC<TrainerPortalProps> = ({
             </p>
           </div>
           <span className="text-xs font-bold text-city-red px-3 py-1 rounded-full bg-red-50 border border-red-200">
-            {trainerBookings.length} lịch hẹn hôm nay
+            {trainerBookings.length} lịch hẹn
           </span>
         </div>
 
@@ -163,4 +269,3 @@ export const TrainerPortal: React.FC<TrainerPortalProps> = ({
     </div>
   );
 };
-
