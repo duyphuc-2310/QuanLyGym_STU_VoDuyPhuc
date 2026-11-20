@@ -106,7 +106,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 <span className="font-black text-base uppercase tracking-wider text-white">
                   CITY<span className="text-city-red">GYM</span>
                 </span>
-                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Hệ Thống Nội Bộ</p>
+                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">
+                  {currentUser.role === 'MEMBER' ? 'Cổng Dịch Vụ Hội Viên' : 'Hệ Thống Quản Trị'}
+                </p>
               </div>
             </div>
           </div>
@@ -133,7 +135,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           {/* Navigation Links */}
           <nav className="px-3 space-y-1">
             <p className="px-3 py-1.5 text-[10px] uppercase font-black tracking-widest text-slate-500">
-              Phân Hệ Quản Trị
+              {currentUser.role === 'MEMBER' ? 'Dịch Vụ Của Bạn' : 'Phân Hệ Quản Trị'}
             </p>
 
             {authorizedNavItems.map((item) => {
@@ -194,10 +196,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         {/* Top Navbar in Dashboard */}
         <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-400 font-bold">Hệ Thống Nội Bộ</span>
+            <span className="text-slate-400 font-bold">
+              {currentUser.role === 'MEMBER' ? 'Cổng Hội Viên' : 'Hệ Thống Nội Bộ'}
+            </span>
             <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
             <span className="font-bold text-slate-700 capitalize">
-              {currentUser.department || 'Ban Điều Hành'}
+              {currentUser.role === 'MEMBER' ? 'Dịch Vụ Cá Nhân 24/7' : (currentUser.department || 'Ban Điều Hành')}
             </span>
           </div>
 

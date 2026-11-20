@@ -1,25 +1,19 @@
 @echo off
-chcp 65001 >nul
-title DONG BO CODE MOI LEN GITHUB - CITYGYM STU
-echo ========================================================
-echo   HE THONG QUAN LY PHONG GYM - LUAN VAN TOT NGHIEP STU
-echo   Tac gia: Vo Duy Phuc ^| GVHD: ThS. Bui Nhat Bang
-echo ========================================================
-echo.
-echo [1/3] Dang kiem tra va them toan bo file thay doi...
+title DONG BO CODE LEN GITHUB - CITYGYM STU
+cd /d "%~dp0"
+
+echo [1/3] Kiem tra va them toan bo file thay doi...
 git add -A
 
-echo.
-echo [2/3] Dang tao commit moi: Khac phuc dong bo ben vung qua localStorage va kich hoat hoi vien tuc thi...
-git commit -m "Khac phuc: Luu localStorage ben vung khong mat du lieu khi reload; Admin kich hoat thi Landing Page hien ngay nut Vao Cong Hoi Vien va tao Hop dong ACTIVE"
+echo [2/3] Tao commit moi...
+git commit -m "Fix RBAC: An RoleSwitcher voi Hoi Vien, tach biet Cong Hoi Vien, luu tru localStorage"
 
-echo.
-echo [3/3] Dang day code len GitHub (duyphuc-2310/QuanLyGym_STU_VoDuyPhuc)...
+echo [3/3] Day code len GitHub...
 git push origin main
 
 echo.
-echo ========================================================
-echo   DA DAY CODE LEN GITHUB THANH CONG!
-echo   Vercel se tu dong bat dau Build va cap nhat website trong 10 giay.
-echo ========================================================
+echo ==============================================
+echo DA DAY CODE LEN GITHUB THANH CONG!
+echo Vercel se tu dong build lai website trong 15s.
+echo ==============================================
 pause

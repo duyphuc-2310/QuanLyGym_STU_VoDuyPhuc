@@ -692,6 +692,13 @@ export default function App() {
     }
   };
 
+  // BẢO VỆ PHÂN QUYỀN RBAC: Hội viên TUYỆT ĐỐI không thể xem các phân hệ nội bộ (Lễ tân, Admin, PT)
+  useEffect(() => {
+    if (currentUser?.role === 'MEMBER' && currentTab !== 'member_portal' && currentTab !== 'nutrition') {
+      setCurrentTab('member_portal');
+    }
+  }, [currentUser, currentTab]);
+
   // Kiểm tra tài khoản khách đăng ký web đã được Admin kích hoạt chưa
   const isPendingMemberActive = pendingMemberUser
     ? systemAccounts.some(
@@ -705,8 +712,8 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       
-      {/* 1. Thanh Role Switcher: CHỈ HIỂN THỊ KHI ĐÃ ĐĂNG NHẬP VÀO HỆ THỐNG NỘI BỘ */}
-      {currentUser !== null && (
+      {/* 1. Thanh Role Switcher: CHỈ DÀNH CHO ADMIN / NHÂN VIÊN DEMO - TUYỆT ĐỐI ẨN KHI LÀ HỘI VIÊN */}
+      {currentUser !== null && currentUser.role !== 'MEMBER' && (
         <RoleSwitcher
           currentUser={currentUser}
           onSelectRole={handleSelectRole}
@@ -808,7 +815,28 @@ export default function App() {
           {/* Phân hệ 5: Cổng Hội Viên (QR động 60s) */}
           {currentTab === 'member_portal' && (
             <MemberPortal
-              member={memberships.find((m) => m.memberName === currentUser.name) || memberships[0]}
+              member={
+                memberships.find(
+                  (m) =>
+                    m.memberName.toLowerCase() === currentUser.name.toLowerCase() ||
+                    m.memberPhone === currentUser.phone
+                ) || {
+                  id: currentUser.id,
+                  contractCode: 'HD-2026-MEMBER',
+                  memberName: currentUser.name,
+                  memberPhone: currentUser.phone,
+                  packageName: 'CityVIP 12 Tháng',
+                  packagePrice: 5800000,
+                  startDate: new Date().toISOString().split('T')[0],
+                  endDate: new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0],
+                  remainingSessions: 20,
+                  totalSessions: 20,
+                  status: 'ACTIVE',
+                  maxFreezeDays: 60,
+                  frozenDaysUsed: 0,
+                  assignedPtName: 'Nguyễn Minh Tuấn (PT)',
+                }
+              }
               onBookPtSession={handleBookPtSession}
               ptBookings={ptBookings}
             />
