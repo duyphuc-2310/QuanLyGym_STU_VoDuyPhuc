@@ -15,6 +15,7 @@ import { AccountManagement, INITIAL_ACCOUNTS } from './pages/admin/AccountManage
 import { SmartNutritionPlanner } from './components/nutrition/SmartNutritionPlanner';
 import { CityAICoachModal } from './components/ai/CityAICoachModal';
 import { AdminLoginPage } from './pages/auth/AdminLoginPage';
+import { ToastNotification } from './components/common/ToastNotification';
 
 // Dữ liệu ban đầu mặc định cho hệ thống (Khi chưa có cache trong localStorage)
 const INITIAL_MEMBERSHIPS: Membership[] = [
@@ -193,6 +194,22 @@ export default function App() {
   // Active Management Tab
   const [currentTab, setCurrentTab] = useState<PortalType>('analytics');
 
+  // Toast Notification System
+  const [toast, setToast] = useState<{
+    id: number;
+    message: string;
+    title?: string;
+    type?: 'success' | 'error' | 'info' | 'warning';
+  } | null>(null);
+
+  const showToast = (
+    message: string,
+    title?: string,
+    type: 'success' | 'error' | 'info' | 'warning' = 'success'
+  ) => {
+    setToast({ id: Date.now(), message, title, type });
+  };
+
   // Shared Data States (Lưu localStorage)
   const [memberships, setMemberships] = useState<Membership[]>(() => {
     try {
@@ -275,12 +292,54 @@ export default function App() {
       )
     : false;
 
+  // Lắng nghe sự kiện Storage để đồng bộ dữ liệu Realtime tức thì giữa các Tab trình duyệt
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'citygym_system_accounts' && e.newValue) {
+        try {
+          const updatedAccounts: SystemAccount[] = JSON.parse(e.newValue);
+          setSystemAccounts(updatedAccounts);
+          if (pendingMemberUser) {
+            const isApproved = updatedAccounts.some(
+              (a) =>
+                (a.phone === pendingMemberUser.phone ||
+                  (pendingMemberUser.username && a.username === pendingMemberUser.username)) &&
+                a.status === 'ACTIVE'
+            );
+            if (isApproved && !isPendingMemberActive) {
+              showToast(
+                'Tài khoản của bạn đã được Admin kích hoạt thành công! Bạn có thể bấm "Vào Cổng Hội Viên" ngay.',
+                'Kích Hoạt Tài Khoản Thành Công',
+                'success'
+              );
+            }
+          }
+        } catch (err) {}
+      }
+      if (e.key === 'citygym_memberships' && e.newValue) {
+        try {
+          setMemberships(JSON.parse(e.newValue));
+        } catch (err) {}
+      }
+      if (e.key === 'citygym_leads' && e.newValue) {
+        try {
+          setLeads(JSON.parse(e.newValue));
+        } catch (err) {}
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [pendingMemberUser, isPendingMemberActive]);
+
   // Xử lý Đăng Nhập Thành Công: Tự động điều hướng đến URL riêng của từng vai trò
   const handleLoginSuccess = (user: User) => {
     setCurrentUser(user);
     try {
       localStorage.setItem('citygym_current_user', JSON.stringify(user));
     } catch (e) {}
+
+    showToast(`Chào mừng ${user.name} đã quay trở lại hệ thống!`, 'Đăng Nhập Thành Công', 'success');
 
     if (user.role === 'ADMIN') {
       setCurrentTab('analytics');
@@ -303,6 +362,7 @@ export default function App() {
     try {
       localStorage.removeItem('citygym_current_user');
     } catch (e) {}
+    showToast('Bạn đã đăng xuất khỏi hệ thống an toàn.', 'Đăng Xuất', 'info');
     window.location.hash = '#/';
   };
 
@@ -377,6 +437,12 @@ export default function App() {
       };
       return [newLead, ...prev];
     });
+
+    showToast(
+      `Đã tạo tài khoản cho ${newUser.name}. Vui lòng chọn gói tập để hoàn tất!`,
+      'Tạo Tài Khoản Thành Công',
+      'success'
+    );
   };
 
   // Xử lý khi khách hàng hoàn tất thanh toán gói tập qua VietQR trên Landing Page
@@ -454,6 +520,12 @@ export default function App() {
       };
       return [newAcc, ...prev];
     });
+
+    showToast(
+      `Đã nhận giao dịch ${data.package.name}. Thông tin đã gửi đến CRM Admin để duyệt!`,
+      'Thanh Toán VietQR Thành Công',
+      'success'
+    );
   };
 
   // Xử lý khi Admin hoặc Lễ tân Duyệt & Kích Hoạt gói đã thanh toán từ CRM
@@ -541,13 +613,10 @@ export default function App() {
       });
     }
 
-    alert(
-      `✅ ĐÃ DUYỆT & KÍCH HOẠT HỘI VIÊN THÀNH CÔNG!\n\n` +
-      `• Khách hàng: ${lead.fullName}\n` +
-      `• Số điện thoại: ${lead.phone}\n` +
-      `• Hợp đồng: ${newM.contractCode} (${newM.packageName})\n` +
-      `• Tài khoản đã được KÍCH HOẠT (ACTIVE) trong hệ thống RBAC.\n` +
-      `• Hội viên có thể đăng nhập tại link #admin hoặc bấm 'Vào Cổng Hội Viên' ngay!`
+    showToast(
+      `Hợp đồng ${newM.contractCode} (${newM.packageName}) đã được kích hoạt. Hội viên ${lead.fullName} có thể vào Cổng Hội Viên ngay!`,
+      'Phê Duyệt & Kích Hoạt Thành Công',
+      'success'
     );
   };
 
@@ -556,7 +625,7 @@ export default function App() {
     const target = systemAccounts.find((a) => a.id === accountId);
     if (!target) return;
     if (target.role === 'ADMIN') {
-      alert('Không thể khóa tài khoản Quản trị viên cấp cao (Admin)!');
+      showToast('Không thể khóa tài khoản Quản trị viên cấp cao (Admin)!', 'Thao Tác Bị Từ Chối', 'error');
       return;
     }
     const nextStatus = target.status === 'ACTIVE' ? 'LOCKED' : 'ACTIVE';
@@ -640,28 +709,37 @@ export default function App() {
         });
       }
 
-      alert(
-        `✅ ĐÃ KÍCH HOẠT HỘI VIÊN THÀNH CÔNG!\n\n` +
-        `• Khách hàng: ${target.name} (${target.phone})\n` +
-        `• Gói tập: ${pkgName}\n` +
-        `• Hợp đồng đã được kích hoạt ở trạng thái ACTIVE.\n` +
-        `• Hội viên có thể đăng nhập hoặc bấm 'Vào Cổng Hội Viên' ngay!`
+      showToast(
+        `Đã kích hoạt tài khoản của ${target.name} (${target.phone}) thành công!`,
+        'Kích Hoạt Tài Khoản',
+        'success'
       );
     } else {
-      alert(`Đã TẠM KHÓA tài khoản của ${target.name}!`);
+      showToast(
+        `Đã tạm khóa tài khoản của ${target.name}!`,
+        'Tạm Khóa Tài Khoản',
+        'warning'
+      );
     }
   };
 
   const handleAccountCreated = (newAcc: SystemAccount) => {
     setSystemAccounts((prev) => [newAcc, ...prev]);
+    showToast(`Đã tạo tài khoản ${newAcc.name} (${newAcc.role}) thành công!`, 'Tạo Tài Khoản', 'success');
   };
 
   const handleRegisterTrial = (newLead: Lead) => {
     setLeads((prev) => [newLead, ...prev]);
+    showToast(`Đăng ký vé tập thử thành công! Mã vé: ${newLead.ticketCode}`, 'Đăng Ký Tập Thử', 'success');
   };
 
   const handleCheckinSuccess = (log: CheckInLog) => {
     setCheckinLogs((prev) => [log, ...prev]);
+    if (log.status === 'SUCCESS') {
+      showToast(`Check-in thành công: ${log.name} (${log.note})`, 'Cửa Khẩu Check-in', 'success');
+    } else {
+      showToast(`Từ chối check-in: ${log.name} (${log.note})`, 'Cảnh Báo Check-in', 'error');
+    }
   };
 
   const handleUpdateLeadStatus = (ticketCode: string, status: any) => {
@@ -676,6 +754,7 @@ export default function App() {
 
   const handleAddMembership = (newM: Membership) => {
     setMemberships((prev) => [newM, ...prev]);
+    showToast(`Đã lập hợp đồng mới ${newM.contractCode} cho ${newM.memberName}!`, 'Hợp Đồng Mới', 'success');
     if (newM.remainingSessions > 0 && newM.assignedPtName) {
       const newBooking: PtBooking = {
         id: Date.now() + 10,
@@ -693,10 +772,16 @@ export default function App() {
 
   const handleUpdateMembership = (updated: Membership) => {
     setMemberships((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
+    showToast(`Đã cập nhật hợp đồng ${updated.contractCode}!`, 'Cập Nhật Hợp Đồng', 'info');
   };
 
   const handleBookPtSession = (newBooking: PtBooking) => {
     setPtBookings((prev) => [newBooking, ...prev]);
+    showToast(
+      `Đặt lịch tập 1-1 với ${newBooking.trainerName} lúc ${newBooking.time} (${newBooking.date}) thành công!`,
+      'Đặt Lịch Huấn Luyện Viên',
+      'success'
+    );
   };
 
   const handleCompleteBooking = (bookingId: number) => {
@@ -712,6 +797,7 @@ export default function App() {
             : m
         )
       );
+      showToast(`Đã xác nhận hoàn thành buổi tập và trừ 1 buổi cho ${booking.memberName}!`, 'Trừ Buổi PT', 'info');
     }
   };
 
@@ -752,366 +838,391 @@ export default function App() {
     currentRoute.startsWith('#admin-bi') || 
     currentRoute.startsWith('#dashboard');
 
-  // 1. CỔNG ĐĂNG NHẬP QUẢN TRỊ BẢO MẬT (#admin)
-  // Đường link giấu kín, khi truy cập hiện màn hình Full-page Login Screen
-  if (isAuthAdminRoute) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
-        <AdminLoginPage
-          onLoginSuccess={handleLoginSuccess}
-          onGoHome={() => { window.location.hash = '#/'; }}
-          accounts={systemAccounts}
-        />
-        <CityAICoachModal
-          memberName={currentUser ? currentUser.name : 'Quản Trị Viên'}
-          memberWeight={68.2}
-          memberBmr={1675}
-          memberBmi={23.1}
-        />
-      </div>
-    );
-  }
-
-  // 2. CỔNG HỘI VIÊN RIÊNG BIỆT (#member)
-  // Chỉ hội viên chính thức hoặc Admin mới xem được (chỉ có QR 60s & Dinh dưỡng)
-  if (isMemberRoute) {
-    const authorizedUser = (currentUser && (currentUser.role === 'MEMBER' || currentUser.role === 'ADMIN'))
-      ? currentUser
-      : (pendingMemberUser && isPendingMemberActive)
-      ? {
-          ...pendingMemberUser,
-          role: 'MEMBER' as UserRole,
-        }
-      : null;
-
-    if (!authorizedUser) {
-      return (
-        <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
-          <AdminLoginPage
-            onLoginSuccess={handleLoginSuccess}
-            onGoHome={() => { window.location.hash = '#/'; }}
-            accounts={systemAccounts}
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-        <DashboardLayout
-          currentUser={authorizedUser}
-          currentTab={currentTab}
-          onChangeTab={setCurrentTab}
-          onLogout={handleLogout}
-          onGoHome={() => { window.location.hash = '#/'; }}
-        >
-          {currentTab === 'member_portal' && (
-            <MemberPortal
-              member={currentMemberData}
-              onBookPtSession={handleBookPtSession}
-              ptBookings={ptBookings}
-            />
-          )}
-          {currentTab === 'nutrition' && (
-            <div className="max-w-6xl mx-auto px-4 py-8">
-              <SmartNutritionPlanner
-                memberWeight={68.2}
-                memberHeight={172}
-                memberBmr={1675}
-              />
-            </div>
-          )}
-        </DashboardLayout>
-        <CityAICoachModal
-          memberName={authorizedUser.name}
-          memberWeight={68.2}
-          memberBmr={1675}
-          memberBmi={23.1}
-        />
-      </div>
-    );
-  }
-
-  // 3. CỔNG LỄ TÂN RIÊNG BIỆT (#reception)
-  // Chỉ Lễ tân hoặc Admin mới xem được (Check-in, Hợp đồng, Lead CRM)
-  if (isReceptionRoute) {
-    const authorizedUser = (currentUser && (currentUser.role === 'RECEPTION' || currentUser.role === 'ADMIN'))
-      ? currentUser
-      : null;
-
-    if (!authorizedUser) {
-      return (
-        <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
-          <AdminLoginPage
-            onLoginSuccess={handleLoginSuccess}
-            onGoHome={() => { window.location.hash = '#/'; }}
-            accounts={systemAccounts}
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-        <DashboardLayout
-          currentUser={authorizedUser}
-          currentTab={currentTab}
-          onChangeTab={setCurrentTab}
-          onLogout={handleLogout}
-          onGoHome={() => { window.location.hash = '#/'; }}
-        >
-          {currentTab === 'checkin' && (
-            <CheckinScanner
-              memberships={memberships}
-              leads={leads}
-              checkinLogs={checkinLogs}
-              onCheckinSuccess={handleCheckinSuccess}
-              onUpdateLeadStatus={handleUpdateLeadStatus}
-            />
-          )}
-          {currentTab === 'memberships' && (
-            <ContractsManager
-              memberships={memberships}
-              onAddMembership={handleAddMembership}
-              onUpdateMembership={handleUpdateMembership}
-            />
-          )}
-          {currentTab === 'leads' && (
-            <LeadCRM
-              leads={leads}
-              onConvertLead={handleConvertLead}
-              onAddMembership={handleAddMembership}
-              onApprovePaidLead={handleApprovePaidLead}
-            />
-          )}
-        </DashboardLayout>
-        <CityAICoachModal
-          memberName={authorizedUser.name}
-          memberWeight={68.2}
-          memberBmr={1675}
-          memberBmi={23.1}
-        />
-      </div>
-    );
-  }
-
-  // 4. CỔNG HUẤN LUYỆN VIÊN PT RIÊNG BIỆT (#trainer)
-  // Chỉ HLV hoặc Admin mới xem được (Lịch dạy PT, Trừ buổi, InBody, Dinh dưỡng)
-  if (isTrainerRoute) {
-    const authorizedUser = (currentUser && (currentUser.role === 'TRAINER' || currentUser.role === 'ADMIN'))
-      ? currentUser
-      : null;
-
-    if (!authorizedUser) {
-      return (
-        <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
-          <AdminLoginPage
-            onLoginSuccess={handleLoginSuccess}
-            onGoHome={() => { window.location.hash = '#/'; }}
-            accounts={systemAccounts}
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-        <DashboardLayout
-          currentUser={authorizedUser}
-          currentTab={currentTab}
-          onChangeTab={setCurrentTab}
-          onLogout={handleLogout}
-          onGoHome={() => { window.location.hash = '#/'; }}
-        >
-          {currentTab === 'pt_portal' && (
-            <TrainerPortal
-              memberships={memberships}
-              ptBookings={ptBookings}
-              onCompleteBooking={handleCompleteBooking}
-              onSaveInBodyMetric={(m) => console.log('InBody:', m)}
-              onAddBooking={handleBookPtSession}
-            />
-          )}
-          {currentTab === 'nutrition' && (
-            <div className="max-w-6xl mx-auto px-4 py-8">
-              <SmartNutritionPlanner
-                memberWeight={68.2}
-                memberHeight={172}
-                memberBmr={1675}
-              />
-            </div>
-          )}
-        </DashboardLayout>
-        <CityAICoachModal
-          memberName={authorizedUser.name}
-          memberWeight={68.2}
-          memberBmr={1675}
-          memberBmi={23.1}
-        />
-      </div>
-    );
-  }
-
-  // 5. CỔNG QUẢN TRỊ CẤP CAO ADMIN (#admin-dashboard)
-  // Chỉ Admin tối cao mới xem được toàn bộ 8 phân hệ
-  if (isAdminDashboardRoute) {
-    const authorizedUser = (currentUser && currentUser.role === 'ADMIN')
-      ? currentUser
-      : null;
-
-    if (!authorizedUser) {
-      if (currentUser?.role === 'MEMBER') {
-        window.location.hash = '#member';
-        return null;
-      }
-      if (currentUser?.role === 'RECEPTION') {
-        window.location.hash = '#reception';
-        return null;
-      }
-      if (currentUser?.role === 'TRAINER') {
-        window.location.hash = '#trainer';
-        return null;
-      }
-      return (
-        <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
-          <AdminLoginPage
-            onLoginSuccess={handleLoginSuccess}
-            onGoHome={() => { window.location.hash = '#/'; }}
-            accounts={systemAccounts}
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-        <DashboardLayout
-          currentUser={authorizedUser}
-          currentTab={currentTab}
-          onChangeTab={setCurrentTab}
-          onLogout={handleLogout}
-          onGoHome={() => { window.location.hash = '#/'; }}
-        >
-          {currentTab === 'analytics' && <AnalyticsDashboard />}
-          {currentTab === 'users' && (
-            <AccountManagement
-              accounts={systemAccounts}
-              onToggleStatus={handleToggleAccountStatus}
-              onAccountCreated={handleAccountCreated}
-            />
-          )}
-          {currentTab === 'checkin' && (
-            <CheckinScanner
-              memberships={memberships}
-              leads={leads}
-              checkinLogs={checkinLogs}
-              onCheckinSuccess={handleCheckinSuccess}
-              onUpdateLeadStatus={handleUpdateLeadStatus}
-            />
-          )}
-          {currentTab === 'memberships' && (
-            <ContractsManager
-              memberships={memberships}
-              onAddMembership={handleAddMembership}
-              onUpdateMembership={handleUpdateMembership}
-            />
-          )}
-          {currentTab === 'leads' && (
-            <LeadCRM
-              leads={leads}
-              onConvertLead={handleConvertLead}
-              onAddMembership={handleAddMembership}
-              onApprovePaidLead={handleApprovePaidLead}
-            />
-          )}
-          {currentTab === 'pt_portal' && (
-            <TrainerPortal
-              memberships={memberships}
-              ptBookings={ptBookings}
-              onCompleteBooking={handleCompleteBooking}
-              onSaveInBodyMetric={(m) => console.log('InBody:', m)}
-              onAddBooking={handleBookPtSession}
-            />
-          )}
-          {currentTab === 'member_portal' && (
-            <MemberPortal
-              member={currentMemberData}
-              onBookPtSession={handleBookPtSession}
-              ptBookings={ptBookings}
-            />
-          )}
-          {currentTab === 'nutrition' && (
-            <div className="max-w-6xl mx-auto px-4 py-8">
-              <SmartNutritionPlanner
-                memberWeight={68.2}
-                memberHeight={172}
-                memberBmr={1675}
-              />
-            </div>
-          )}
-        </DashboardLayout>
-        <CityAICoachModal
-          memberName={authorizedUser.name}
-          memberWeight={68.2}
-          memberBmr={1675}
-          memberBmi={23.1}
-        />
-      </div>
-    );
-  }
-
-  // 6. MẶC ĐỊNH: TRANG CHỦ LANDING PAGE DÀNH CHO KHÁCH VÃNG LAI (Route #/ hoặc rỗng)
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      <LandingPage
-        currentUser={pendingMemberUser}
-        isAccountActive={isPendingMemberActive}
-        onRegisterTrial={handleRegisterTrial}
-        onOpenLogin={() => { window.location.hash = '#admin'; }}
-        onMemberAuthSuccess={handleMemberAuthSuccess}
-        onPackagePurchased={handlePackagePurchased}
-        onGoToPortal={() => {
-          if (pendingMemberUser) {
-            const fullUser = systemAccounts.find(
-              (a) =>
-                a.phone === pendingMemberUser.phone ||
-                (pendingMemberUser.username && a.username === pendingMemberUser.username)
+    <>
+      {/* ==================== 1. CỔNG ĐĂNG NHẬP QUẢN TRỊ BẢO MẬT (#admin) ==================== */}
+      {isAuthAdminRoute ? (
+        <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
+          <AdminLoginPage
+            onLoginSuccess={handleLoginSuccess}
+            onGoHome={() => { window.location.hash = '#/'; }}
+            accounts={systemAccounts}
+          />
+          <CityAICoachModal
+            memberName={currentUser ? currentUser.name : 'Quản Trị Viên'}
+            memberWeight={68.2}
+            memberBmr={1675}
+            memberBmi={23.1}
+          />
+        </div>
+      ) : isMemberRoute ? (
+        /* ==================== 2. CỔNG HỘI VIÊN RIÊNG BIỆT (#member) ==================== */
+        (() => {
+          const authorizedUser = (currentUser && (currentUser.role === 'MEMBER' || currentUser.role === 'ADMIN'))
+            ? currentUser
+            : (pendingMemberUser && isPendingMemberActive)
+            ? {
+                ...pendingMemberUser,
+                role: 'MEMBER' as UserRole,
+              }
+            : null;
+
+          if (!authorizedUser) {
+            return (
+              <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
+                <AdminLoginPage
+                  onLoginSuccess={handleLoginSuccess}
+                  onGoHome={() => { window.location.hash = '#/'; }}
+                  accounts={systemAccounts}
+                />
+              </div>
             );
-            const memberUser: User = fullUser
-              ? {
-                  id: fullUser.id,
-                  name: fullUser.name,
-                  email: fullUser.email,
-                  phone: fullUser.phone,
-                  role: 'MEMBER',
-                  department: fullUser.department,
-                  age: fullUser.age,
-                  username: fullUser.username,
-                }
-              : { ...pendingMemberUser, role: 'MEMBER' };
-            setCurrentUser(memberUser);
-            try {
-              localStorage.setItem('citygym_current_user', JSON.stringify(memberUser));
-            } catch (e) {}
           }
-          setCurrentTab('member_portal');
-          window.location.hash = '#member';
-        }}
-        onLogout={() => {
-          setPendingMemberUser(null);
-          setCurrentUser(null);
-          try {
-            localStorage.removeItem('citygym_pending_member');
-            localStorage.removeItem('citygym_current_user');
-          } catch (e) {}
-        }}
-      />
-      <CityAICoachModal
-        memberName={pendingMemberUser ? pendingMemberUser.name : 'Khách Vãng Lai'}
-        memberWeight={68.2}
-        memberBmr={1675}
-        memberBmi={23.1}
-      />
-    </div>
+
+          return (
+            <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+              <DashboardLayout
+                currentUser={authorizedUser}
+                currentTab={currentTab}
+                onChangeTab={setCurrentTab}
+                onLogout={handleLogout}
+                onGoHome={() => { window.location.hash = '#/'; }}
+              >
+                {currentTab === 'member_portal' && (
+                  <MemberPortal
+                    member={currentMemberData}
+                    onBookPtSession={handleBookPtSession}
+                    ptBookings={ptBookings}
+                  />
+                )}
+                {currentTab === 'nutrition' && (
+                  <div className="max-w-6xl mx-auto px-4 py-8">
+                    <SmartNutritionPlanner
+                      memberWeight={68.2}
+                      memberHeight={172}
+                      memberBmr={1675}
+                    />
+                  </div>
+                )}
+              </DashboardLayout>
+              <CityAICoachModal
+                memberName={authorizedUser.name}
+                memberWeight={68.2}
+                memberBmr={1675}
+                memberBmi={23.1}
+              />
+            </div>
+          );
+        })()
+      ) : isReceptionRoute ? (
+        /* ==================== 3. CỔNG LỄ TÂN RIÊNG BIỆT (#reception) ==================== */
+        (() => {
+          const authorizedUser = (currentUser && (currentUser.role === 'RECEPTION' || currentUser.role === 'ADMIN'))
+            ? currentUser
+            : null;
+
+          if (!authorizedUser) {
+            if (currentUser?.role === 'MEMBER') {
+              window.location.hash = '#member';
+              return null;
+            }
+            if (currentUser?.role === 'TRAINER') {
+              window.location.hash = '#trainer';
+              return null;
+            }
+            return (
+              <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
+                <AdminLoginPage
+                  onLoginSuccess={handleLoginSuccess}
+                  onGoHome={() => { window.location.hash = '#/'; }}
+                  accounts={systemAccounts}
+                />
+              </div>
+            );
+          }
+
+          return (
+            <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+              <DashboardLayout
+                currentUser={authorizedUser}
+                currentTab={currentTab}
+                onChangeTab={setCurrentTab}
+                onLogout={handleLogout}
+                onGoHome={() => { window.location.hash = '#/'; }}
+              >
+                {currentTab === 'checkin' && (
+                  <CheckinScanner
+                    memberships={memberships}
+                    leads={leads}
+                    checkinLogs={checkinLogs}
+                    onCheckinSuccess={handleCheckinSuccess}
+                    onUpdateLeadStatus={handleUpdateLeadStatus}
+                  />
+                )}
+                {currentTab === 'memberships' && (
+                  <ContractsManager
+                    memberships={memberships}
+                    onAddMembership={handleAddMembership}
+                    onUpdateMembership={handleUpdateMembership}
+                  />
+                )}
+                {currentTab === 'leads' && (
+                  <LeadCRM
+                    leads={leads}
+                    onConvertLead={handleConvertLead}
+                    onAddMembership={handleAddMembership}
+                    onApprovePaidLead={handleApprovePaidLead}
+                  />
+                )}
+              </DashboardLayout>
+              <CityAICoachModal
+                memberName={authorizedUser.name}
+                memberWeight={68.2}
+                memberBmr={1675}
+                memberBmi={23.1}
+              />
+            </div>
+          );
+        })()
+      ) : isTrainerRoute ? (
+        /* ==================== 4. CỔNG HUẤN LUYỆN VIÊN PT RIÊNG BIỆT (#trainer) ==================== */
+        (() => {
+          const authorizedUser = (currentUser && (currentUser.role === 'TRAINER' || currentUser.role === 'ADMIN'))
+            ? currentUser
+            : null;
+
+          if (!authorizedUser) {
+            if (currentUser?.role === 'MEMBER') {
+              window.location.hash = '#member';
+              return null;
+            }
+            if (currentUser?.role === 'RECEPTION') {
+              window.location.hash = '#reception';
+              return null;
+            }
+            return (
+              <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
+                <AdminLoginPage
+                  onLoginSuccess={handleLoginSuccess}
+                  onGoHome={() => { window.location.hash = '#/'; }}
+                  accounts={systemAccounts}
+                />
+              </div>
+            );
+          }
+
+          return (
+            <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+              <DashboardLayout
+                currentUser={authorizedUser}
+                currentTab={currentTab}
+                onChangeTab={setCurrentTab}
+                onLogout={handleLogout}
+                onGoHome={() => { window.location.hash = '#/'; }}
+              >
+                {currentTab === 'pt_portal' && (
+                  <TrainerPortal
+                    memberships={memberships}
+                    ptBookings={ptBookings}
+                    onCompleteBooking={handleCompleteBooking}
+                    onSaveInBodyMetric={(m) => console.log('InBody:', m)}
+                    onAddBooking={handleBookPtSession}
+                  />
+                )}
+                {currentTab === 'nutrition' && (
+                  <div className="max-w-6xl mx-auto px-4 py-8">
+                    <SmartNutritionPlanner
+                      memberWeight={68.2}
+                      memberHeight={172}
+                      memberBmr={1675}
+                    />
+                  </div>
+                )}
+              </DashboardLayout>
+              <CityAICoachModal
+                memberName={authorizedUser.name}
+                memberWeight={68.2}
+                memberBmr={1675}
+                memberBmi={23.1}
+              />
+            </div>
+          );
+        })()
+      ) : isAdminDashboardRoute ? (
+        /* ==================== 5. CỔNG QUẢN TRỊ CẤP CAO ADMIN (#admin-dashboard) ==================== */
+        (() => {
+          const authorizedUser = (currentUser && currentUser.role === 'ADMIN')
+            ? currentUser
+            : null;
+
+          if (!authorizedUser) {
+            if (currentUser?.role === 'MEMBER') {
+              window.location.hash = '#member';
+              return null;
+            }
+            if (currentUser?.role === 'RECEPTION') {
+              window.location.hash = '#reception';
+              return null;
+            }
+            if (currentUser?.role === 'TRAINER') {
+              window.location.hash = '#trainer';
+              return null;
+            }
+            return (
+              <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
+                <AdminLoginPage
+                  onLoginSuccess={handleLoginSuccess}
+                  onGoHome={() => { window.location.hash = '#/'; }}
+                  accounts={systemAccounts}
+                />
+              </div>
+            );
+          }
+
+          return (
+            <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+              <DashboardLayout
+                currentUser={authorizedUser}
+                currentTab={currentTab}
+                onChangeTab={setCurrentTab}
+                onLogout={handleLogout}
+                onGoHome={() => { window.location.hash = '#/'; }}
+              >
+                {currentTab === 'analytics' && <AnalyticsDashboard />}
+                {currentTab === 'users' && (
+                  <AccountManagement
+                    accounts={systemAccounts}
+                    onToggleStatus={handleToggleAccountStatus}
+                    onAccountCreated={handleAccountCreated}
+                  />
+                )}
+                {currentTab === 'checkin' && (
+                  <CheckinScanner
+                    memberships={memberships}
+                    leads={leads}
+                    checkinLogs={checkinLogs}
+                    onCheckinSuccess={handleCheckinSuccess}
+                    onUpdateLeadStatus={handleUpdateLeadStatus}
+                  />
+                )}
+                {currentTab === 'memberships' && (
+                  <ContractsManager
+                    memberships={memberships}
+                    onAddMembership={handleAddMembership}
+                    onUpdateMembership={handleUpdateMembership}
+                  />
+                )}
+                {currentTab === 'leads' && (
+                  <LeadCRM
+                    leads={leads}
+                    onConvertLead={handleConvertLead}
+                    onAddMembership={handleAddMembership}
+                    onApprovePaidLead={handleApprovePaidLead}
+                  />
+                )}
+                {currentTab === 'pt_portal' && (
+                  <TrainerPortal
+                    memberships={memberships}
+                    ptBookings={ptBookings}
+                    onCompleteBooking={handleCompleteBooking}
+                    onSaveInBodyMetric={(m) => console.log('InBody:', m)}
+                    onAddBooking={handleBookPtSession}
+                  />
+                )}
+                {currentTab === 'member_portal' && (
+                  <MemberPortal
+                    member={currentMemberData}
+                    onBookPtSession={handleBookPtSession}
+                    ptBookings={ptBookings}
+                  />
+                )}
+                {currentTab === 'nutrition' && (
+                  <div className="max-w-6xl mx-auto px-4 py-8">
+                    <SmartNutritionPlanner
+                      memberWeight={68.2}
+                      memberHeight={172}
+                      memberBmr={1675}
+                    />
+                  </div>
+                )}
+              </DashboardLayout>
+              <CityAICoachModal
+                memberName={authorizedUser.name}
+                memberWeight={68.2}
+                memberBmr={1675}
+                memberBmi={23.1}
+              />
+            </div>
+          );
+        })()
+      ) : (
+        /* ==================== 6. MẶC ĐỊNH: TRANG CHỦ LANDING PAGE DÀNH CHO KHÁCH VÃNG LAI ==================== */
+        <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+          <LandingPage
+            currentUser={pendingMemberUser}
+            isAccountActive={isPendingMemberActive}
+            accounts={systemAccounts}
+            onRegisterTrial={handleRegisterTrial}
+            onOpenLogin={() => { window.location.hash = '#admin'; }}
+            onMemberAuthSuccess={handleMemberAuthSuccess}
+            onPackagePurchased={handlePackagePurchased}
+            onGoToPortal={() => {
+              if (pendingMemberUser) {
+                const fullUser = systemAccounts.find(
+                  (a) =>
+                    a.phone === pendingMemberUser.phone ||
+                    (pendingMemberUser.username && a.username === pendingMemberUser.username)
+                );
+                const memberUser: User = fullUser
+                  ? {
+                      id: fullUser.id,
+                      name: fullUser.name,
+                      email: fullUser.email,
+                      phone: fullUser.phone,
+                      role: 'MEMBER',
+                      department: fullUser.department,
+                      age: fullUser.age,
+                      username: fullUser.username,
+                    }
+                  : { ...pendingMemberUser, role: 'MEMBER' };
+                setCurrentUser(memberUser);
+                try {
+                  localStorage.setItem('citygym_current_user', JSON.stringify(memberUser));
+                } catch (e) {}
+              }
+              setCurrentTab('member_portal');
+              window.location.hash = '#member';
+            }}
+            onLogout={() => {
+              setPendingMemberUser(null);
+              setCurrentUser(null);
+              try {
+                localStorage.removeItem('citygym_pending_member');
+                localStorage.removeItem('citygym_current_user');
+              } catch (e) {}
+              showToast('Bạn đã đăng xuất tài khoản hội viên.', 'Đăng Xuất', 'info');
+            }}
+          />
+          <CityAICoachModal
+            memberName={pendingMemberUser ? pendingMemberUser.name : 'Khách Vãng Lai'}
+            memberWeight={68.2}
+            memberBmr={1675}
+            memberBmi={23.1}
+          />
+        </div>
+      )}
+
+      {/* ==================== TOAST NOTIFICATION HỆ THỐNG TOÀN CỤC ==================== */}
+      {toast && (
+        <ToastNotification
+          key={toast.id}
+          id={toast.id}
+          title={toast.title}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+    </>
   );
 }

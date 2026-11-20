@@ -13,6 +13,7 @@ import { MemberAuthModal } from '../../components/modals/MemberAuthModal';
 interface LandingPageProps {
   currentUser?: UserType | null;
   isAccountActive?: boolean;
+  accounts?: any[];
   onRegisterTrial?: (lead: Lead) => void;
   onOpenLogin?: () => void;
   onMemberAuthSuccess?: (newUser: UserType, rawPassword?: string) => void;
@@ -36,6 +37,7 @@ interface LandingPageProps {
 export const LandingPage: React.FC<LandingPageProps> = ({ 
   currentUser,
   isAccountActive = false,
+  accounts = [],
   onRegisterTrial, 
   onOpenLogin,
   onMemberAuthSuccess,
@@ -1698,6 +1700,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         onRegisterSuccess={handleAuthCompleted}
         onLoginSuccess={(u) => handleAuthCompleted(u)}
         pendingActionNotice={authActionNotice}
+        accounts={accounts}
       />
 
     </div>

@@ -12,6 +12,7 @@ interface MemberAuthModalProps {
   onLoginSuccess: (user: UserType) => void;
   pendingActionNotice?: string;
   initialTab?: 'REGISTER' | 'LOGIN';
+  accounts?: any[];
 }
 
 export const MemberAuthModal: React.FC<MemberAuthModalProps> = ({
@@ -21,6 +22,7 @@ export const MemberAuthModal: React.FC<MemberAuthModalProps> = ({
   onLoginSuccess,
   pendingActionNotice = 'Khách vãng lai cần tạo tài khoản hoặc đăng nhập để hoàn tất đăng ký tập.',
   initialTab = 'REGISTER',
+  accounts = [],
 }) => {
   const [tab, setTab] = useState<'REGISTER' | 'LOGIN'>(initialTab);
 
@@ -89,20 +91,56 @@ export const MemberAuthModal: React.FC<MemberAuthModalProps> = ({
       return;
     }
 
-    // Default user for member login
-    const loggedUser: UserType = {
-      id: Date.now(),
-      name: loginAccount.includes('09') ? 'Hội Viên CITYGYM' : loginAccount,
-      email: `${loginAccount.toLowerCase()}@citygym.vn`,
-      phone: loginAccount.startsWith('0') ? loginAccount : '0901234567',
-      role: 'MEMBER',
-      department: 'Hội Viên Cá Nhân 24/7',
-      age: 23,
-      username: loginAccount.toLowerCase(),
-    };
+    // 1. Kiểm tra trong danh sách tài khoản hệ thống (systemAccounts)
+    const cleanAcc = loginAccount.trim().toLowerCase();
+    if (accounts && accounts.length > 0) {
+      const found = accounts.find(
+        (a: any) =>
+          (a.email && a.email.toLowerCase() === cleanAcc) ||
+          a.phone === loginAccount.trim() ||
+          (a.username && a.username.toLowerCase() === cleanAcc)
+      );
 
-    onLoginSuccess(loggedUser);
-    onClose();
+      if (found) {
+        if (found.status === 'LOCKED') {
+          setLoginError('Tài khoản này đang ở trạng thái CHỜ ADMIN DUYỆT THANH TOÁN hoặc ĐÃ BỊ KHÓA!');
+          return;
+        }
+
+        onLoginSuccess({
+          id: found.id,
+          name: found.name,
+          email: found.email,
+          phone: found.phone,
+          role: found.role || 'MEMBER',
+          department: found.department,
+          age: found.age,
+          username: found.username,
+        });
+        onClose();
+        return;
+      }
+    }
+
+    // 2. Tài khoản mẫu mặc định
+    if (cleanAcc === 'phuc.vo@stu.edu.vn' || cleanAcc === '0901234567' || cleanAcc === 'member') {
+      const loggedUser: UserType = {
+        id: Date.now(),
+        name: 'Võ Duy Phúc (Hội Viên VIP)',
+        email: 'phuc.vo@stu.edu.vn',
+        phone: '0901234567',
+        role: 'MEMBER',
+        department: 'Hội Viên Thẻ VIP (CityVIP 12 Tháng)',
+        age: 23,
+        username: 'duyphuc',
+      };
+      onLoginSuccess(loggedUser);
+      onClose();
+      return;
+    }
+
+    // 3. Fallback: Nếu không tìm thấy
+    setLoginError('Tài khoản hoặc mật khẩu không chính xác. Vui lòng đăng ký nếu bạn chưa có tài khoản!');
   };
 
   return (
