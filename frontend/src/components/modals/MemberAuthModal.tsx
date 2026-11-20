@@ -273,13 +273,20 @@ export const MemberAuthModal: React.FC<MemberAuthModalProps> = ({
               </div>
             </div>
 
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <p className="leading-relaxed">
+                <strong>Quy trình kích hoạt:</strong> Sau khi hoàn tất đăng ký tài khoản và thanh toán gói tập qua VietQR, <strong>Admin sẽ xác nhận và kích hoạt quyền hội viên</strong> để bạn đăng nhập vào Cổng Hội Viên.
+              </p>
+            </div>
+
             <div className="pt-2">
               <button
                 type="submit"
                 className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-city-red to-city-accent hover:from-city-darkred hover:to-city-red text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-city-red/30 hover:scale-[1.01] transition-all"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Xác Nhận Tạo Tài Khoản & Kích Hoạt Đăng Ký</span>
+                <span>Xác Nhận Tạo Tài Khoản & Tiếp Tục Thanh Toán</span>
               </button>
             </div>
 

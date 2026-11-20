@@ -176,21 +176,28 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   };
 
   // Xử lý nộp form nhận vé tập thử
+  // BẮT BUỘC ĐĂNG NHẬP / TẠO TÀI KHOẢN để xác thực thông tin nhận vé
+  // Nhưng KHÔNG cấp quyền vào Cổng Hội Viên (chỉ ghi Lead CRM và cấp vé QR tập thử)
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // CHẶN KHÁCH VÃNG LAI: Bắt buộc phải đăng nhập hoặc tạo tài khoản mới
     if (!currentUser) {
       setAuthActionNotice(
-        'Bạn đang là khách vãng lai (chỉ xem được thông tin). Để đăng ký nhận vé tập thử E-Pass 0Đ 24/7, vui lòng tạo tài khoản hội viên gồm: SĐT, Tên đăng nhập, Mật khẩu, Họ tên, Tuổi!'
+        'Vui lòng đăng nhập hoặc tạo tài khoản (SĐT, Tên đăng nhập, Mật khẩu, Họ tên, Tuổi) để hệ thống xác thực và cấp mã vé tập thử E-Pass 0Đ!'
       );
       setPendingBookingType('TRIAL');
       setShowMemberAuthModal(true);
       return;
     }
 
-    const userName = currentUser.name || bookingForm.name;
-    const userPhone = currentUser.phone || bookingForm.phone;
+    const userName = (currentUser.name || bookingForm.name).trim();
+    const userPhone = (currentUser.phone || bookingForm.phone).trim();
+
+    if (!userName || !userPhone) {
+      alert('Vui lòng nhập đầy đủ Họ tên và Số điện thoại để nhận vé E-Pass.');
+      return;
+    }
+
     executeBooking(userName, userPhone);
   };
 
@@ -377,7 +384,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <span>Tập Thử 0Đ (E-Pass)</span>
             </a>
 
-            {/* Trạng thái xác thực: Khách Vãng Lai vs Hội Viên Đã Đăng Nhập */}
+            {/* Trạng thái xác thực: Khách Vãng Lai vs Khách Đã Đăng Ký (chờ Admin) */}
             {!currentUser ? (
               <button
                 onClick={() => {
@@ -393,20 +400,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="flex items-center gap-2">
                 <div className="text-right hidden md:block">
                   <p className="text-xs font-black text-slate-900">{currentUser.name}</p>
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                    Hội viên chính thức {currentUser.age ? `(${currentUser.age} tuổi)` : ''}
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                    ⏳ Chờ Admin kích hoạt
                   </span>
                 </div>
-
-                {onGoToPortal && (
-                  <button
-                    onClick={onGoToPortal}
-                    className="px-4 py-2.5 rounded-full text-xs font-black bg-slate-900 hover:bg-slate-800 text-white transition-all flex items-center gap-1.5 shadow-md"
-                  >
-                    <span>Vào Cổng Hội Viên</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                )}
               </div>
             )}
 
@@ -805,25 +802,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="bg-slate-50 p-8 sm:p-12 rounded-3xl border border-slate-200 shadow-xl max-w-2xl mx-auto relative">
             <form onSubmit={handleBookingSubmit} className="space-y-5">
 
-              {/* CẢNH BÁO / YÊU CẦU TẠO TÀI KHOẢN CHO KHÁCH VÃNG LAI */}
+              {/* YÊU CẦU ĐĂNG NHẬP / TẠO TÀI KHOẢN ĐỂ XÁC THỰC THÔNG TIN */}
               {!currentUser ? (
                 <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3 text-xs text-left">
                   <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                  <div className="space-y-1">
-                    <p className="font-bold text-xs uppercase tracking-wide">Yêu Cầu Hội Viên (Chặn Khách Vãng Lai):</p>
+                  <div className="space-y-1.5">
+                    <p className="font-bold text-xs uppercase tracking-wide text-amber-900">
+                      🔐 Yêu Cầu Xác Thực Tài Khoản:
+                    </p>
                     <p className="text-[11px] text-amber-800 leading-relaxed">
-                      Khách vãng lai chỉ có quyền xem thông tin giới thiệu. Để nhận mã vé điện tử E-Pass 0Đ hoặc đăng ký gói tập, bạn cần <strong>Tạo Tài Khoản Hội Viên</strong> (gồm: SĐT, Tên đăng nhập, Mật khẩu, Họ tên, Tuổi).
+                      Để đăng ký vé tập thử E-Pass 0Đ hoặc mua gói, bạn cần <strong>Tạo tài khoản hoặc Đăng nhập</strong> (SĐT, Tên đăng nhập, Mật khẩu, Họ tên, Tuổi).
+                    </p>
+                    <p className="text-[10px] text-amber-700 bg-amber-100/70 p-2 rounded-xl border border-amber-200">
+                      ℹ️ <strong>Lưu ý:</strong> Đăng ký tập thử chỉ gửi thông tin về hệ thống và cấp mã vé QR trải nghiệm tại quầy (không truy cập Cổng Hội Viên). Chỉ khi mua gói tập và được Admin duyệt sau thanh toán, bạn mới được cấp quyền vào Cổng Hội Viên.
                     </p>
                     <button
                       type="button"
                       onClick={() => {
-                        setAuthActionNotice('Vui lòng tạo tài khoản hội viên để tiếp tục nhận vé tập thử E-Pass 0Đ.');
+                        setAuthActionNotice('Vui lòng tạo tài khoản hoặc đăng nhập để tiếp tục nhận vé tập thử E-Pass 0Đ.');
+                        setPendingBookingType('TRIAL');
                         setShowMemberAuthModal(true);
                       }}
-                      className="mt-2 px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] inline-flex items-center gap-1.5 shadow-sm transition-all"
+                      className="mt-1 px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] inline-flex items-center gap-1.5 shadow-sm transition-all"
                     >
                       <UserPlus className="w-3.5 h-3.5" />
-                      <span>Tạo Tài Khoản Mới Ngay (100% Miễn Phí)</span>
+                      <span>Đăng Nhập / Tạo Tài Khoản Để Nhận Vé</span>
                     </button>
                   </div>
                 </div>
@@ -831,9 +834,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-start gap-3 text-xs text-left">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-bold text-xs uppercase tracking-wide">Đã Xác Thực Hội Viên:</p>
+                    <p className="font-bold text-xs uppercase tracking-wide">Đã Xác Thực Thông Tin:</p>
                     <p className="text-[11px] text-emerald-800 mt-0.5">
-                      Hội viên: <strong>{currentUser.name}</strong> {currentUser.age ? `(${currentUser.age} tuổi)` : ''} • SĐT: <strong>{currentUser.phone}</strong> • Tài khoản: <strong>@{currentUser.username || 'member'}</strong>. Bạn đã đủ điều kiện nhận vé tập thử 24/7!
+                      Khách hàng: <strong>{currentUser.name}</strong> {currentUser.age ? `(${currentUser.age} tuổi)` : ''} • SĐT: <strong>{currentUser.phone}</strong> • Tài khoản: <strong>@{currentUser.username || 'member'}</strong>.
+                    </p>
+                    <p className="text-[10px] text-emerald-700 mt-1">
+                      Mã vé E-Pass QR sẽ được cấp và gửi qua Zalo sau khi bấm nút bên dưới.
                     </p>
                   </div>
                 </div>
@@ -1472,6 +1478,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <p className="text-[10px] text-slate-500">Xuất trình mã này tại quầy Lễ tân hoặc cổng xoay để quét vào tập.</p>
             </div>
 
+            <div className="p-2.5 bg-white/5 border border-white/10 rounded-2xl text-[11px] text-slate-300 space-y-1">
+              <p className="font-semibold text-emerald-400">✓ Đã gửi thông tin đăng ký tập thử về hệ thống</p>
+              <p className="text-[10px] text-slate-400">
+                Vé chỉ dùng quét tại cổng hoặc quầy Lễ tân. Khi chọn mua gói tập chính thức, Admin sẽ kích hoạt tài khoản truy cập Cổng Hội Viên.
+              </p>
+            </div>
+
             <div className="space-y-2">
               <button
                 onClick={() => setShowZaloModal(true)}
@@ -1480,19 +1493,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <Smartphone className="w-4 h-4" />
                 <span>📱 Mở Tin Nhắn Zalo ZNS Tự Động (Tích Xanh)</span>
               </button>
-
-              {onGoToPortal && (
-                <button
-                  onClick={() => {
-                    setShowTicketModal(false);
-                    onGoToPortal();
-                  }}
-                  className="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-1.5 shadow transition-all"
-                >
-                  <span>Vào Cổng Hội Viên Quản Lý (Mã QR 60s & Lịch PT)</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              )}
 
               <button
                 onClick={() => setShowTicketModal(false)}
@@ -1591,20 +1591,28 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
               </>
             ) : (
-              <div className="py-6 space-y-4">
+              <div className="py-6 space-y-5">
                 <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
-                <div>
-                  <h4 className="text-xl font-black text-slate-900">Thanh Toán Thành Công!</h4>
-                  <p className="text-xs text-slate-500 mt-1">Hệ thống đã nhận được Webhook từ ngân hàng NAPAS247.</p>
-                  <p className="text-xs text-emerald-600 font-bold mt-1">Hợp đồng gói tập của bạn đã được kích hoạt 24/7!</p>
+                <div className="space-y-2">
+                  <h4 className="text-xl font-black text-slate-900">Thanh Toán Thành Công! 🎉</h4>
+                  <p className="text-xs text-slate-500">Hệ thống đã nhận được xác nhận thanh toán từ NAPAS247.</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-left space-y-1.5">
+                  <p className="text-xs font-black text-amber-900 uppercase tracking-wide">⏳ Admin Đang Xử Lý Kích Hoạt</p>
+                  <p className="text-[11px] text-amber-800 leading-relaxed">
+                    Tài khoản hội viên của bạn sẽ được <strong>Admin kích hoạt trong vòng 24 giờ</strong> sau khi xác minh thanh toán. Bạn sẽ nhận thông báo qua <strong>Zalo</strong> kèm mật khẩu đăng nhập vào Cổng Hội Viên.
+                  </p>
+                  <p className="text-[11px] text-amber-700 font-semibold mt-1">
+                    📞 Liên hệ hỗ trợ: <strong>1900 8899</strong> (8:00 – 22:00 hàng ngày)
+                  </p>
                 </div>
                 <button
                   onClick={() => setShowCheckoutModal(false)}
                   className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-all"
                 >
-                  Đóng & Sử Dụng Thẻ
+                  Đóng — Chờ Admin Kích Hoạt
                 </button>
               </div>
             )}
