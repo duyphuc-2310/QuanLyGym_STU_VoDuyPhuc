@@ -4,7 +4,6 @@ import {
   CheckInLog, PtBooking, InBodyMetric, SystemAccount 
 } from './types';
 import { DashboardLayout } from './components/layout/DashboardLayout';
-import { LoginModal } from './components/modals/LoginModal';
 import { LandingPage } from './pages/public/LandingPage';
 import { CheckinScanner } from './pages/reception/CheckinScanner';
 import { ContractsManager } from './pages/reception/ContractsManager';
@@ -15,6 +14,7 @@ import { AnalyticsDashboard } from './pages/admin/AnalyticsDashboard';
 import { AccountManagement, INITIAL_ACCOUNTS } from './pages/admin/AccountManagement';
 import { SmartNutritionPlanner } from './components/nutrition/SmartNutritionPlanner';
 import { CityAICoachModal } from './components/ai/CityAICoachModal';
+import { AdminLoginPage } from './pages/auth/AdminLoginPage';
 
 // Dữ liệu ban đầu mặc định cho hệ thống (Khi chưa có cache trong localStorage)
 const INITIAL_MEMBERSHIPS: Membership[] = [
@@ -150,7 +150,20 @@ const INITIAL_PT_BOOKINGS: PtBooking[] = [
 ];
 
 export default function App() {
-  // Current Authenticated User (null = Public Guest on Landing Page)
+  // 1. Quản lý Router Hash điều hướng độc lập chuẩn doanh nghiệp
+  const [currentRoute, setCurrentRoute] = useState<string>(() => {
+    return window.location.hash.toLowerCase() || '#/';
+  });
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      setCurrentRoute(window.location.hash.toLowerCase() || '#/');
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  // 2. Current Authenticated User (null = Khách vãng lai trên Landing Page)
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     try {
       const saved = localStorage.getItem('citygym_current_user');
@@ -159,9 +172,7 @@ export default function App() {
     return null;
   });
 
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-
-  // Tài khoản khách vãng lai đã ĐĂNG KÝ trên web (Lưu localStorage tránh mất dữ liệu khi chuyển trang)
+  // Tài khoản khách vãng lai vừa đăng ký từ Landing Page (Lưu localStorage)
   const [pendingMemberUser, setPendingMemberUser] = useState<User | null>(() => {
     try {
       const saved = localStorage.getItem('citygym_pending_member');
@@ -170,7 +181,7 @@ export default function App() {
     return null;
   });
 
-  // Hệ Thống Quản Lý Tài Khoản Toàn Cục (Lưu localStorage)
+  // Hệ Thống Quản Lý Tài Khoản Toàn Cục RBAC (Lưu localStorage)
   const [systemAccounts, setSystemAccounts] = useState<SystemAccount[]>(() => {
     try {
       const saved = localStorage.getItem('citygym_system_accounts');
@@ -179,10 +190,10 @@ export default function App() {
     return INITIAL_ACCOUNTS;
   });
 
-  // Active Management Tab when inside the internal dashboard
-  const [currentTab, setCurrentTab] = useState<PortalType>('checkin');
+  // Active Management Tab
+  const [currentTab, setCurrentTab] = useState<PortalType>('analytics');
 
-  // Shared State for Entire Gym Operations (Lưu localStorage)
+  // Shared Data States (Lưu localStorage)
   const [memberships, setMemberships] = useState<Membership[]>(() => {
     try {
       const saved = localStorage.getItem('citygym_memberships');
@@ -209,7 +220,7 @@ export default function App() {
     return INITIAL_PT_BOOKINGS;
   });
 
-  // LƯU DỮ LIỆU TỰ ĐỘNG VÀO LOCALSTORAGE ĐỂ KHÔNG BAO GIỜ MẤT DỮ LIỆU
+  // TỰ ĐỘNG LƯU VÀO LOCALSTORAGE
   useEffect(() => {
     try {
       localStorage.setItem('citygym_system_accounts', JSON.stringify(systemAccounts));
@@ -254,62 +265,70 @@ export default function App() {
     } catch (e) {}
   }, [currentUser]);
 
-  // Handle Login Role Switch
-  const handleSelectRole = (role: UserRole) => {
-    let name = 'Quản Trị Viên';
-    let email = 'admin@citygym.vn';
-    let dept = 'Ban Giám Đốc';
-    let defaultTab: PortalType = 'analytics';
+  // Kiểm tra tài khoản khách đăng ký web đã được Admin kích hoạt chưa
+  const isPendingMemberActive = pendingMemberUser
+    ? systemAccounts.some(
+        (a) =>
+          (a.phone === pendingMemberUser.phone ||
+            (pendingMemberUser.username && a.username === pendingMemberUser.username)) &&
+          a.status === 'ACTIVE'
+      )
+    : false;
 
-    if (role === 'RECEPTION') {
-      name = 'Nguyễn Thị Thu (Lễ Tân)';
-      email = 'letan@citygym.vn';
-      dept = 'Quầy Tiếp Đón & Check-in';
-      defaultTab = 'checkin';
-    } else if (role === 'TRAINER') {
-      name = 'Nguyễn Minh Tuấn (HLV PT)';
-      email = 'pt.tuan@citygym.vn';
-      dept = 'Bộ Phận Huấn Luyện Viên';
-      defaultTab = 'pt_portal';
-    } else if (role === 'MEMBER') {
-      name = 'Võ Duy Phúc (Hội Viên VIP)';
-      email = 'phuc.vo@stu.edu.vn';
-      dept = 'Cổng Dịch Vụ Hội Viên';
-      defaultTab = 'member_portal';
-    } else if (role === 'ADMIN') {
-      name = 'ThS. Bùi Nhật Bằng & Võ Duy Phúc';
-      email = 'admin@citygym.vn';
-      dept = 'Quản Trị Cấp Cao BI';
-      defaultTab = 'analytics';
-    }
-
-    setCurrentUser({
-      id: Date.now(),
-      name,
-      email,
-      phone: '0901234567',
-      role,
-      department: dept,
-    });
-    setCurrentTab(defaultTab);
-  };
-
+  // Xử lý Đăng Nhập Thành Công: Tự động điều hướng đến URL riêng của từng vai trò
   const handleLoginSuccess = (user: User) => {
     setCurrentUser(user);
-    if (user.role === 'RECEPTION') setCurrentTab('checkin');
-    else if (user.role === 'TRAINER') setCurrentTab('pt_portal');
-    else if (user.role === 'MEMBER') setCurrentTab('member_portal');
-    else setCurrentTab('analytics');
-    setIsLoginModalOpen(false);
+    try {
+      localStorage.setItem('citygym_current_user', JSON.stringify(user));
+    } catch (e) {}
+
+    if (user.role === 'ADMIN') {
+      setCurrentTab('analytics');
+      window.location.hash = '#admin-dashboard';
+    } else if (user.role === 'RECEPTION') {
+      setCurrentTab('checkin');
+      window.location.hash = '#reception';
+    } else if (user.role === 'TRAINER') {
+      setCurrentTab('pt_portal');
+      window.location.hash = '#trainer';
+    } else if (user.role === 'MEMBER') {
+      setCurrentTab('member_portal');
+      window.location.hash = '#member';
+    }
   };
 
+  // Xử lý Đăng Xuất: Xóa phiên và trở về Landing Page
   const handleLogout = () => {
     setCurrentUser(null);
-    window.location.hash = '';
+    try {
+      localStorage.removeItem('citygym_current_user');
+    } catch (e) {}
+    window.location.hash = '#/';
   };
 
+  // Đồng bộ tab mặc định phù hợp khi route thay đổi
+  useEffect(() => {
+    const hash = currentRoute;
+    if (hash.startsWith('#member')) {
+      if (currentTab !== 'member_portal' && currentTab !== 'nutrition') {
+        setCurrentTab('member_portal');
+      }
+    } else if (hash.startsWith('#reception')) {
+      if (currentTab !== 'checkin' && currentTab !== 'memberships' && currentTab !== 'leads') {
+        setCurrentTab('checkin');
+      }
+    } else if (hash.startsWith('#trainer')) {
+      if (currentTab !== 'pt_portal' && currentTab !== 'nutrition') {
+        setCurrentTab('pt_portal');
+      }
+    } else if (hash.startsWith('#admin-dashboard')) {
+      if (currentTab === 'member_portal' || currentTab === 'pt_portal') {
+        setCurrentTab('analytics');
+      }
+    }
+  }, [currentRoute, currentTab]);
+
   // Xử lý khi khách vãng lai Đăng Ký / Tạo Tài Khoản thành công từ Landing Page
-  // Đồng bộ ngay thông tin vào CRM Lead và danh sách tài khoản RBAC (trạng thái LOCKED chờ thanh toán)
   const handleMemberAuthSuccess = (newUser: User, _rawPassword?: string) => {
     setPendingMemberUser(newUser);
 
@@ -396,7 +415,6 @@ export default function App() {
     };
 
     setLeads((prev) => {
-      // Cập nhật nếu khách đã có lead từ trước, hoặc thêm mới
       const existingIdx = prev.findIndex((l) => l.phone === data.buyerPhone);
       if (existingIdx >= 0) {
         const copy = [...prev];
@@ -515,13 +533,21 @@ export default function App() {
       prev.map((l) => (l.id === lead.id ? { ...l, status: 'CONVERTED' } : l))
     );
 
+    // 5. Cập nhật pendingMemberUser nếu trùng khớp
+    if (pendingMemberUser && (pendingMemberUser.phone === lead.phone || pendingMemberUser.username === lead.username)) {
+      setPendingMemberUser({
+        ...pendingMemberUser,
+        department: `Hội Viên Chính Thức (${newM.packageName})`,
+      });
+    }
+
     alert(
       `✅ ĐÃ DUYỆT & KÍCH HOẠT HỘI VIÊN THÀNH CÔNG!\n\n` +
       `• Khách hàng: ${lead.fullName}\n` +
       `• Số điện thoại: ${lead.phone}\n` +
       `• Hợp đồng: ${newM.contractCode} (${newM.packageName})\n` +
       `• Tài khoản đã được KÍCH HOẠT (ACTIVE) trong hệ thống RBAC.\n` +
-      `• Khách hàng có thể đăng nhập vào Cổng Hội Viên ngay!`
+      `• Hội viên có thể đăng nhập tại link #admin hoặc bấm 'Vào Cổng Hội Viên' ngay!`
     );
   };
 
@@ -626,11 +652,10 @@ export default function App() {
     }
   };
 
-  // Admin cấp tài khoản thủ công
   const handleAccountCreated = (newAcc: SystemAccount) => {
     setSystemAccounts((prev) => [newAcc, ...prev]);
   };
-  // Cross-portal Handlers
+
   const handleRegisterTrial = (newLead: Lead) => {
     setLeads((prev) => [newLead, ...prev]);
   };
@@ -651,7 +676,6 @@ export default function App() {
 
   const handleAddMembership = (newM: Membership) => {
     setMemberships((prev) => [newM, ...prev]);
-    // Tự động lên lịch hẹn buổi đầu tiên cho HLV phụ trách nếu hợp đồng có buổi PT
     if (newM.remainingSessions > 0 && newM.assignedPtName) {
       const newBooking: PtBooking = {
         id: Date.now() + 10,
@@ -691,184 +715,103 @@ export default function App() {
     }
   };
 
-  // Điều hướng bảo mật cho trang Quản trị nội bộ (#admin, #quan-tri, #admin-portal)
-  useEffect(() => {
-    const checkHashRoute = () => {
-      const hash = window.location.hash.toLowerCase();
-      if (
-        hash === '#admin' || 
-        hash === '#quan-tri' || 
-        hash === '#admin-portal' || 
-        hash === '#management' || 
-        hash === '#internal'
-      ) {
-        setIsLoginModalOpen(true);
-      }
-    };
-    checkHashRoute();
-    window.addEventListener('hashchange', checkHashRoute);
-    return () => window.removeEventListener('hashchange', checkHashRoute);
-  }, []);
+  // Dữ liệu hội viên phục vụ hiển thị thẻ Cổng Hội Viên
+  const currentMemberData: Membership = memberships.find(
+    (m) =>
+      (currentUser && m.memberName.toLowerCase() === currentUser.name.toLowerCase()) ||
+      (currentUser && m.memberPhone === currentUser.phone)
+  ) || {
+    id: currentUser ? currentUser.id : Date.now(),
+    contractCode: 'HD-2026-MEMBER',
+    memberName: currentUser ? currentUser.name : (pendingMemberUser?.name || 'Võ Duy Phúc'),
+    memberPhone: currentUser ? currentUser.phone : (pendingMemberUser?.phone || '0901234567'),
+    packageName: 'CityVIP 12 Tháng',
+    packagePrice: 5800000,
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0],
+    remainingSessions: 20,
+    totalSessions: 20,
+    status: 'ACTIVE',
+    maxFreezeDays: 60,
+    frozenDaysUsed: 0,
+    assignedPtName: 'Nguyễn Minh Tuấn (PT)',
+  };
 
-  // BẢO VỆ PHÂN QUYỀN RBAC NGHIÊM NGẶT THEO CHUẨN DOANH NGHIỆP:
-  // - Hội viên CHỈ ĐƯỢC VÀO: 'member_portal', 'nutrition'
-  // - Huấn luyện viên (PT) CHỈ ĐƯỢC VÀO: 'pt_portal', 'nutrition'
-  // - Lễ tân CHỈ ĐƯỢC VÀO: 'checkin', 'memberships', 'leads'
-  // - CHỈ ADMIN mới có toàn quyền xem tất cả các tab
-  useEffect(() => {
-    if (!currentUser) return;
-    if (currentUser.role === 'MEMBER') {
-      if (currentTab !== 'member_portal' && currentTab !== 'nutrition') {
-        setCurrentTab('member_portal');
-      }
-    } else if (currentUser.role === 'TRAINER') {
-      if (currentTab !== 'pt_portal' && currentTab !== 'nutrition') {
-        setCurrentTab('pt_portal');
-      }
-    } else if (currentUser.role === 'RECEPTION') {
-      if (currentTab !== 'checkin' && currentTab !== 'memberships' && currentTab !== 'leads') {
-        setCurrentTab('checkin');
-      }
-    }
-  }, [currentUser, currentTab]);
+  // ==================== ĐỊNH TUYẾN URL HASH BẢO MẬT DOANH NGHIỆP ====================
+  const isAuthAdminRoute = 
+    currentRoute === '#admin' || 
+    currentRoute === '#quan-tri' || 
+    currentRoute === '#login' || 
+    currentRoute === '#admin-portal';
 
-  // Kiểm tra tài khoản khách đăng ký web đã được Admin kích hoạt chưa
-  const isPendingMemberActive = pendingMemberUser
-    ? systemAccounts.some(
-        (a) =>
-          (a.phone === pendingMemberUser.phone ||
-            (pendingMemberUser.username && a.username === pendingMemberUser.username)) &&
-          a.status === 'ACTIVE'
-      )
-    : false;
+  const isMemberRoute = currentRoute.startsWith('#member');
+  const isReceptionRoute = currentRoute.startsWith('#reception');
+  const isTrainerRoute = currentRoute.startsWith('#trainer');
+  const isAdminDashboardRoute = 
+    currentRoute.startsWith('#admin-dashboard') || 
+    currentRoute.startsWith('#admin-bi') || 
+    currentRoute.startsWith('#dashboard');
 
-  return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      
-      {/* KHÔNG CÒN THANH ROLESWITCHER NÀO - BẢO MẬT TUYỆT ĐỐI GIAO DIỆN QUẢN TRỊ */}
-
-      {/* Main Viewport */}
-      {currentUser === null ? (
-        /* ==================== 100% PURE PUBLIC LANDING PAGE ==================== */
-        <LandingPage
-          currentUser={pendingMemberUser}
-          isAccountActive={isPendingMemberActive}
-          onRegisterTrial={handleRegisterTrial}
-          onOpenLogin={() => setIsLoginModalOpen(true)}
-          onMemberAuthSuccess={handleMemberAuthSuccess}
-          onPackagePurchased={handlePackagePurchased}
-          onGoToPortal={() => {
-            if (pendingMemberUser) {
-              const fullUser = systemAccounts.find(
-                (a) =>
-                  a.phone === pendingMemberUser.phone ||
-                  (pendingMemberUser.username && a.username === pendingMemberUser.username)
-              );
-              if (fullUser) {
-                setCurrentUser({
-                  id: fullUser.id,
-                  name: fullUser.name,
-                  email: fullUser.email,
-                  phone: fullUser.phone,
-                  role: 'MEMBER',
-                  department: fullUser.department,
-                  age: fullUser.age,
-                  username: fullUser.username,
-                });
-              } else {
-                setCurrentUser(pendingMemberUser);
-              }
-              setCurrentTab('member_portal');
-            }
-          }}
-          onLogout={() => {
-            setPendingMemberUser(null);
-            try {
-              localStorage.removeItem('citygym_pending_member');
-            } catch (e) {}
-          }}
+  // 1. CỔNG ĐĂNG NHẬP QUẢN TRỊ BẢO MẬT (#admin)
+  // Đường link giấu kín, khi truy cập hiện màn hình Full-page Login Screen
+  if (isAuthAdminRoute) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
+        <AdminLoginPage
+          onLoginSuccess={handleLoginSuccess}
+          onGoHome={() => { window.location.hash = '#/'; }}
+          accounts={systemAccounts}
         />
-      ) : (
-        /* ==================== INTERNAL MANAGEMENT DASHBOARD (PORTALS) ==================== */
+        <CityAICoachModal
+          memberName={currentUser ? currentUser.name : 'Quản Trị Viên'}
+          memberWeight={68.2}
+          memberBmr={1675}
+          memberBmi={23.1}
+        />
+      </div>
+    );
+  }
+
+  // 2. CỔNG HỘI VIÊN RIÊNG BIỆT (#member)
+  // Chỉ hội viên chính thức hoặc Admin mới xem được (chỉ có QR 60s & Dinh dưỡng)
+  if (isMemberRoute) {
+    const authorizedUser = (currentUser && (currentUser.role === 'MEMBER' || currentUser.role === 'ADMIN'))
+      ? currentUser
+      : (pendingMemberUser && isPendingMemberActive)
+      ? {
+          ...pendingMemberUser,
+          role: 'MEMBER' as UserRole,
+        }
+      : null;
+
+    if (!authorizedUser) {
+      return (
+        <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
+          <AdminLoginPage
+            onLoginSuccess={handleLoginSuccess}
+            onGoHome={() => { window.location.hash = '#/'; }}
+            accounts={systemAccounts}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
         <DashboardLayout
-          currentUser={currentUser}
+          currentUser={authorizedUser}
           currentTab={currentTab}
           onChangeTab={setCurrentTab}
           onLogout={handleLogout}
-          onGoHome={handleLogout}
+          onGoHome={() => { window.location.hash = '#/'; }}
         >
-          {/* Phân hệ 1: Lễ tân Check-in Realtime */}
-          {currentTab === 'checkin' && (
-            <CheckinScanner
-              memberships={memberships}
-              leads={leads}
-              checkinLogs={checkinLogs}
-              onCheckinSuccess={handleCheckinSuccess}
-              onUpdateLeadStatus={handleUpdateLeadStatus}
-            />
-          )}
-
-          {/* Phân hệ 2: Quản lý Hợp đồng & Bảo lưu bù ngày */}
-          {currentTab === 'memberships' && (
-            <ContractsManager
-              memberships={memberships}
-              onAddMembership={handleAddMembership}
-              onUpdateMembership={handleUpdateMembership}
-            />
-          )}
-
-          {/* Phân hệ 3: CRM Phễu Lead khách tập thử */}
-          {currentTab === 'leads' && (
-            <LeadCRM
-              leads={leads}
-              onConvertLead={handleConvertLead}
-              onAddMembership={handleAddMembership}
-              onApprovePaidLead={handleApprovePaidLead}
-            />
-          )}
-
-          {/* Phân hệ 4: Cổng Huấn Luyện Viên PT */}
-          {currentTab === 'pt_portal' && (
-            <TrainerPortal
-              memberships={memberships}
-              ptBookings={ptBookings}
-              onCompleteBooking={handleCompleteBooking}
-              onSaveInBodyMetric={(m) => console.log('InBody:', m)}
-              onAddBooking={handleBookPtSession}
-            />
-          )}
-
-          {/* Phân hệ 5: Cổng Hội Viên (QR động 60s) */}
           {currentTab === 'member_portal' && (
             <MemberPortal
-              member={
-                memberships.find(
-                  (m) =>
-                    m.memberName.toLowerCase() === currentUser.name.toLowerCase() ||
-                    m.memberPhone === currentUser.phone
-                ) || {
-                  id: currentUser.id,
-                  contractCode: 'HD-2026-MEMBER',
-                  memberName: currentUser.name,
-                  memberPhone: currentUser.phone,
-                  packageName: 'CityVIP 12 Tháng',
-                  packagePrice: 5800000,
-                  startDate: new Date().toISOString().split('T')[0],
-                  endDate: new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0],
-                  remainingSessions: 20,
-                  totalSessions: 20,
-                  status: 'ACTIVE',
-                  maxFreezeDays: 60,
-                  frozenDaysUsed: 0,
-                  assignedPtName: 'Nguyễn Minh Tuấn (PT)',
-                }
-              }
+              member={currentMemberData}
               onBookPtSession={handleBookPtSession}
               ptBookings={ptBookings}
             />
           )}
-
-          {/* Phân hệ 7: Trợ lý Dinh Dưỡng & AI Food Scanner */}
           {currentTab === 'nutrition' && (
             <div className="max-w-6xl mx-auto px-4 py-8">
               <SmartNutritionPlanner
@@ -878,11 +821,178 @@ export default function App() {
               />
             </div>
           )}
+        </DashboardLayout>
+        <CityAICoachModal
+          memberName={authorizedUser.name}
+          memberWeight={68.2}
+          memberBmr={1675}
+          memberBmi={23.1}
+        />
+      </div>
+    );
+  }
 
-          {/* Phân hệ 6: Quản Trị Cấp Cao BI Dashboard */}
+  // 3. CỔNG LỄ TÂN RIÊNG BIỆT (#reception)
+  // Chỉ Lễ tân hoặc Admin mới xem được (Check-in, Hợp đồng, Lead CRM)
+  if (isReceptionRoute) {
+    const authorizedUser = (currentUser && (currentUser.role === 'RECEPTION' || currentUser.role === 'ADMIN'))
+      ? currentUser
+      : null;
+
+    if (!authorizedUser) {
+      return (
+        <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
+          <AdminLoginPage
+            onLoginSuccess={handleLoginSuccess}
+            onGoHome={() => { window.location.hash = '#/'; }}
+            accounts={systemAccounts}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+        <DashboardLayout
+          currentUser={authorizedUser}
+          currentTab={currentTab}
+          onChangeTab={setCurrentTab}
+          onLogout={handleLogout}
+          onGoHome={() => { window.location.hash = '#/'; }}
+        >
+          {currentTab === 'checkin' && (
+            <CheckinScanner
+              memberships={memberships}
+              leads={leads}
+              checkinLogs={checkinLogs}
+              onCheckinSuccess={handleCheckinSuccess}
+              onUpdateLeadStatus={handleUpdateLeadStatus}
+            />
+          )}
+          {currentTab === 'memberships' && (
+            <ContractsManager
+              memberships={memberships}
+              onAddMembership={handleAddMembership}
+              onUpdateMembership={handleUpdateMembership}
+            />
+          )}
+          {currentTab === 'leads' && (
+            <LeadCRM
+              leads={leads}
+              onConvertLead={handleConvertLead}
+              onAddMembership={handleAddMembership}
+              onApprovePaidLead={handleApprovePaidLead}
+            />
+          )}
+        </DashboardLayout>
+        <CityAICoachModal
+          memberName={authorizedUser.name}
+          memberWeight={68.2}
+          memberBmr={1675}
+          memberBmi={23.1}
+        />
+      </div>
+    );
+  }
+
+  // 4. CỔNG HUẤN LUYỆN VIÊN PT RIÊNG BIỆT (#trainer)
+  // Chỉ HLV hoặc Admin mới xem được (Lịch dạy PT, Trừ buổi, InBody, Dinh dưỡng)
+  if (isTrainerRoute) {
+    const authorizedUser = (currentUser && (currentUser.role === 'TRAINER' || currentUser.role === 'ADMIN'))
+      ? currentUser
+      : null;
+
+    if (!authorizedUser) {
+      return (
+        <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
+          <AdminLoginPage
+            onLoginSuccess={handleLoginSuccess}
+            onGoHome={() => { window.location.hash = '#/'; }}
+            accounts={systemAccounts}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+        <DashboardLayout
+          currentUser={authorizedUser}
+          currentTab={currentTab}
+          onChangeTab={setCurrentTab}
+          onLogout={handleLogout}
+          onGoHome={() => { window.location.hash = '#/'; }}
+        >
+          {currentTab === 'pt_portal' && (
+            <TrainerPortal
+              memberships={memberships}
+              ptBookings={ptBookings}
+              onCompleteBooking={handleCompleteBooking}
+              onSaveInBodyMetric={(m) => console.log('InBody:', m)}
+              onAddBooking={handleBookPtSession}
+            />
+          )}
+          {currentTab === 'nutrition' && (
+            <div className="max-w-6xl mx-auto px-4 py-8">
+              <SmartNutritionPlanner
+                memberWeight={68.2}
+                memberHeight={172}
+                memberBmr={1675}
+              />
+            </div>
+          )}
+        </DashboardLayout>
+        <CityAICoachModal
+          memberName={authorizedUser.name}
+          memberWeight={68.2}
+          memberBmr={1675}
+          memberBmi={23.1}
+        />
+      </div>
+    );
+  }
+
+  // 5. CỔNG QUẢN TRỊ CẤP CAO ADMIN (#admin-dashboard)
+  // Chỉ Admin tối cao mới xem được toàn bộ 8 phân hệ
+  if (isAdminDashboardRoute) {
+    const authorizedUser = (currentUser && currentUser.role === 'ADMIN')
+      ? currentUser
+      : null;
+
+    if (!authorizedUser) {
+      if (currentUser?.role === 'MEMBER') {
+        window.location.hash = '#member';
+        return null;
+      }
+      if (currentUser?.role === 'RECEPTION') {
+        window.location.hash = '#reception';
+        return null;
+      }
+      if (currentUser?.role === 'TRAINER') {
+        window.location.hash = '#trainer';
+        return null;
+      }
+      return (
+        <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
+          <AdminLoginPage
+            onLoginSuccess={handleLoginSuccess}
+            onGoHome={() => { window.location.hash = '#/'; }}
+            accounts={systemAccounts}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+        <DashboardLayout
+          currentUser={authorizedUser}
+          currentTab={currentTab}
+          onChangeTab={setCurrentTab}
+          onLogout={handleLogout}
+          onGoHome={() => { window.location.hash = '#/'; }}
+        >
           {currentTab === 'analytics' && <AnalyticsDashboard />}
-
-          {/* Phân hệ Quản Trị RBAC: Cấp Tài Khoản & Phân Quyền (Chỉ Admin) */}
           {currentTab === 'users' && (
             <AccountManagement
               accounts={systemAccounts}
@@ -890,30 +1000,118 @@ export default function App() {
               onAccountCreated={handleAccountCreated}
             />
           )}
+          {currentTab === 'checkin' && (
+            <CheckinScanner
+              memberships={memberships}
+              leads={leads}
+              checkinLogs={checkinLogs}
+              onCheckinSuccess={handleCheckinSuccess}
+              onUpdateLeadStatus={handleUpdateLeadStatus}
+            />
+          )}
+          {currentTab === 'memberships' && (
+            <ContractsManager
+              memberships={memberships}
+              onAddMembership={handleAddMembership}
+              onUpdateMembership={handleUpdateMembership}
+            />
+          )}
+          {currentTab === 'leads' && (
+            <LeadCRM
+              leads={leads}
+              onConvertLead={handleConvertLead}
+              onAddMembership={handleAddMembership}
+              onApprovePaidLead={handleApprovePaidLead}
+            />
+          )}
+          {currentTab === 'pt_portal' && (
+            <TrainerPortal
+              memberships={memberships}
+              ptBookings={ptBookings}
+              onCompleteBooking={handleCompleteBooking}
+              onSaveInBodyMetric={(m) => console.log('InBody:', m)}
+              onAddBooking={handleBookPtSession}
+            />
+          )}
+          {currentTab === 'member_portal' && (
+            <MemberPortal
+              member={currentMemberData}
+              onBookPtSession={handleBookPtSession}
+              ptBookings={ptBookings}
+            />
+          )}
+          {currentTab === 'nutrition' && (
+            <div className="max-w-6xl mx-auto px-4 py-8">
+              <SmartNutritionPlanner
+                memberWeight={68.2}
+                memberHeight={172}
+                memberBmr={1675}
+              />
+            </div>
+          )}
         </DashboardLayout>
-      )}
+        <CityAICoachModal
+          memberName={authorizedUser.name}
+          memberWeight={68.2}
+          memberBmr={1675}
+          memberBmi={23.1}
+        />
+      </div>
+    );
+  }
 
-      {/* 3. Modal Đăng nhập an toàn */}
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        accounts={systemAccounts}
-        onClose={() => {
-          setIsLoginModalOpen(false);
-          if (window.location.hash) {
-            history.pushState('', document.title, window.location.pathname + window.location.search);
+  // 6. MẶC ĐỊNH: TRANG CHỦ LANDING PAGE DÀNH CHO KHÁCH VÃNG LAI (Route #/ hoặc rỗng)
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+      <LandingPage
+        currentUser={pendingMemberUser}
+        isAccountActive={isPendingMemberActive}
+        onRegisterTrial={handleRegisterTrial}
+        onOpenLogin={() => { window.location.hash = '#admin'; }}
+        onMemberAuthSuccess={handleMemberAuthSuccess}
+        onPackagePurchased={handlePackagePurchased}
+        onGoToPortal={() => {
+          if (pendingMemberUser) {
+            const fullUser = systemAccounts.find(
+              (a) =>
+                a.phone === pendingMemberUser.phone ||
+                (pendingMemberUser.username && a.username === pendingMemberUser.username)
+            );
+            const memberUser: User = fullUser
+              ? {
+                  id: fullUser.id,
+                  name: fullUser.name,
+                  email: fullUser.email,
+                  phone: fullUser.phone,
+                  role: 'MEMBER',
+                  department: fullUser.department,
+                  age: fullUser.age,
+                  username: fullUser.username,
+                }
+              : { ...pendingMemberUser, role: 'MEMBER' };
+            setCurrentUser(memberUser);
+            try {
+              localStorage.setItem('citygym_current_user', JSON.stringify(memberUser));
+            } catch (e) {}
           }
+          setCurrentTab('member_portal');
+          window.location.hash = '#member';
         }}
-        onLoginSuccess={handleLoginSuccess}
+        onLogout={() => {
+          setPendingMemberUser(null);
+          setCurrentUser(null);
+          try {
+            localStorage.removeItem('citygym_pending_member');
+            localStorage.removeItem('citygym_current_user');
+          } catch (e) {}
+        }}
       />
-
-      {/* 4. Trợ Lý Thể Hình & Dinh Dưỡng Thông Minh CityAI Coach (24/7 Live Copilot) */}
       <CityAICoachModal
-        memberName={currentUser ? currentUser.name : 'Võ Duy Phúc'}
+        memberName={pendingMemberUser ? pendingMemberUser.name : 'Khách Vãng Lai'}
         memberWeight={68.2}
         memberBmr={1675}
         memberBmi={23.1}
       />
-
     </div>
   );
 }
