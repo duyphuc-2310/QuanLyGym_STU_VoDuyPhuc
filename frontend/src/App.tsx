@@ -3,7 +3,6 @@ import {
   User, UserRole, PortalType, Membership, Lead, 
   CheckInLog, PtBooking, InBodyMetric, SystemAccount 
 } from './types';
-import { RoleSwitcher } from './components/layout/RoleSwitcher';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { LoginModal } from './components/modals/LoginModal';
 import { LandingPage } from './pages/public/LandingPage';
@@ -692,10 +691,44 @@ export default function App() {
     }
   };
 
-  // BẢO VỆ PHÂN QUYỀN RBAC: Hội viên TUYỆT ĐỐI không thể xem các phân hệ nội bộ (Lễ tân, Admin, PT)
+  // Điều hướng bảo mật cho trang Quản trị nội bộ (#admin, #quan-tri, #admin-portal)
   useEffect(() => {
-    if (currentUser?.role === 'MEMBER' && currentTab !== 'member_portal' && currentTab !== 'nutrition') {
-      setCurrentTab('member_portal');
+    const checkHashRoute = () => {
+      const hash = window.location.hash.toLowerCase();
+      if (
+        hash === '#admin' || 
+        hash === '#quan-tri' || 
+        hash === '#admin-portal' || 
+        hash === '#management' || 
+        hash === '#internal'
+      ) {
+        setIsLoginModalOpen(true);
+      }
+    };
+    checkHashRoute();
+    window.addEventListener('hashchange', checkHashRoute);
+    return () => window.removeEventListener('hashchange', checkHashRoute);
+  }, []);
+
+  // BẢO VỆ PHÂN QUYỀN RBAC NGHIÊM NGẶT THEO CHUẨN DOANH NGHIỆP:
+  // - Hội viên CHỈ ĐƯỢC VÀO: 'member_portal', 'nutrition'
+  // - Huấn luyện viên (PT) CHỈ ĐƯỢC VÀO: 'pt_portal', 'nutrition'
+  // - Lễ tân CHỈ ĐƯỢC VÀO: 'checkin', 'memberships', 'leads'
+  // - CHỈ ADMIN mới có toàn quyền xem tất cả các tab
+  useEffect(() => {
+    if (!currentUser) return;
+    if (currentUser.role === 'MEMBER') {
+      if (currentTab !== 'member_portal' && currentTab !== 'nutrition') {
+        setCurrentTab('member_portal');
+      }
+    } else if (currentUser.role === 'TRAINER') {
+      if (currentTab !== 'pt_portal' && currentTab !== 'nutrition') {
+        setCurrentTab('pt_portal');
+      }
+    } else if (currentUser.role === 'RECEPTION') {
+      if (currentTab !== 'checkin' && currentTab !== 'memberships' && currentTab !== 'leads') {
+        setCurrentTab('checkin');
+      }
     }
   }, [currentUser, currentTab]);
 
@@ -712,16 +745,9 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       
-      {/* 1. Thanh Role Switcher: CHỈ DÀNH CHO ADMIN / NHÂN VIÊN DEMO - TUYỆT ĐỐI ẨN KHI LÀ HỘI VIÊN */}
-      {currentUser !== null && currentUser.role !== 'MEMBER' && (
-        <RoleSwitcher
-          currentUser={currentUser}
-          onSelectRole={handleSelectRole}
-          onGoLanding={handleLogout}
-        />
-      )}
+      {/* KHÔNG CÒN THANH ROLESWITCHER NÀO - BẢO MẬT TUYỆT ĐỐI GIAO DIỆN QUẢN TRỊ */}
 
-      {/* 2. Main Viewport */}
+      {/* Main Viewport */}
       {currentUser === null ? (
         /* ==================== 100% PURE PUBLIC LANDING PAGE ==================== */
         <LandingPage

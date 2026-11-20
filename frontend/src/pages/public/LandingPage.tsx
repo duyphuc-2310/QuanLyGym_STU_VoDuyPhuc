@@ -461,15 +461,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
               </div>
             )}
-
-            {/* Nút đăng nhập quản trị dành riêng cho nhân viên */}
-            <button
-              onClick={onOpenLogin}
-              className="p-2.5 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-all"
-              title="Đăng nhập cổng quản lý hoặc truy cập URL riêng: #admin"
-            >
-              <Lock className="w-3.5 h-3.5" />
-            </button>
           </div>
         </div>
       </header>

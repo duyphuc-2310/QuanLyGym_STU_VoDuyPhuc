@@ -185,7 +185,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             className="w-full px-3 py-2 rounded-xl text-xs font-bold text-red-400 hover:text-red-300 hover:bg-red-950/30 transition-colors flex items-center gap-2"
           >
             <LogOut className="w-4 h-4" />
-            <span>Đăng Xuất / Đổi Vai Trò</span>
+            <span>Đăng Xuất</span>
           </button>
         </div>
       </aside>
