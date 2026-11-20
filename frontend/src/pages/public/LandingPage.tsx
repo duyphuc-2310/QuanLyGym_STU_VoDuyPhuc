@@ -15,6 +15,19 @@ interface LandingPageProps {
   onRegisterTrial?: (lead: Lead) => void;
   onOpenLogin?: () => void;
   onMemberAuthSuccess?: (newUser: UserType, rawPassword?: string) => void;
+  onPackagePurchased?: (purchaseData: {
+    buyerName: string;
+    buyerPhone: string;
+    buyerUsername: string;
+    buyerAge: number;
+    package: {
+      name: string;
+      price: number;
+      priceStr: string;
+      duration: string;
+      ptSessions: number;
+    };
+  }) => void;
   onGoToPortal?: () => void;
   onLogout?: () => void;
 }
@@ -24,6 +37,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onRegisterTrial, 
   onOpenLogin,
   onMemberAuthSuccess,
+  onPackagePurchased,
   onGoToPortal,
   onLogout,
 }) => {
@@ -128,6 +142,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  // Xác nhận thanh toán VietQR và đồng bộ ngay về CRM Admin
+  const handleConfirmPayment = () => {
+    setIsPaidSuccess(true);
+    if (selectedPackage && onPackagePurchased) {
+      const buyerName = (currentUser?.name || bookingForm.name).trim() || 'Hội Viên Mới';
+      const buyerPhone = (currentUser?.phone || bookingForm.phone).trim() || '0901234567';
+      const buyerUsername = currentUser?.username || buyerPhone;
+      const buyerAge = currentUser?.age || 23;
+
+      onPackagePurchased({
+        buyerName,
+        buyerPhone,
+        buyerUsername,
+        buyerAge,
+        package: selectedPackage,
+      });
+    }
   };
 
   // Cấp vé và bắn Zalo ZNS
@@ -1582,7 +1615,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 <div className="pt-2">
                   <button
-                    onClick={() => setIsPaidSuccess(true)}
+                    onClick={handleConfirmPayment}
                     className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-2xl text-xs shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition-all"
                   >
                     <CheckCircle2 className="w-4 h-4" />

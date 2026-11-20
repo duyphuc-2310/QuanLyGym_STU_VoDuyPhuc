@@ -10,12 +10,14 @@ interface LeadCRMProps {
   leads: Lead[];
   onConvertLead: (leadId: number) => void;
   onAddMembership: (newM: Membership) => void;
+  onApprovePaidLead?: (lead: Lead) => void;
 }
 
 export const LeadCRM: React.FC<LeadCRMProps> = ({
   leads,
   onConvertLead,
   onAddMembership,
+  onApprovePaidLead,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | string>('ALL');
@@ -33,6 +35,7 @@ export const LeadCRM: React.FC<LeadCRMProps> = ({
   const totalLeads = leads.length;
   const checkedInLeads = leads.filter((l) => l.status === 'TRIAL_CHECKED_IN').length;
   const convertedLeads = leads.filter((l) => l.status === 'CONVERTED').length;
+  const pendingApprovalLeads = leads.filter((l) => l.status === 'PAID_PENDING_APPROVAL').length;
   const conversionRate = totalLeads > 0 ? ((convertedLeads / totalLeads) * 100).toFixed(1) : '0';
 
   return (
@@ -60,21 +63,27 @@ export const LeadCRM: React.FC<LeadCRMProps> = ({
       </div>
 
       {/* KPI Funnel */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
           <span className="text-[11px] font-bold uppercase text-slate-400">1. Đăng Ký Mới Từ Landing</span>
           <p className="text-2xl font-black text-slate-900 mt-1">{totalLeads}</p>
-          <p className="text-[10px] text-slate-500">Nhận mã E-Pass qua web</p>
+          <p className="text-[10px] text-slate-500">Khách gửi thông tin qua web</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-amber-200 bg-amber-50/40 shadow-sm">
+          <span className="text-[11px] font-bold uppercase text-amber-700">2. Chờ Duyệt VietQR</span>
+          <p className="text-2xl font-black text-amber-600 mt-1">{pendingApprovalLeads}</p>
+          <p className="text-[10px] text-amber-800">Đã thanh toán - Cần cấp TK</p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-          <span className="text-[11px] font-bold uppercase text-slate-400">2. Đã Quét Đến Tập Thử</span>
+          <span className="text-[11px] font-bold uppercase text-slate-400">3. Đã Quét Đến Tập Thử</span>
           <p className="text-2xl font-black text-purple-600 mt-1">{checkedInLeads}</p>
           <p className="text-[10px] text-slate-500">Đã trải nghiệm phòng tập</p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-          <span className="text-[11px] font-bold uppercase text-slate-400">3. Đã Chốt Gói Hội Viên</span>
+          <span className="text-[11px] font-bold uppercase text-slate-400">4. Đã Chốt Gói Hội Viên</span>
           <p className="text-2xl font-black text-emerald-600 mt-1">{convertedLeads}</p>
           <p className="text-[10px] text-slate-500">Đã chuyển thành hội viên chính thức</p>
         </div>
@@ -101,6 +110,7 @@ export const LeadCRM: React.FC<LeadCRMProps> = ({
           {[
             { id: 'ALL', label: 'Tất cả' },
             { id: 'NEW', label: 'Mới đăng ký' },
+            { id: 'PAID_PENDING_APPROVAL', label: `Chờ duyệt VietQR (${pendingApprovalLeads})` },
             { id: 'TRIAL_CHECKED_IN', label: 'Đã check-in tập' },
             { id: 'CONVERTED', label: 'Đã mua gói' },
           ].map((st) => (
@@ -169,6 +179,11 @@ export const LeadCRM: React.FC<LeadCRMProps> = ({
                         Mới Đăng Ký
                       </span>
                     )}
+                    {lead.status === 'PAID_PENDING_APPROVAL' && (
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm flex items-center gap-1 w-fit animate-pulse">
+                        ⚡ Đã Trả VietQR (Chờ Duyệt)
+                      </span>
+                    )}
                     {lead.status === 'TRIAL_CHECKED_IN' && (
                       <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-purple-100 text-purple-700 border border-purple-200">
                         Đã Quét Đến Tập Thử
@@ -182,7 +197,21 @@ export const LeadCRM: React.FC<LeadCRMProps> = ({
                   </td>
 
                   <td className="p-4 text-right space-x-2">
-                    {lead.status !== 'CONVERTED' ? (
+                    {lead.status === 'PAID_PENDING_APPROVAL' ? (
+                      <button
+                        onClick={() => {
+                          if (onApprovePaidLead) {
+                            onApprovePaidLead(lead);
+                          } else {
+                            setSelectedLeadForConvert(lead);
+                          }
+                        }}
+                        className="px-3 py-1.5 rounded-xl font-black bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md flex items-center gap-1.5 ml-auto text-xs hover:scale-105 transition-all"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Duyệt & Cấp Tài Khoản</span>
+                      </button>
+                    ) : lead.status !== 'CONVERTED' ? (
                       <button
                         onClick={() => setSelectedLeadForConvert(lead)}
                         className="px-3 py-1.5 rounded-xl font-bold bg-gradient-to-r from-city-red to-city-accent hover:from-city-darkred hover:to-city-red text-white shadow-sm flex items-center gap-1.5 ml-auto text-xs"
@@ -193,7 +222,7 @@ export const LeadCRM: React.FC<LeadCRMProps> = ({
                     ) : (
                       <span className="text-emerald-600 font-bold text-xs inline-flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        Đã chuyển đổi
+                        Đã kích hoạt HĐ
                       </span>
                     )}
                   </td>

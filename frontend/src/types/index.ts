@@ -59,7 +59,7 @@ export interface Membership {
   assignedPtName?: string;
 }
 
-export type LeadStatus = 'NEW' | 'CONTACTED' | 'TRIAL_CHECKED_IN' | 'CONVERTED' | 'CANCELLED';
+export type LeadStatus = 'NEW' | 'CONTACTED' | 'TRIAL_CHECKED_IN' | 'PAID_PENDING_APPROVAL' | 'CONVERTED' | 'CANCELLED';
 
 export interface Lead {
   id: number;
@@ -71,6 +71,12 @@ export interface Lead {
   notes?: string;
   status: LeadStatus;
   date: string;
+  packagePrice?: number;
+  packageName?: string;
+  username?: string;
+  age?: number;
+  ptSessions?: number;
+  duration?: string;
 }
 
 export type CheckInStatus = 'SUCCESS' | 'DENIED';

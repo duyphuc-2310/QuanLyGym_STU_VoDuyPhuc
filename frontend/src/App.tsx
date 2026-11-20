@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   User, UserRole, PortalType, Membership, Lead, 
-  CheckInLog, PtBooking, InBodyMetric 
+  CheckInLog, PtBooking, InBodyMetric, SystemAccount 
 } from './types';
 import { RoleSwitcher } from './components/layout/RoleSwitcher';
 import { DashboardLayout } from './components/layout/DashboardLayout';
@@ -13,7 +13,7 @@ import { LeadCRM } from './pages/sales/LeadCRM';
 import { MemberPortal } from './pages/member/MemberPortal';
 import { TrainerPortal } from './pages/trainer/TrainerPortal';
 import { AnalyticsDashboard } from './pages/admin/AnalyticsDashboard';
-import { AccountManagement } from './pages/admin/AccountManagement';
+import { AccountManagement, INITIAL_ACCOUNTS } from './pages/admin/AccountManagement';
 import { SmartNutritionPlanner } from './components/nutrition/SmartNutritionPlanner';
 import { CityAICoachModal } from './components/ai/CityAICoachModal';
 
@@ -25,6 +25,9 @@ export default function App() {
   // Tài khoản khách vãng lai đã ĐĂNG KÝ (chờ Admin cấp quyền sau thanh toán)
   // Khác với currentUser (đã vào hệ thống nội bộ) - pendingMemberUser vẫn ở Landing Page
   const [pendingMemberUser, setPendingMemberUser] = useState<User | null>(null);
+
+  // Hệ Thống Quản Lý Tài Khoản Toàn Cục (Đồng bộ giữa Landing Page và RBAC Admin)
+  const [systemAccounts, setSystemAccounts] = useState<SystemAccount[]>(INITIAL_ACCOUNTS);
 
   // Active Management Tab when inside the internal dashboard
   const [currentTab, setCurrentTab] = useState<PortalType>('checkin');
@@ -230,12 +233,240 @@ export default function App() {
   };
 
   // Xử lý khi khách vãng lai Đăng Ký / Tạo Tài Khoản thành công từ Landing Page
-  // CHỈ lưu tạm thông tin - KHÔNG tạo membership, KHÔNG vào dashboard
-  // Khách vẫn ở Landing Page để tiến hành thanh toán VietQR
-  // Sau khi Admin xác minh thanh toán, Admin vào RBAC cấp thủ công
+  // Đồng bộ ngay thông tin vào CRM Lead và danh sách tài khoản RBAC (trạng thái LOCKED chờ thanh toán)
   const handleMemberAuthSuccess = (newUser: User, _rawPassword?: string) => {
     setPendingMemberUser(newUser);
-    // KHÔNG gọi setCurrentUser → khách vẫn ở Landing Page (currentUser === null)
+
+    // 1. Thêm vào danh sách tài khoản hệ thống (LOCKED - Chờ Admin kích hoạt sau khi mua gói)
+    const newAccount: SystemAccount = {
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      phone: newUser.phone,
+      role: 'MEMBER',
+      status: 'LOCKED',
+      createdAt: new Date().toISOString().split('T')[0],
+      department: `Đăng ký từ Web (${newUser.age ? newUser.age + ' tuổi' : 'Hội viên mới'})`,
+      permissions: [
+        'Mã QR thẻ tập động 60s',
+        'Đặt lịch tập 1-1 với PT',
+        'Xem hồ sơ InBody cá nhân',
+        'AI Food Scanner & Thực đơn',
+      ],
+      age: newUser.age,
+      username: newUser.username,
+    };
+
+    setSystemAccounts((prev) => {
+      const exists = prev.some((a) => a.phone === newUser.phone || (newUser.username && a.username === newUser.username));
+      if (exists) return prev;
+      return [newAccount, ...prev];
+    });
+
+    // 2. Thêm vào Lead CRM để bộ phận tư vấn & Admin nhìn thấy khách hàng vừa đăng ký
+    setLeads((prev) => {
+      const exists = prev.some((l) => l.phone === newUser.phone);
+      if (exists) return prev;
+      const newLead: Lead = {
+        id: Date.now(),
+        ticketCode: 'WEB-' + Math.floor(100000 + Math.random() * 900000),
+        fullName: newUser.name,
+        phone: newUser.phone,
+        email: newUser.email,
+        service: 'Đăng ký tài khoản từ Landing Page (Chưa thanh toán)',
+        notes: `Tài khoản: @${newUser.username || 'member'} - Tuổi: ${newUser.age || 22}`,
+        status: 'NEW',
+        date: new Date().toISOString().split('T')[0],
+        username: newUser.username,
+        age: newUser.age,
+      };
+      return [newLead, ...prev];
+    });
+  };
+
+  // Xử lý khi khách hàng hoàn tất thanh toán gói tập qua VietQR trên Landing Page
+  const handlePackagePurchased = (data: {
+    buyerName: string;
+    buyerPhone: string;
+    buyerUsername: string;
+    buyerAge: number;
+    package: {
+      name: string;
+      price: number;
+      priceStr: string;
+      duration: string;
+      ptSessions: number;
+    };
+  }) => {
+    const ticketCode = 'PAY-' + Math.floor(100000 + Math.random() * 900000);
+
+    // 1. Đồng bộ vào CRM Lead ở trạng thái PAID_PENDING_APPROVAL (Chờ Admin duyệt)
+    const newLead: Lead = {
+      id: Date.now(),
+      ticketCode,
+      fullName: data.buyerName,
+      phone: data.buyerPhone,
+      email: `${data.buyerUsername.toLowerCase()}@citygym.vn`,
+      service: `${data.package.name} (${data.package.priceStr})`,
+      notes: `Đã thanh toán qua VietQR NAPAS247. Gói: ${data.package.name} (Tặng ${data.package.ptSessions} buổi PT). Username: @${data.buyerUsername}`,
+      status: 'PAID_PENDING_APPROVAL',
+      date: new Date().toISOString().split('T')[0],
+      packagePrice: data.package.price,
+      packageName: data.package.name,
+      username: data.buyerUsername,
+      age: data.buyerAge,
+      ptSessions: data.package.ptSessions,
+      duration: data.package.duration,
+    };
+
+    setLeads((prev) => {
+      // Cập nhật nếu khách đã có lead từ trước, hoặc thêm mới
+      const existingIdx = prev.findIndex((l) => l.phone === data.buyerPhone);
+      if (existingIdx >= 0) {
+        const copy = [...prev];
+        copy[existingIdx] = { ...copy[existingIdx], ...newLead };
+        return copy;
+      }
+      return [newLead, ...prev];
+    });
+
+    // 2. Cập nhật hoặc thêm tài khoản vào danh sách RBAC (LOCKED chờ duyệt)
+    setSystemAccounts((prev) => {
+      const exists = prev.some((a) => a.phone === data.buyerPhone || a.username === data.buyerUsername);
+      if (exists) {
+        return prev.map((a) =>
+          a.phone === data.buyerPhone
+            ? { ...a, department: `Chờ duyệt kích hoạt (${data.package.name})` }
+            : a
+        );
+      }
+      const newAcc: SystemAccount = {
+        id: Date.now(),
+        name: data.buyerName,
+        email: `${data.buyerUsername.toLowerCase()}@citygym.vn`,
+        phone: data.buyerPhone,
+        role: 'MEMBER',
+        status: 'LOCKED',
+        createdAt: new Date().toISOString().split('T')[0],
+        department: `Chờ duyệt kích hoạt (${data.package.name})`,
+        permissions: [
+          'Mã QR thẻ tập động 60s',
+          'Đặt lịch tập 1-1 với PT',
+          'Xem hồ sơ InBody cá nhân',
+          'AI Food Scanner & Thực đơn',
+        ],
+        age: data.buyerAge,
+        username: data.buyerUsername,
+      };
+      return [newAcc, ...prev];
+    });
+  };
+
+  // Xử lý khi Admin hoặc Lễ tân Duyệt & Kích Hoạt gói đã thanh toán từ CRM
+  const handleApprovePaidLead = (lead: Lead) => {
+    const durationDays = lead.duration?.includes('365') ? 365 : lead.duration?.includes('180') ? 180 : 30;
+    const ptSessions = lead.ptSessions !== undefined ? lead.ptSessions : (lead.packageName?.includes('VIP') ? 20 : lead.packageName?.includes('Pro') ? 5 : 0);
+    const assignedPt = ptSessions > 0 ? 'Nguyễn Minh Tuấn (PT)' : undefined;
+
+    // 1. Tạo Hợp đồng hội viên chính thức
+    const newM: Membership = {
+      id: Date.now(),
+      contractCode: 'HD-2026-' + Math.floor(1000 + Math.random() * 9000),
+      memberName: lead.fullName,
+      memberPhone: lead.phone,
+      memberEmail: lead.email || `${lead.username || 'member'}@citygym.vn`,
+      packageName: lead.packageName || lead.service || 'CityVIP 12 Tháng',
+      packagePrice: lead.packagePrice || 5800000,
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date(Date.now() + durationDays * 86400000).toISOString().split('T')[0],
+      remainingSessions: ptSessions,
+      totalSessions: ptSessions,
+      status: 'ACTIVE',
+      maxFreezeDays: durationDays > 100 ? 60 : 30,
+      frozenDaysUsed: 0,
+      assignedPtName: assignedPt,
+    };
+    setMemberships((prev) => [newM, ...prev]);
+
+    // 2. Kích hoạt tài khoản người dùng sang ACTIVE trong RBAC
+    setSystemAccounts((prev) => {
+      const found = prev.find((a) => a.phone === lead.phone || (lead.username && a.username === lead.username));
+      if (found) {
+        return prev.map((a) =>
+          a.id === found.id
+            ? { ...a, status: 'ACTIVE', department: `Hội Viên Chính Thức (${newM.packageName})` }
+            : a
+        );
+      }
+      const created: SystemAccount = {
+        id: Date.now() + 1,
+        name: lead.fullName,
+        email: `${(lead.username || 'member').toLowerCase()}@citygym.vn`,
+        phone: lead.phone,
+        role: 'MEMBER',
+        status: 'ACTIVE',
+        createdAt: new Date().toISOString().split('T')[0],
+        department: `Hội Viên Chính Thức (${newM.packageName})`,
+        permissions: [
+          'Mã QR thẻ tập động 60s',
+          'Đặt lịch tập 1-1 với PT',
+          'Xem hồ sơ InBody cá nhân',
+          'AI Food Scanner & Thực đơn',
+        ],
+        age: lead.age,
+        username: lead.username,
+      };
+      return [created, ...prev];
+    });
+
+    // 3. Tự động lên lịch 1 buổi PT đầu tiên nếu có buổi PT
+    if (ptSessions > 0) {
+      const newBooking: PtBooking = {
+        id: Date.now() + 2,
+        memberName: lead.fullName,
+        memberPhone: lead.phone,
+        trainerName: 'Nguyễn Minh Tuấn (PT)',
+        date: 'Hôm nay',
+        time: '19:15 - 20:15 (Buổi 1)',
+        status: 'SCHEDULED',
+        goal: `Kèm 1-1 (${newM.packageName})`,
+      };
+      setPtBookings((prev) => [newBooking, ...prev]);
+    }
+
+    // 4. Cập nhật Lead thành CONVERTED
+    setLeads((prev) =>
+      prev.map((l) => (l.id === lead.id ? { ...l, status: 'CONVERTED' } : l))
+    );
+
+    alert(
+      `✅ ĐÃ DUYỆT & KÍCH HOẠT HỘI VIÊN THÀNH CÔNG!\n\n` +
+      `• Khách hàng: ${lead.fullName}\n` +
+      `• Số điện thoại: ${lead.phone}\n` +
+      `• Hợp đồng: ${newM.contractCode} (${newM.packageName})\n` +
+      `• Tài khoản đã được KÍCH HOẠT (ACTIVE) trong hệ thống RBAC.\n` +
+      `• Khách hàng có thể đăng nhập vào Cổng Hội Viên ngay!`
+    );
+  };
+
+  // Toggle trạng thái tài khoản trong RBAC
+  const handleToggleAccountStatus = (accountId: number) => {
+    const target = systemAccounts.find((a) => a.id === accountId);
+    if (!target) return;
+    if (target.role === 'ADMIN') {
+      alert('Không thể khóa tài khoản Quản trị viên cấp cao (Admin)!');
+      return;
+    }
+    const nextStatus = target.status === 'ACTIVE' ? 'LOCKED' : 'ACTIVE';
+    setSystemAccounts((prev) =>
+      prev.map((a) => (a.id === accountId ? { ...a, status: nextStatus } : a))
+    );
+    alert(`Đã ${nextStatus === 'LOCKED' ? 'TẠM KHÓA' : 'KÍCH HOẠT LẠI'} tài khoản của ${target.name}!`);
+  };
+
+  // Admin cấp tài khoản thủ công
+  const handleAccountCreated = (newAcc: SystemAccount) => {
+    setSystemAccounts((prev) => [newAcc, ...prev]);
   };
   // Cross-portal Handlers
   const handleRegisterTrial = (newLead: Lead) => {
@@ -318,6 +549,7 @@ export default function App() {
           onRegisterTrial={handleRegisterTrial}
           onOpenLogin={() => setIsLoginModalOpen(true)}
           onMemberAuthSuccess={handleMemberAuthSuccess}
+          onPackagePurchased={handlePackagePurchased}
           onLogout={() => setPendingMemberUser(null)}
         />
       ) : (
@@ -355,6 +587,7 @@ export default function App() {
               leads={leads}
               onConvertLead={handleConvertLead}
               onAddMembership={handleAddMembership}
+              onApprovePaidLead={handleApprovePaidLead}
             />
           )}
 
@@ -393,7 +626,13 @@ export default function App() {
           {currentTab === 'analytics' && <AnalyticsDashboard />}
 
           {/* Phân hệ Quản Trị RBAC: Cấp Tài Khoản & Phân Quyền (Chỉ Admin) */}
-          {currentTab === 'users' && <AccountManagement />}
+          {currentTab === 'users' && (
+            <AccountManagement
+              accounts={systemAccounts}
+              onToggleStatus={handleToggleAccountStatus}
+              onAccountCreated={handleAccountCreated}
+            />
+          )}
         </DashboardLayout>
       )}
 
