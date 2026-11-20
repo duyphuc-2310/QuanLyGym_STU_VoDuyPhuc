@@ -225,6 +225,43 @@ export default function App() {
     window.location.hash = '';
   };
 
+  // Xử lý khi khách vãng lai Đăng Ký / Tạo Tài Khoản thành công từ Landing Page
+  const handleMemberAuthSuccess = (newUser: User, rawPassword?: string) => {
+    setCurrentUser(newUser);
+
+    // Tự động khởi tạo hợp đồng hội viên mới với 20 buổi PT 1-1
+    const newM: Membership = {
+      id: Date.now(),
+      contractCode: 'HD-2026-' + Math.floor(1000 + Math.random() * 9000),
+      memberName: newUser.name,
+      memberPhone: newUser.phone,
+      packageName: 'CityVIP 12 Tháng',
+      packagePrice: 5800000,
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0],
+      remainingSessions: 20,
+      totalSessions: 20,
+      status: 'ACTIVE',
+      maxFreezeDays: 60,
+      frozenDaysUsed: 0,
+      assignedPtName: 'Nguyễn Minh Tuấn (PT)',
+    };
+    setMemberships((prev) => [newM, ...prev]);
+
+    // Tự động lên lịch hẹn buổi đầu tiên
+    const firstBooking: PtBooking = {
+      id: Date.now() + 10,
+      memberName: newUser.name,
+      memberPhone: newUser.phone,
+      trainerName: 'Nguyễn Minh Tuấn (PT)',
+      date: 'Hôm nay',
+      time: '19:15 - 20:15 (Buổi 1)',
+      status: 'SCHEDULED',
+      goal: 'Buổi định hướng thể hình & InBody 270',
+    };
+    setPtBookings((prev) => [firstBooking, ...prev]);
+  };
+
   // Cross-portal Handlers
   const handleRegisterTrial = (newLead: Lead) => {
     setLeads((prev) => [newLead, ...prev]);
@@ -302,8 +339,14 @@ export default function App() {
       {currentUser === null ? (
         /* ==================== 100% PURE PUBLIC LANDING PAGE ==================== */
         <LandingPage
+          currentUser={currentUser}
           onRegisterTrial={handleRegisterTrial}
           onOpenLogin={() => setIsLoginModalOpen(true)}
+          onMemberAuthSuccess={handleMemberAuthSuccess}
+          onGoToPortal={() => {
+            setCurrentTab('member_portal');
+          }}
+          onLogout={handleLogout}
         />
       ) : (
         /* ==================== INTERNAL MANAGEMENT DASHBOARD (PORTALS) ==================== */
@@ -357,7 +400,7 @@ export default function App() {
           {/* Phân hệ 5: Cổng Hội Viên (QR động 60s) */}
           {currentTab === 'member_portal' && (
             <MemberPortal
-              member={memberships[0]}
+              member={memberships.find((m) => m.memberName === currentUser.name) || memberships[0]}
               onBookPtSession={handleBookPtSession}
               ptBookings={ptBookings}
             />

@@ -4,17 +4,29 @@ import {
   ArrowRight, ShieldCheck, Check, X, Clock, User, Star, Ticket, 
   Zap, TrendingDown, Crown, Award, Phone, Lock, CreditCard, ChevronRight,
   MapPin, Heart, Compass, Smartphone, Calendar, Search, Activity, Users, 
-  Shield, Timer, RefreshCw, Camera, Utensils, Apple
+  Shield, Timer, RefreshCw, Camera, Utensils, Apple, UserPlus, LogIn, AlertCircle
 } from 'lucide-react';
-import { Lead, ZaloZnsMessage } from '../../types';
+import { Lead, ZaloZnsMessage, User as UserType } from '../../types';
 import { ZaloNotificationModal } from '../../components/modals/ZaloNotificationModal';
+import { MemberAuthModal } from '../../components/modals/MemberAuthModal';
 
 interface LandingPageProps {
+  currentUser?: UserType | null;
   onRegisterTrial?: (lead: Lead) => void;
   onOpenLogin?: () => void;
+  onMemberAuthSuccess?: (newUser: UserType, rawPassword?: string) => void;
+  onGoToPortal?: () => void;
+  onLogout?: () => void;
 }
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onRegisterTrial, onOpenLogin }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({ 
+  currentUser,
+  onRegisterTrial, 
+  onOpenLogin,
+  onMemberAuthSuccess,
+  onGoToPortal,
+  onLogout,
+}) => {
   // Calculator State (Mifflin-St Jeor)
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [height, setHeight] = useState<number>(172);
@@ -47,6 +59,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onRegisterTrial, onOpe
     service: string;
     date: string;
   } | null>(null);
+
+  // Member Auth Modal State (Chặn khách vãng lai, yêu cầu tạo tài khoản để đăng ký tập)
+  const [showMemberAuthModal, setShowMemberAuthModal] = useState<boolean>(false);
+  const [authActionNotice, setAuthActionNotice] = useState<string>(
+    'Khách vãng lai cần tạo tài khoản (SĐT, Tên đăng nhập, Mật khẩu, Tên, Tuổi) để đăng ký tập.'
+  );
+  const [pendingBookingType, setPendingBookingType] = useState<'TRIAL' | 'PACKAGE' | null>(null);
+  const [pendingPackage, setPendingPackage] = useState<{
+    name: string;
+    price: number;
+    priceStr: string;
+    duration: string;
+    ptSessions: number;
+  } | null>(null);
+
+  // Auto fill form when user is logged in
+  useEffect(() => {
+    if (currentUser) {
+      setBookingForm((prev) => ({
+        ...prev,
+        name: currentUser.name,
+        phone: currentUser.phone,
+      }));
+    }
+  }, [currentUser]);
 
   // VietQR Checkout Modal State
   const [showCheckoutModal, setShowCheckoutModal] = useState<boolean>(false);
@@ -93,18 +130,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onRegisterTrial, onOpe
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const handleBookingSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!bookingForm.name.trim() || !bookingForm.phone.trim()) {
-      alert('Vui lòng nhập Họ tên và Số điện thoại để nhận mã vé tập thử.');
-      return;
-    }
-
+  // Cấp vé và bắn Zalo ZNS
+  const executeBooking = (userName: string, userPhone: string) => {
     const code = 'TRIAL-' + Math.floor(100000 + Math.random() * 900000);
     const newTicket = {
       code,
-      name: bookingForm.name,
-      phone: bookingForm.phone,
+      name: userName,
+      phone: userPhone,
       branch: bookingForm.branch,
       service: bookingForm.service,
       date: new Date().toLocaleDateString('vi-VN'),
@@ -116,8 +148,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onRegisterTrial, onOpe
     // Tự động kích hoạt tin nhắn Zalo ZNS mô phỏng gửi về điện thoại hội viên
     const newZns: ZaloZnsMessage = {
       id: 'ZNS-' + Date.now(),
-      recipientName: bookingForm.name,
-      recipientPhone: bookingForm.phone,
+      recipientName: userName,
+      recipientPhone: userPhone,
       templateType: 'TRIAL_EPASS',
       ticketCode: code,
       branchName: bookingForm.branch,
@@ -133,8 +165,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onRegisterTrial, onOpe
       const newLead: Lead = {
         id: Date.now(),
         ticketCode: code,
-        fullName: bookingForm.name,
-        phone: bookingForm.phone,
+        fullName: userName,
+        phone: userPhone,
         service: `${bookingForm.service} (${bookingForm.branch})`,
         status: 'NEW',
         date: new Date().toISOString().split('T')[0],
@@ -143,11 +175,67 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onRegisterTrial, onOpe
     }
   };
 
+  // Xử lý nộp form nhận vé tập thử
+  const handleBookingSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // CHẶN KHÁCH VÃNG LAI: Bắt buộc phải đăng nhập hoặc tạo tài khoản mới
+    if (!currentUser) {
+      setAuthActionNotice(
+        'Bạn đang là khách vãng lai (chỉ xem được thông tin). Để đăng ký nhận vé tập thử E-Pass 0Đ 24/7, vui lòng tạo tài khoản hội viên gồm: SĐT, Tên đăng nhập, Mật khẩu, Họ tên, Tuổi!'
+      );
+      setPendingBookingType('TRIAL');
+      setShowMemberAuthModal(true);
+      return;
+    }
+
+    const userName = currentUser.name || bookingForm.name;
+    const userPhone = currentUser.phone || bookingForm.phone;
+    executeBooking(userName, userPhone);
+  };
+
+  // Xử lý khi bấm Đăng ký gói tập ở Bảng giá
   const handleOpenCheckout = (pkg: { name: string; price: number; priceStr: string; duration: string; ptSessions: number }) => {
+    // CHẶN KHÁCH VÃNG LAI: Bắt buộc phải đăng nhập hoặc tạo tài khoản mới
+    if (!currentUser) {
+      setPendingPackage(pkg);
+      setPendingBookingType('PACKAGE');
+      setAuthActionNotice(
+        `Bạn đang là khách vãng lai. Vui lòng tạo tài khoản hội viên (gồm: SĐT, Tên đăng nhập, Mật khẩu, Họ tên, Tuổi) để đăng ký gói ${pkg.name}!`
+      );
+      setShowMemberAuthModal(true);
+      return;
+    }
+
     setSelectedPackage(pkg);
     setCountdown(900);
     setIsPaidSuccess(false);
     setShowCheckoutModal(true);
+  };
+
+  // Callback sau khi khách tạo tài khoản hoặc đăng nhập thành công
+  const handleAuthCompleted = (authenticatedUser: UserType, rawPassword?: string) => {
+    if (onMemberAuthSuccess) {
+      onMemberAuthSuccess(authenticatedUser, rawPassword);
+    }
+
+    setBookingForm((prev) => ({
+      ...prev,
+      name: authenticatedUser.name,
+      phone: authenticatedUser.phone,
+    }));
+
+    if (pendingBookingType === 'TRIAL') {
+      executeBooking(authenticatedUser.name, authenticatedUser.phone);
+      setPendingBookingType(null);
+    } else if (pendingBookingType === 'PACKAGE' && pendingPackage) {
+      setSelectedPackage(pendingPackage);
+      setCountdown(900);
+      setIsPaidSuccess(false);
+      setShowCheckoutModal(true);
+      setPendingBookingType(null);
+      setPendingPackage(null);
+    }
   };
 
   // Branch Data (Hệ thống chi nhánh kiểu Anytime Fitness)
@@ -280,23 +368,55 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onRegisterTrial, onOpe
           </nav>
 
           {/* Right Action Buttons */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <a 
               href="#trial-section" 
-              className="px-6 py-2.5 rounded-full text-xs font-black bg-gradient-to-r from-[#DC2626] to-[#EF4444] text-white shadow-lg shadow-[#DC2626]/30 hover:shadow-[#DC2626]/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2"
+              className="px-5 py-2.5 rounded-full text-xs font-black bg-gradient-to-r from-[#DC2626] to-[#EF4444] text-white shadow-lg shadow-[#DC2626]/30 hover:shadow-[#DC2626]/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1.5"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>Tập Thử 0Đ (E-Pass)</span>
             </a>
 
-            {/* Nút đăng nhập thanh lịch, kín đáo */}
+            {/* Trạng thái xác thực: Khách Vãng Lai vs Hội Viên Đã Đăng Nhập */}
+            {!currentUser ? (
+              <button
+                onClick={() => {
+                  setAuthActionNotice('Vui lòng tạo tài khoản hội viên (Họ tên, SĐT, Tuổi, Tên đăng nhập, Mật khẩu) hoặc đăng nhập để đăng ký tập.');
+                  setShowMemberAuthModal(true);
+                }}
+                className="px-4 py-2.5 rounded-full text-xs font-bold bg-white text-slate-800 border border-slate-300 hover:border-[#DC2626] hover:text-[#DC2626] transition-all flex items-center gap-1.5 shadow-sm"
+              >
+                <UserPlus className="w-3.5 h-3.5 text-[#DC2626]" />
+                <span className="hidden sm:inline">Đăng Ký / Đăng Nhập</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <div className="text-right hidden md:block">
+                  <p className="text-xs font-black text-slate-900">{currentUser.name}</p>
+                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    Hội viên chính thức {currentUser.age ? `(${currentUser.age} tuổi)` : ''}
+                  </span>
+                </div>
+
+                {onGoToPortal && (
+                  <button
+                    onClick={onGoToPortal}
+                    className="px-4 py-2.5 rounded-full text-xs font-black bg-slate-900 hover:bg-slate-800 text-white transition-all flex items-center gap-1.5 shadow-md"
+                  >
+                    <span>Vào Cổng Hội Viên</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Nút đăng nhập quản trị dành riêng cho nhân viên */}
             <button
               onClick={onOpenLogin}
-              className="px-3.5 py-2.5 rounded-full text-xs font-bold border border-slate-300 hover:border-[#DC2626] hover:text-[#DC2626] text-slate-700 transition-all flex items-center gap-1.5"
+              className="p-2.5 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-all"
               title="Đăng nhập cổng quản lý hoặc truy cập URL riêng: #admin"
             >
               <Lock className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Đăng Nhập</span>
             </button>
           </div>
         </div>
@@ -684,6 +804,40 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onRegisterTrial, onOpe
           {/* Form thiết kế tinh giản, sang trọng */}
           <div className="bg-slate-50 p-8 sm:p-12 rounded-3xl border border-slate-200 shadow-xl max-w-2xl mx-auto relative">
             <form onSubmit={handleBookingSubmit} className="space-y-5">
+
+              {/* CẢNH BÁO / YÊU CẦU TẠO TÀI KHOẢN CHO KHÁCH VÃNG LAI */}
+              {!currentUser ? (
+                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3 text-xs text-left">
+                  <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="font-bold text-xs uppercase tracking-wide">Yêu Cầu Hội Viên (Chặn Khách Vãng Lai):</p>
+                    <p className="text-[11px] text-amber-800 leading-relaxed">
+                      Khách vãng lai chỉ có quyền xem thông tin giới thiệu. Để nhận mã vé điện tử E-Pass 0Đ hoặc đăng ký gói tập, bạn cần <strong>Tạo Tài Khoản Hội Viên</strong> (gồm: SĐT, Tên đăng nhập, Mật khẩu, Họ tên, Tuổi).
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthActionNotice('Vui lòng tạo tài khoản hội viên để tiếp tục nhận vé tập thử E-Pass 0Đ.');
+                        setShowMemberAuthModal(true);
+                      }}
+                      className="mt-2 px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] inline-flex items-center gap-1.5 shadow-sm transition-all"
+                    >
+                      <UserPlus className="w-3.5 h-3.5" />
+                      <span>Tạo Tài Khoản Mới Ngay (100% Miễn Phí)</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-start gap-3 text-xs text-left">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold text-xs uppercase tracking-wide">Đã Xác Thực Hội Viên:</p>
+                    <p className="text-[11px] text-emerald-800 mt-0.5">
+                      Hội viên: <strong>{currentUser.name}</strong> {currentUser.age ? `(${currentUser.age} tuổi)` : ''} • SĐT: <strong>{currentUser.phone}</strong> • Tài khoản: <strong>@{currentUser.username || 'member'}</strong>. Bạn đã đủ điều kiện nhận vé tập thử 24/7!
+                    </p>
+                  </div>
+                </div>
+              )}
               
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
@@ -1327,6 +1481,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onRegisterTrial, onOpe
                 <span>📱 Mở Tin Nhắn Zalo ZNS Tự Động (Tích Xanh)</span>
               </button>
 
+              {onGoToPortal && (
+                <button
+                  onClick={() => {
+                    setShowTicketModal(false);
+                    onGoToPortal();
+                  }}
+                  className="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-1.5 shadow transition-all"
+                >
+                  <span>Vào Cổng Hội Viên Quản Lý (Mã QR 60s & Lịch PT)</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              )}
+
               <button
                 onClick={() => setShowTicketModal(false)}
                 className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-2xl text-xs transition-all"
@@ -1445,6 +1612,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onRegisterTrial, onOpe
           </div>
         </div>
       )}
+
+      {/* ==================== 14. MODAL XÁC THỰC / TẠO TÀI KHOẢN HỘI VIÊN MỚI (CHẶN KHÁCH VÃNG LAI) ==================== */}
+      <MemberAuthModal
+        isOpen={showMemberAuthModal}
+        onClose={() => setShowMemberAuthModal(false)}
+        onRegisterSuccess={handleAuthCompleted}
+        onLoginSuccess={(u) => handleAuthCompleted(u)}
+        pendingActionNotice={authActionNotice}
+      />
 
     </div>
   );

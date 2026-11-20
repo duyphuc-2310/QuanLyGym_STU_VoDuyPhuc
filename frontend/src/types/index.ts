@@ -10,6 +10,8 @@ export interface User {
   role: UserRole;
   avatar?: string;
   department?: string;
+  age?: number;
+  username?: string;
 }
 
 export type PortalType = 
@@ -33,6 +35,8 @@ export interface SystemAccount {
   createdAt: string;
   department: string;
   permissions: string[];
+  age?: number;
+  username?: string;
 }
 
 export type MembershipStatus = 'ACTIVE' | 'FROZEN' | 'EXPIRED' | 'CANCELLED';
