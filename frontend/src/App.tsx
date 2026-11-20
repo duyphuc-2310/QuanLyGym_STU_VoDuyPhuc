@@ -13,6 +13,7 @@ import { LeadCRM } from './pages/sales/LeadCRM';
 import { MemberPortal } from './pages/member/MemberPortal';
 import { TrainerPortal } from './pages/trainer/TrainerPortal';
 import { AnalyticsDashboard } from './pages/admin/AnalyticsDashboard';
+import { SmartNutritionPlanner } from './components/nutrition/SmartNutritionPlanner';
 
 export default function App() {
   // Current Authenticated User (null = Public Guest on Landing Page)
@@ -337,6 +338,17 @@ export default function App() {
               onBookPtSession={handleBookPtSession}
               ptBookings={ptBookings}
             />
+          )}
+
+          {/* Phân hệ 7: Trợ lý Dinh Dưỡng & AI Food Scanner */}
+          {currentTab === 'nutrition' && (
+            <div className="max-w-6xl mx-auto px-4 py-8">
+              <SmartNutritionPlanner
+                memberWeight={68.2}
+                memberHeight={172}
+                memberBmr={1675}
+              />
+            </div>
           )}
 
           {/* Phân hệ 6: Quản Trị Cấp Cao BI Dashboard */}

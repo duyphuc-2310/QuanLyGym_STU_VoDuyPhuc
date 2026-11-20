@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   QrCode, CreditCard, Users, Dumbbell, ShieldCheck, 
-  BarChart3, LogOut, Home, User, ChevronRight, Bell
+  BarChart3, LogOut, Home, User, ChevronRight, Bell, Sparkles
 } from 'lucide-react';
 import { PortalType, User as UserType } from '../../types';
 
@@ -68,6 +68,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       icon: ShieldCheck,
       allowedRoles: ['ADMIN', 'MEMBER'],
       badge: 'Cá nhân',
+    },
+    {
+      id: 'nutrition',
+      label: 'Dinh Dưỡng & AI Food Scan',
+      icon: Sparkles,
+      allowedRoles: ['ADMIN', 'MEMBER', 'TRAINER'],
+      badge: 'HOT AI',
     },
   ];
 

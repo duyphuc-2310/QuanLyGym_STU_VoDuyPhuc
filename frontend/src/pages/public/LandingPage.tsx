@@ -4,7 +4,7 @@ import {
   ArrowRight, ShieldCheck, Check, X, Clock, User, Star, Ticket, 
   Zap, TrendingDown, Crown, Award, Phone, Lock, CreditCard, ChevronRight,
   MapPin, Heart, Compass, Smartphone, Calendar, Search, Activity, Users, 
-  Shield, Timer, RefreshCw
+  Shield, Timer, RefreshCw, Camera, Utensils, Apple
 } from 'lucide-react';
 import { Lead } from '../../types';
 
@@ -250,6 +250,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onRegisterTrial, onOpe
             <a href="#packages" className="hover:text-[#DC2626] transition-colors">Bảng giá gói</a>
             <a href="#classes" className="hover:text-[#DC2626] transition-colors">Lịch GroupX</a>
             <a href="#trainers" className="hover:text-[#DC2626] transition-colors">Đội ngũ PT</a>
+            <a href="#ai-nutrition" className="hover:text-[#DC2626] transition-colors flex items-center gap-1 font-bold text-[#DC2626]">
+              <Sparkles className="w-3.5 h-3.5 text-[#DC2626]" />
+              <span>AI Dinh Dưỡng</span>
+            </a>
             <a href="#bmi-tool" className="hover:text-[#DC2626] transition-colors flex items-center gap-1.5 font-bold">
               <Calculator className="w-3.5 h-3.5 text-[#DC2626]" />
               <span>Đo BMI / TDEE</span>
@@ -1093,7 +1097,143 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onRegisterTrial, onOpe
         </div>
       </section>
 
-      {/* ==================== 11. FOOTER ==================== */}
+      {/* ==================== 11. AI VISION NUTRITION & MEAL SCANNER SHOWCASE ==================== */}
+      <section id="ai-nutrition" className="py-24 bg-slate-900 text-white border-t border-slate-800 relative overflow-hidden">
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#DC2626]/10 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
+            <span className="text-xs font-black uppercase tracking-widest text-amber-400 px-3.5 py-1.5 bg-white/10 rounded-full border border-amber-400/30 flex items-center justify-center gap-1.5 w-max mx-auto">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>CÔNG NGHỆ ĐỘT PHÁ LUẬN VĂN STU 2026</span>
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">
+              AI FOOD SCANNER & THEO DÕI DINH DƯỠNG
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto leading-relaxed">
+              Chỉ cần chụp ảnh món ăn bằng điện thoại — Hệ thống AI Vision tự động nhận diện thành phần, bóc tách Calo và Macro (Đạm, Tinh bột, Béo) trong 2 giây!
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center max-w-6xl mx-auto">
+            
+            {/* Left: 3 Process Steps */}
+            <div className="lg:col-span-6 space-y-6">
+              
+              <div className="p-6 rounded-3xl bg-white/5 border border-white/10 space-y-2 hover:border-[#DC2626] transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-red-500/20 text-[#DC2626] flex items-center justify-center font-black">
+                    <Camera className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-white text-base">1. Chụp Ảnh Món Ăn Bất Kỳ</h4>
+                    <p className="text-xs text-slate-400">Không cần cân đo thủ công hay tìm kiếm tên nguyên liệu phức tạp.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-3xl bg-white/5 border border-white/10 space-y-2 hover:border-[#DC2626] transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-black">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-white text-base">2. AI Vision Phân Tách Macro Tức Thì</h4>
+                    <p className="text-xs text-slate-400">Mạng nơ-ron nhận diện món ăn Việt & Gymer, ước tính khối lượng, Calo, Protein, Carbs, Fat.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-3xl bg-white/5 border border-white/10 space-y-2 hover:border-[#DC2626] transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black">
+                    <Utensils className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-white text-base">3. Đề Xuất Thực Đơn 4 Bữa Cá Nhân Hóa</h4>
+                    <p className="text-xs text-slate-400">Đồng bộ về Cổng Hội Viên để HLV theo dõi và đề xuất thực đơn tăng cơ / giảm mỡ bám sát mục tiêu.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={onOpenLogin}
+                  className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#DC2626] to-[#EF4444] text-white font-bold text-xs shadow-lg shadow-[#DC2626]/30 flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
+                >
+                  <Camera className="w-4 h-4" />
+                  <span>Đăng Nhập Cổng Hội Viên Để Trải Nghiệm AI</span>
+                </button>
+                <a
+                  href="#trial-section"
+                  className="px-6 py-3.5 rounded-2xl border border-white/20 hover:border-white text-white font-bold text-xs flex items-center justify-center gap-2 transition-all"
+                >
+                  <span>Nhận Vé Tập Thử 0Đ</span>
+                </a>
+              </div>
+
+            </div>
+
+            {/* Right: Mockup Card of AI Food Vision */}
+            <div className="lg:col-span-6 bg-slate-950 p-6 sm:p-7 rounded-3xl border border-slate-800 shadow-2xl space-y-5">
+              
+              <div className="flex justify-between items-center pb-3 border-b border-slate-800 text-xs">
+                <span className="font-mono text-emerald-400 flex items-center gap-1.5 font-bold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  AI Vision: Ức Gà Áp Chảo + Khoai Lang
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-white/10 text-slate-300">
+                  Điểm: 9.8 / 10
+                </span>
+              </div>
+
+              <div className="relative rounded-2xl overflow-hidden border border-slate-800">
+                <img
+                  src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80"
+                  alt="AI Food Scan Sample"
+                  className="w-full h-48 object-cover"
+                />
+                <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md text-[10px] font-bold text-white border border-white/20">
+                  🎯 AI Bounding Box: 180g Ức gà nạc + 150g Khoai lang
+                </div>
+                <div className="absolute bottom-2.5 right-2.5 px-3 py-1 rounded-lg bg-[#DC2626] text-white text-xs font-black shadow">
+                  465 kcal
+                </div>
+              </div>
+
+              {/* 4 Macro Bars */}
+              <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                <div className="p-2.5 bg-white/5 rounded-xl border border-white/5">
+                  <span className="text-[10px] text-slate-400 font-bold block">Calo</span>
+                  <strong className="text-white text-sm">465</strong>
+                </div>
+                <div className="p-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                  <span className="text-[10px] text-blue-400 font-bold block">Đạm</span>
+                  <strong className="text-blue-300 text-sm">48g</strong>
+                </div>
+                <div className="p-2.5 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                  <span className="text-[10px] text-amber-400 font-bold block">Carb</span>
+                  <strong className="text-amber-300 text-sm">52g</strong>
+                </div>
+                <div className="p-2.5 bg-purple-500/10 rounded-xl border border-purple-500/20">
+                  <span className="text-[10px] text-purple-400 font-bold block">Fat</span>
+                  <strong className="text-purple-300 text-sm">6g</strong>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-slate-300 bg-white/5 p-3 rounded-xl border border-white/5 italic">
+                💬 <strong>AI Coach:</strong> Bữa ăn chuẩn mẫu mực! Giàu đạm nạc giúp hồi phục sợi cơ sau tập, tinh bột hấp thu chậm từ khoai lang duy trì năng lượng bền bỉ.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* ==================== 12. FOOTER ==================== */}
       <footer className="bg-slate-950 text-slate-400 py-12 border-t border-slate-800 text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>

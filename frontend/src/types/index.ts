@@ -18,6 +18,7 @@ export type PortalType =
   | 'memberships' 
   | 'leads' 
   | 'member_portal' 
+  | 'nutrition'
   | 'pt_portal' 
   | 'analytics';
 
@@ -103,4 +104,46 @@ export interface GymPackage {
   maxFreezeDays: number;
   features: string[];
   isPopular?: boolean;
+}
+
+// ==================== SMART NUTRITION & AI FOOD SCANNER TYPES ====================
+
+export interface FoodNutritionItem {
+  id: string;
+  foodName: string;
+  portionGrams: number;
+  calories: number; // kcal
+  protein: number; // grams
+  carbs: number; // grams
+  fat: number; // grams
+  fiber?: number; // grams
+  sodium?: number; // mg
+  imageUrl: string;
+  healthScore: number; // 1 - 10
+  tags: string[];
+  analysisNotes: string;
+  coachAdvice: string;
+  detectedAt?: string;
+}
+
+export interface MealRecommendation {
+  mealType: 'SÁNG' | 'TRƯA' | 'PHỤ (PRE-WORKOUT)' | 'TỐI';
+  timeSlot: string;
+  dishName: string;
+  ingredients: string[];
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  tips: string;
+}
+
+export interface DailyMealPlan {
+  goal: 'LOSE_FAT' | 'GAIN_MUSCLE' | 'MAINTAIN';
+  targetCalories: number;
+  targetProtein: number;
+  targetCarbs: number;
+  targetFat: number;
+  waterIntakeLiters: number;
+  meals: MealRecommendation[];
 }
